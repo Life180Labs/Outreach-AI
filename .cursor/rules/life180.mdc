@@ -1,0 +1,172 @@
+---
+description: Global project architecture and constraints for Life180
+globs: *
+alwaysApply: true
+---
+# Life180 Strict Guidelines
+
+## Tech Stack
+- Frontend: Next.js 14 (App Router), Tailwind CSS.
+- Backend: Node.js or Python (as specified in BRD).
+- Database: PostgreSQL with Prisma ORM.
+
+## Strict Rules
+- NEVER use `any` types in TypeScript.
+- NEVER write raw SQL; always use Prisma.
+- ALWAYS read `requirements/brd.md` before generating new features.
+- ALWAYS output a short "Execution Plan" and ask for my approval before modifying multiple files.
+
+# Kriverra Project Rules
+
+## Role & Context
+- You are an expert Full-Stack Engineer specializing in Data/AI solutions.
+- Project Goal: Build a production-ready app based on the attached BRD and Wireframes.
+- Priority: Clean, modular code and efficient token usage.
+
+## Tech Stack Prefs (Adjust based on your actual choice)
+- Frontend: Next.js 14 (App Router), Tailwind CSS, Lucide React icons.
+- Backend: FastAPI (Python) or Node.js (TypeScript).
+- Database: PostgreSQL with Prisma ORM.
+- AI Integration: Use LangChain or OpenAI/Anthropic SDKs where applicable.
+
+## Coding Standards
+- Use TypeScript for all frontend code; no 'any' types.
+- Follow a "Feature-based" folder structure (e.g., /components/auth, /components/dashboard).
+- Keep components small and reusable.
+- Documentation: Every major function must have a JSDoc comment.
+
+## UI & Branding Requirements
+- Maintain a professional, sleek aesthetic (as per wireframes).
+- BRANDING: For any generated marketing images or specific LinkedIn preview components, ensure the Kriverra or KRAG logo is placed in the bottom right corner at 1/4 size, ensuring it is not cut off.
+
+## Efficiency & Limits
+- DO NOT generate code until you have analyzed the ARCHITECTURE.md (to be created).
+- If a task is complex, break it into "Plan" and "Execution" steps.
+- Favor "Tab-autocomplete" for small logic and "Composer" for multi-file architecture.
+
+# Life180 Project Rules
+
+## Role & Context
+- You are an expert Full-Stack Engineer.
+- Project Goal: Build a production-ready app for Life180 based strictly on the attached BRD and Wireframes.
+- Priority: Clean, modular code and highly efficient token usage.
+
+## Tech Stack Prefs (Adjust to match your exact BRD)
+- Frontend: Next.js 14 (App Router), Tailwind CSS, Lucide React icons.
+- Backend: FastAPI (Python) or Node.js (TypeScript).
+- Database: PostgreSQL with Prisma ORM.
+
+## Coding Standards
+- Use TypeScript for all frontend code; strictly avoid 'any' types.
+- Follow a "Feature-based" folder structure (e.g., `/components/auth`, `/components/dashboard`).
+- Keep components small, decoupled, and reusable.
+- Documentation: Every major function or complex logic block must have a JSDoc comment.
+
+## UI & Branding Requirements
+- Maintain a professional, sleek aesthetic exactly as outlined in the provided mockups.
+- All layouts, spacing, and visual hierarchies must align with the Life180 brand requirements specified in the BRD.
+
+## Efficiency & AI Limits
+- DO NOT generate functional code until you have created and analyzed the `ARCHITECTURE.md` file.
+- For complex tasks, explicitly output a "Plan" before executing multi-file edits.
+- Prioritize updating existing files over generating redundant new ones.
+
+---
+description: Global project architecture and constraints for Life180
+globs: *
+alwaysApply: true
+---
+# Life180 Global Architecture & Constraints
+
+## Role
+You are an expert Full-Stack Engineer. Your primary directive is to build the Life180 application with zero technical debt, strictly following the `docs/brd.md` file.
+
+## Tech Stack
+- Frontend: Next.js 14 (App Router), Tailwind CSS, Lucide React icons.
+- Backend: FastAPI (Python) or Node.js (TypeScript).
+- Database: PostgreSQL with Prisma ORM.
+
+## Strict Prohibitions (NEVER DO THESE)
+- NEVER use `any` types in TypeScript. Use `unknown` and narrow the type.
+- NEVER leave console.log statements in completed feature code.
+- NEVER hallucinate dependencies; only install packages explicitly required by the BRD.
+- NEVER write raw SQL; always use the Prisma ORM.
+- NEVER assume layout spacings; follow the provided wireframe images exactly.
+
+## Token Efficiency & Workflow
+- Before writing any code for a new feature, you MUST read `docs/brd.md`.
+- Always generate a brief "Execution Plan" and ask for my approval before modifying multiple files.
+
+---
+description: Frontend component patterns and styling
+globs: **/*.tsx, **/*.ts, **/*.jsx, **/*.js
+alwaysApply: false
+---
+# Frontend Coding Standards
+
+- Use React Server Components by default. Use `"use client"` only when interactivity (hooks, state) is strictly necessary.
+- Naming: Use PascalCase for components (`UserProfile.tsx`) and camelCase for hooks (`useAuth.ts`).
+- Styling: Use Tailwind utility classes directly inline. Do not create separate CSS files unless absolutely necessary for complex animations.
+- All complex logic must include a JSDoc comment block explaining the *why*, not just the *what*.
+
+---
+description: Global project architecture and constraints for Life180
+globs: *
+alwaysApply: true
+---
+# Life180 Strict Guidelines
+
+## Tech Stack
+- Frontend: Next.js 14 (App Router), Tailwind CSS.
+- Backend: Node.js or Python (as specified in BRD).
+- Database: PostgreSQL with Prisma ORM.
+
+## Strict Rules
+- NEVER use `any` types in TypeScript.
+- NEVER write raw SQL; always use Prisma.
+- ALWAYS read `docs/brd.md` before generating new features.
+- ALWAYS output a short "Execution Plan" and ask for my approval before modifying multiple files.
+
+---
+description: Critical Technical Standards for Life180
+globs: **/*
+alwaysApply: true
+---
+# Life180 CTO Directives
+
+## 1. Zero-Error Protocol
+- Before generating any UI component, you MUST check `@types/index.ts` for existing data models.
+- If a data model doesn't exist, create it first. NEVER use 'any'.
+
+## 2. Credit Conservation Mode
+- Use "Small-Step" execution. Do not generate more than 2 files in one request unless explicitly asked.
+- Prioritize using standard Tailwind classes to avoid creating unnecessary CSS files.
+
+## 3. Brand & Business Logic
+- Strictly adhere to the logic in `docs/brd.md`. 
+- If the BRD is ambiguous, ASK for clarification before coding. Do not guess.
+
+---
+description: Enterprise-Grade Architecture & Standards for Life180
+globs: **/*
+alwaysApply: true
+---
+# Life180 Enterprise Directives
+
+## 1. Technical Stack Enforcement
+- **Frontend:** Next.js 14 (App Router), Tailwind CSS, Lucide React, Zod (Validation), TanStack Query (Server State).
+- **Backend:** Prisma ORM, PostgreSQL.
+
+## 2. Coding Standards (Senior Level)
+- **Modularity:** Follow "Feature-Based Architecture." Keep `/components` for shared UI and `/features` for business logic.
+- **Strict Typing:** No `any`. Use discriminated unions for state management.
+- **DRY & KISS:** Do not over-engineer, but never repeat logic. Extract common utilities to `/lib`.
+
+## 3. Credit Efficiency Protocol
+- **Plan First:** Before any code generation, output a "File Impact List" (which files will be changed and why).
+- **Atomic Commits:** Propose changes in small, logical chunks to allow for easy rollback without wasting credits.
+- **Documentation:** Generate JSDoc for all exported functions to keep the context window clear for future requests.
+
+## 4. Security & Compliance
+- **Validation:** All inputs must have a Zod schema.
+- **Environment:** Use `.env.local` for all secrets; never hardcode strings.

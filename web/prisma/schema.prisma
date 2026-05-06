@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+
+
+model Campaign {
+  id        String         @id @default(cuid())
+  name      String?
+  status    String         @default("draft")
+  tone      String?
+  cta       String?
+  context   String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  leads     Lead[]
+  errors    LeadUploadError[]
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  firstName   String
+  lastName    String
+  jobTitle    String
+  companyName String
+  email       String
+
+  sector      String?
+  city        String?
+  zipcode     String?
+  country     String?
+  linkedinUrl String?
+  notes       String?
+
+  status      String   @default("cold") // cold, warm, hot
+  emailSubject String?
+  emailBody    String?
+  aiRationale  String?
+  
+  sent        Boolean  @default(false)
+  opened      Boolean  @default(false)
+  replied     Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([campaignId])
+  @@unique([campaignId, email])
+}
+
+model LeadUploadError {
+  id         String   @id @default(cuid())
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  rowNumber  Int
+  field      String
+  message    String
+
+  createdAt  DateTime @default(now())
+
+  @@index([campaignId])
+}
+
+model Settings {
+  id                   String @id @default("global")
+  gmailAccessToken     String?
+  gmailRefreshToken    String?
+  gmailEmailAddress    String?
+  geminiApiKey         String?
+  groqApiKey           String?
+  openaiApiKey         String?
+  claudeApiKey         String?
+  aiProvider           String  @default("gemini")
+  
+  smtpHost             String?
+  smtpPort             Int?
+  smtpUser             String?
+  smtpPass             String?
+  
+  maxEmailsPerHour     Int @default(50)
+}

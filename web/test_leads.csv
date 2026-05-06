@@ -1,0 +1,5 @@
+firstName,lastName,email,companyName,jobTitle,sector,linkedinUrl,notes
+John,Doe,john@example.com,Acme Corp,CEO,Tech,https://linkedin.com/in/johndoe,"Interested in AI"
+Jane,Smith,jane@example.com,Globex,CTO,Finance,https://linkedin.com/in/janesmith,"Met at conference"
+John,Doe,john@example.com,Acme Corp,CEO,Tech,https://linkedin.com/in/johndoe,"Duplicate row"
+Invalid,Lead,not-an-email,BadCo,None,None,None,None
