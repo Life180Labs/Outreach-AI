@@ -3,10 +3,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
-type GmailStatus = "connected" | "disconnected";
+type AccountStatus = "connected" | "disconnected";
 
-function GmailStatusPill({ status }: { status: GmailStatus }) {
-  const label = status === "connected" ? "Gmail connected" : "Gmail disconnected";
+function StatusPill({ status, label }: { status: AccountStatus, label: string }) {
   const dotClasses = status === "connected" ? "bg-emerald-500" : "bg-zinc-400";
 
   return (
@@ -19,10 +18,12 @@ function GmailStatusPill({ status }: { status: GmailStatus }) {
 
 export function AppShell({
   children,
-  gmailStatus = "disconnected",
+  accountStatus = "disconnected",
+  accountLabel = "No account",
 }: {
   children: ReactNode;
-  gmailStatus?: GmailStatus;
+  accountStatus?: AccountStatus;
+  accountLabel?: string;
 }) {
   return (
     <div className="min-h-full bg-zinc-50">
@@ -34,7 +35,7 @@ export function AppShell({
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <GmailStatusPill status={gmailStatus} />
+            <StatusPill status={accountStatus} label={accountLabel} />
             <Link href="/settings" className="text-sm font-medium text-zinc-700 hover:text-zinc-950">
               Settings
             </Link>

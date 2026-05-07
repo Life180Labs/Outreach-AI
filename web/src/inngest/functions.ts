@@ -62,18 +62,30 @@ export const sendEmailSequence = inngest.createFunction(
       return { campaign: c, settings: s };
     });
 
-    if (!campaign || !settings || !settings.smtpHost) {
-      return { error: "Missing campaign or SMTP settings" };
+    if (!campaign || !settings || (!settings.smtpHost && !settings.gmailEmailAddress)) {
+      return { error: "Missing campaign or sending configuration (SMTP or Gmail)" };
     }
 
-    const transporter = nodemailer.createTransport({
-      host: settings.smtpHost,
-      port: settings.smtpPort || 587,
-      auth: {
-        user: settings.smtpUser,
-        pass: settings.smtpPass,
-      }
-    });
+    let transporter;
+    if (settings.smtpHost) {
+      transporter = nodemailer.createTransport({
+        host: settings.smtpHost,
+        port: settings.smtpPort || 587,
+        secure: settings.smtpPort === 465,
+        auth: {
+          user: settings.smtpUser,
+          pass: settings.smtpPass,
+        }
+      });
+    } else {
+      transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: settings.gmailEmailAddress,
+          pass: settings.gmailRefreshToken,
+        }
+      });
+    }
 
     // Calculate delay per email based on maxEmailsPerHour
     const maxEmailsPerHour = settings.maxEmailsPerHour || 50;
@@ -87,7 +99,7 @@ export const sendEmailSequence = inngest.createFunction(
           const htmlBody = `${lead.emailBody}<br><br><img src="${pixelUrl}" width="1" height="1" />`;
           
           await transporter.sendMail({
-            from: settings.smtpUser, // or a configurable sender email
+            from: settings.smtpUser || settings.gmailEmailAddress,
             to: lead.email,
             subject: lead.emailSubject!,
             html: htmlBody,

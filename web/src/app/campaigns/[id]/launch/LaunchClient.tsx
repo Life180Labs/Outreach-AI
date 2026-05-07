@@ -7,7 +7,7 @@ export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any
   const [loading, setLoading] = useState(false);
   const [launched, setLaunched] = useState(false);
 
-  const canLaunch = readyLeads > 0 && settings?.gmailEmailAddress;
+  const canLaunch = readyLeads > 0 && (settings?.gmailEmailAddress || settings?.smtpHost);
   const pendingLeads = totalLeads - readyLeads;
 
   const handleLaunch = async () => {
@@ -36,7 +36,9 @@ export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any
               </div>
               <div className="flex justify-between items-center border-b border-brand-border pb-3">
                 <span className="text-brand-muted font-medium">From</span>
-                <span className="text-black font-semibold text-right">{settings?.gmailEmailAddress || 'Not connected'}</span>
+                <span className="text-black font-semibold text-right">
+                  {settings?.gmailEmailAddress || settings?.smtpUser || 'Not connected'}
+                </span>
               </div>
               <div className="flex justify-between items-center border-b border-brand-border pb-3">
                 <span className="text-brand-muted font-medium">Send rate</span>
@@ -79,7 +81,7 @@ export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any
           <ul className="space-y-3 mb-6">
             <li className="flex items-center gap-3 text-sm">
               <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-              <span className="text-black font-medium">Gmail account connected</span>
+              <span className="text-black font-medium">Sending account connected</span>
             </li>
             <li className="flex items-center gap-3 text-sm">
               <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>

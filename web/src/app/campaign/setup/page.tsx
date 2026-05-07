@@ -30,7 +30,7 @@ export default function CampaignSetupPage() {
   }, [leads.length]);
 
   return (
-    <AppShell gmailStatus="disconnected">
+    <AppShell accountStatus="disconnected" accountLabel="Not connected">
       <div className="space-y-6">
         <header className="space-y-2">
           <div className="text-xs font-medium text-zinc-500">Campaign setup</div>
