@@ -2,45 +2,25 @@
 
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/gmail";
+import { inngest } from "@/inngest/client";
 
 export async function startCampaignAction(campaignId: string) {
-  await prisma.campaign.update({
-    where: { id: campaignId },
-    data: { status: "active" }
-  });
+  console.log(`[startCampaignAction] Starting campaign ${campaignId}`);
+  try {
+    await prisma.campaign.update({
+      where: { id: campaignId },
+      data: { status: "active" }
+    });
+    console.log(`[startCampaignAction] Status updated to active`);
 
-  // Async process (in production use a job queue)
-  processCampaignEmails(campaignId);
-}
-
-async function processCampaignEmails(campaignId: string) {
-  const leads = await prisma.lead.findMany({
-    where: {
-      campaignId,
-      emailSubject: { not: null },
-      emailBody: { not: null },
-      sent: false
-    }
-  });
-
-  for (const lead of leads) {
-    if (!lead.emailSubject || !lead.emailBody) continue;
-
-    const result = await sendEmail(lead.email, lead.emailSubject, lead.emailBody);
-    
-    if (result.success) {
-      await prisma.lead.update({
-        where: { id: lead.id },
-        data: { sent: true }
-      });
-    }
-    
-    // Simple throttle
-    await new Promise(res => setTimeout(res, 2000));
+    // Trigger Inngest function for background sending
+    const result = await inngest.send({
+      name: "campaign/send.sequence",
+      data: { campaignId }
+    } as any);
+    console.log(`[startCampaignAction] Inngest event sent:`, result);
+  } catch (error: any) {
+    console.error(`[startCampaignAction] Error:`, error);
+    throw new Error(`Failed to launch campaign: ${error.message}`);
   }
-
-  await prisma.campaign.update({
-    where: { id: campaignId },
-    data: { status: "completed" }
-  });
 }

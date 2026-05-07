@@ -6,15 +6,29 @@ import { Check, Loader2, Mail, ShieldCheck, Zap } from "lucide-react";
 
 export function SettingsClient({ settings }: { settings: any }) {
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [maxEmails, setMaxEmails] = useState(settings?.maxEmailsPerHour || 30);
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
-    const formData = new FormData(e.currentTarget);
-    await saveSettings(formData);
-    setSaving(false);
+    setSaved(false);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await saveSettings(formData);
+      if (result.success) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      } else {
+        alert("Failed to save: " + (result.error || "Unknown error"));
+      }
+    } catch (err: any) {
+      alert("Error saving settings: " + err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleTestConnection = async () => {
@@ -34,9 +48,9 @@ export function SettingsClient({ settings }: { settings: any }) {
   };
 
   return (
-    <form onSubmit={handleSave} className="grid grid-cols-1 md:grid-cols-2 gap-12">
+    <form onSubmit={handleSave} className="flex flex-col lg:grid lg:grid-cols-2 gap-12 pb-24">
       {/* Left Column */}
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
           <h3 className="text-black font-semibold text-sm mb-4 flex items-center gap-2">
             <Mail className="w-4 h-4" /> SMTP Configuration
@@ -82,6 +96,17 @@ export function SettingsClient({ settings }: { settings: any }) {
                 placeholder="SG...." 
                 className="w-full bg-white border border-brand-border rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black/5" 
               />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-black uppercase tracking-wider">SMTP From Email</label>
+              <input 
+                type="email" 
+                name="smtpFromEmail"
+                defaultValue={settings?.smtpFromEmail || ""}
+                placeholder="hello@yourdomain.com" 
+                className="w-full bg-white border border-brand-border rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black/5" 
+              />
+              <p className="text-[10px] text-brand-muted">The verified sender address in your SMTP provider.</p>
             </div>
             
             <div className="pt-2">
@@ -138,13 +163,6 @@ export function SettingsClient({ settings }: { settings: any }) {
           <h3 className="text-black font-semibold text-sm flex items-center gap-2">
             <Zap className="w-4 h-4" /> Sending controls & AI
           </h3>
-          <button 
-            type="submit" 
-            disabled={saving}
-            className="bg-black text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-zinc-800 transition shadow-sm flex items-center gap-2 disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" /> Save Settings</>}
-          </button>
         </div>
 
         <div className="bg-brand-surface border border-brand-border rounded-xl p-6 space-y-6">
@@ -154,16 +172,32 @@ export function SettingsClient({ settings }: { settings: any }) {
                 <p className="text-black font-semibold text-sm">Max emails per hour</p>
                 <p className="text-brand-muted text-sm">Lower = lower spam risk. Recommended: 20-40.</p>
               </div>
-              <span className="text-black font-bold text-sm">{settings?.maxEmailsPerHour || 30}/hr</span>
+              <span className="text-black font-bold text-sm">{maxEmails}/hr</span>
             </div>
             <input 
               type="range" 
               name="maxEmailsPerHour"
               min="10" 
               max="100" 
-              defaultValue={settings?.maxEmailsPerHour || 30}
+              value={maxEmails}
+              onChange={(e) => setMaxEmails(parseInt(e.target.value))}
               className="w-full accent-black" 
             />
+          </div>
+          
+          <div className="pt-2 border-t border-brand-border space-y-4">
+            <p className="text-black font-semibold text-sm">Follow-up Configuration</p>
+            <div className="space-y-2">
+              <label className="text-xs font-semibold text-black uppercase tracking-wider">Delay Options (Days, comma-separated)</label>
+              <input 
+                type="text" 
+                name="followupDelayOptions"
+                defaultValue={settings?.followupDelayOptions || "1,3,5,7,10,14"}
+                placeholder="1,3,5,7,10,14" 
+                className="w-full bg-white border border-brand-border rounded-lg px-3 py-2 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black/5" 
+              />
+              <p className="text-[10px] text-brand-muted">These options will appear in your campaign setup dropdowns.</p>
+            </div>
           </div>
 
           <div className="pt-2 border-t border-brand-border space-y-4">
@@ -206,6 +240,23 @@ export function SettingsClient({ settings }: { settings: any }) {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Sticky Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-brand-border p-4 flex justify-center items-center z-50">
+        <div className="max-w-7xl w-full flex justify-between items-center px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-brand-muted hidden sm:block">All changes are saved to your local database.</p>
+            {saved && <span className="text-emerald-600 text-xs font-bold animate-in fade-in slide-in-from-bottom-1">✓ Saved successfully!</span>}
+          </div>
+          <button 
+            type="submit" 
+            disabled={saving}
+            className={`w-full sm:w-auto px-8 py-3 rounded-xl text-sm font-bold transition shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 ${saved ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-black text-white hover:bg-zinc-800'}`}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <><Check className="w-4 h-4" /> Configuration Saved</> : <><Check className="w-4 h-4" /> Save Configuration</>}
+          </button>
         </div>
       </div>
     </form>

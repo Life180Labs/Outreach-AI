@@ -1,24 +1,35 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export function SendingClient({ campaign, recentLeads, stats }: any) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
+  }, [router]);
+
   const progressPercent = stats.total > 0 ? Math.round((stats.sent / stats.total) * 100) : 0;
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 h-full">
       <div className="space-y-8">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
-            <p className="text-4xl font-semibold text-emerald-600 mb-1">{stats.sent || 64}</p>
+            <p className="text-2xl sm:text-4xl font-semibold text-emerald-600 mb-1">{stats.sent}</p>
             <p className="text-brand-muted text-sm font-medium">Sent</p>
           </div>
           <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
-            <p className="text-4xl font-semibold text-amber-600 mb-1">{stats.pending || 18}</p>
+            <p className="text-2xl sm:text-4xl font-semibold text-amber-600 mb-1">{stats.pending}</p>
             <p className="text-brand-muted text-sm font-medium">Pending</p>
           </div>
           <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
-            <p className="text-4xl font-semibold text-red-600 mb-1">{stats.failed || 2}</p>
+            <p className="text-2xl sm:text-4xl font-semibold text-red-600 mb-1">{stats.failed}</p>
             <p className="text-brand-muted text-sm font-medium">Failed</p>
           </div>
         </div>
@@ -28,7 +39,7 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
           <div className="w-full bg-brand-surface border border-brand-border rounded-full h-2.5 mb-2 overflow-hidden">
             <div className="h-2.5 bg-[#7ba6f5] rounded-full transition-all duration-1000" style={{ width: `${progressPercent || 76}%` }}></div>
           </div>
-          <p className="text-brand-muted text-sm">{progressPercent || 76}% complete · ~8 min remaining · 30 emails/hr</p>
+          <p className="text-brand-muted text-sm">{progressPercent}% complete · {stats.total > 0 ? `${Math.ceil(stats.pending / 30 * 60)} min remaining` : 'No leads'} · 30 emails/hr</p>
         </div>
 
         <div>
@@ -71,57 +82,29 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
       <div>
         <h3 className="text-black font-semibold text-sm mb-3">Live send feed</h3>
         <div className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden h-[500px] overflow-y-auto divide-y divide-brand-border">
-          <div className="p-4 flex items-start gap-3 bg-brand-surface">
-            <div className="mt-0.5">
-              <div className="w-3 h-3 text-emerald-500">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+          {recentLeads.length === 0 ? (
+            <div className="p-8 text-center text-brand-muted text-sm italic">
+              Waiting for first email to send...
+            </div>
+          ) : recentLeads.map((lead: any) => (
+            <div key={lead.id} className="p-4 flex items-start gap-3 bg-brand-surface hover:bg-white transition-colors">
+              <div className="mt-0.5">
+                <div className={`w-3 h-3 ${lead.sent ? 'text-emerald-500' : 'text-amber-500'}`}>
+                  {lead.sent ? (
+                    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  ) : (
+                    <div className="w-2 h-2 rounded-full bg-current animate-pulse ml-0.5 mt-0.5" />
+                  )}
+                </div>
+              </div>
+              <div>
+                <p className="text-black font-bold text-sm truncate max-w-[180px]">{lead.email}</p>
+                <p className="text-brand-muted text-xs mt-0.5" suppressHydrationWarning>
+                  {lead.sent ? 'Sent' : 'Pending'} · {new Date(lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
               </div>
             </div>
-            <div>
-              <p className="text-black font-bold text-sm">rania@novaspark.ai</p>
-              <p className="text-brand-muted text-xs mt-0.5">Sent · 2s ago</p>
-            </div>
-          </div>
-          <div className="p-4 flex items-start gap-3 bg-brand-surface">
-            <div className="mt-0.5">
-              <div className="w-3 h-3 text-emerald-500">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-black font-bold text-sm">james@cognify.io</p>
-              <p className="text-brand-muted text-xs mt-0.5">Sent · 5s ago</p>
-            </div>
-          </div>
-          <div className="p-4 flex items-start gap-3 bg-brand-surface">
-            <div className="mt-0.5 text-orange-400 font-bold text-xs mt-1">!</div>
-            <div>
-              <p className="text-black font-bold text-sm">khalid@visioncore.ae</p>
-              <p className="text-brand-muted text-xs mt-0.5">Retry · invalid domain</p>
-            </div>
-          </div>
-          <div className="p-4 flex items-start gap-3 bg-brand-surface">
-            <div className="mt-0.5">
-              <div className="w-3 h-3 text-emerald-500">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-black font-bold text-sm">sara@heliosml.com</p>
-              <p className="text-brand-muted text-xs mt-0.5">Sent · 9s ago</p>
-            </div>
-          </div>
-          <div className="p-4 flex items-start gap-3 bg-brand-surface">
-            <div className="mt-0.5">
-              <div className="w-3 h-3 text-emerald-500">
-                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              </div>
-            </div>
-            <div>
-              <p className="text-black font-bold text-sm">meera@inferiq.com</p>
-              <p className="text-brand-muted text-xs mt-0.5">Sent · 14s ago</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>

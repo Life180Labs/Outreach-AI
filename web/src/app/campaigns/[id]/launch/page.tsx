@@ -13,7 +13,7 @@ export default async function CampaignLaunchPage({ params }: { params: Promise<{
 
   const settings = await prisma.settings.findUnique({ where: { id: "global" } });
   const readyLeads = await prisma.lead.count({
-    where: { campaignId: id, emailSubject: { not: null }, emailBody: { not: null } }
+    where: { campaignId: id, isApproved: true }
   });
 
   return (

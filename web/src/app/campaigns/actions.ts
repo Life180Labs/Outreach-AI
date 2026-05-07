@@ -9,10 +9,20 @@ export async function createCampaignFromUpload(formData: FormData) {
   
   const leads = JSON.parse(rawData as string);
   
+  // Auto-detect business type and location from leads
+  const sectors = [...new Set(leads.map((l: any) => l.sector).filter(Boolean))].slice(0, 3);
+  const cities = [...new Set(leads.map((l: any) => l.city).filter(Boolean))].slice(0, 2);
+  const countries = [...new Set(leads.map((l: any) => l.country).filter(Boolean))].slice(0, 2);
+  
+  const businessType = sectors.join(" / ") || "Unknown";
+  const locationContext = [...cities, ...countries].join(", ") || "Global";
+
   const campaign = await prisma.campaign.create({
     data: {
       name: formData.get("campaignName") as string || "New Campaign",
       status: "draft",
+      businessType,
+      locationContext,
     }
   });
 
@@ -48,8 +58,40 @@ export async function updateCampaignSetup(formData: FormData) {
       tone: formData.get("tone") as string,
       cta: formData.get("cta") as string,
       context: formData.get("context") as string,
+      businessType: formData.get("businessType") as string,
+      locationContext: formData.get("locationContext") as string,
+      followup1Delay: parseInt(formData.get("followup1Delay") as string || "3"),
+      followup2Delay: parseInt(formData.get("followup2Delay") as string || "7"),
     }
+  });
+  
+  // Trigger bulk generation in background
+  const { inngest } = await import("@/inngest/client");
+  await inngest.send({
+    name: "campaign/generate.drafts",
+    data: { campaignId: id }
   });
 
   redirect(`/campaigns/${id}/review`);
+}
+
+export async function toggleCampaignStatus(id: string) {
+  const campaign = await prisma.campaign.findUnique({ where: { id } });
+  if (!campaign) return;
+
+  const newStatus = campaign.status === "active" ? "paused" : "active";
+  
+  await prisma.campaign.update({
+    where: { id },
+    data: { status: newStatus }
+  });
+
+  return newStatus;
+}
+
+export async function stopAllCampaigns() {
+  await prisma.campaign.updateMany({
+    where: { status: "active" },
+    data: { status: "paused" }
+  });
 }

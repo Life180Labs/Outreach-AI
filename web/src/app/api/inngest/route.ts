@@ -1,12 +1,20 @@
 import { serve } from "inngest/next";
 import { inngest } from "@/inngest/client";
-import { generateDraftsBatch, sendEmailSequence, scheduleFollowUps } from "@/inngest/functions";
+import { 
+  ping, 
+  generateDraftsBatch, 
+  sendEmailSequence, 
+  scheduleFollowUps,
+  checkInboxForReplies
+} from "@/inngest/functions";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
+    ping,
     generateDraftsBatch,
     sendEmailSequence,
     scheduleFollowUps,
+    checkInboxForReplies,
   ],
 });

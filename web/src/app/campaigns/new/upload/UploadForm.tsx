@@ -111,8 +111,10 @@ export function UploadForm() {
     
     try {
       await createCampaignFromUpload(formData);
-    } catch (e) {
+    } catch (e: any) {
+      if (e.message?.includes("NEXT_REDIRECT")) return;
       console.error(e);
+      alert("Error creating campaign: " + (e.message || "Unknown error"));
       setLoading(false);
     }
   };

@@ -1,12 +1,25 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import prisma from "@/lib/prisma";
+import { StopSequencesButton } from "./StopSequencesButton";
 
 export default async function DashboardPage() {
   const campaigns = await prisma.campaign.findMany({
     orderBy: { updatedAt: 'desc' },
     take: 5,
-    include: { _count: { select: { leads: true } } }
+    include: { 
+      _count: { 
+        select: { 
+          leads: true 
+        } 
+      },
+      leads: {
+        select: {
+          sent: true,
+          status: true
+        }
+      }
+    }
   });
 
   const lastCampaign = campaigns[0];
@@ -41,14 +54,12 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="p-4 rounded-xl border border-red-200 bg-red-50 flex items-center justify-between">
+      <div className="p-4 rounded-xl border border-red-200 bg-red-50 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-red-500 shrink-0"></div>
           <p className="text-red-900 text-sm"><span className="font-semibold">Global kill switch</span> — stops all active sequences immediately if a prompt error is detected.</p>
         </div>
-        <button className="bg-red-50 hover:bg-red-100 border border-red-200 text-red-900 px-4 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-          Stop all sequences
-        </button>
+        <StopSequencesButton />
       </div>
 
       <div>
@@ -56,20 +67,29 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {campaigns.length === 0 ? (
             <div className="p-6 text-brand-muted text-sm border border-brand-border rounded-xl bg-brand-surface">No campaigns yet.</div>
-          ) : campaigns.map(c => (
-            <div key={c.id} className="p-5 rounded-xl border border-brand-border bg-brand-surface space-y-4">
-              <div>
-                <h3 className="font-semibold text-black mb-0.5">{c.name || 'Untitled'}</h3>
-                <p className="text-brand-muted text-sm">{c._count.leads} leads · {c.status === 'active' ? 'Running' : c.status === 'completed' ? 'Completed' : 'Draft'}</p>
+          ) : campaigns.map(c => {
+            const sentCount = c.leads.filter(l => l.sent).length;
+            const hotCount = c.leads.filter(l => l.status === 'hot').length;
+            const progress = c._count.leads > 0 ? (sentCount / c._count.leads) * 100 : 0;
+
+            return (
+              <div key={c.id} className="p-5 rounded-xl border border-brand-border bg-brand-surface space-y-4">
+                <div>
+                  <h3 className="font-semibold text-black mb-0.5">{c.name || 'Untitled'}</h3>
+                  <p className="text-brand-muted text-sm">{c._count.leads} leads · {c.status === 'active' ? 'Running' : c.status === 'completed' ? 'Completed' : 'Draft'}</p>
+                </div>
+                <div className="w-full bg-brand-border rounded-full h-1.5">
+                  <div 
+                    className={`h-1.5 rounded-full ${c.status === 'completed' ? 'bg-[#a3d482]' : 'bg-brand-primary'}`} 
+                    style={{ width: `${c.status === 'completed' ? 100 : progress}%` }}
+                  ></div>
+                </div>
+                <div className="text-sm text-brand-muted">
+                  Sent {sentCount} · {hotCount} hot leads · <Link href={`/campaigns/${c.id}`} className="text-black hover:underline inline-flex items-center">View <ArrowRight className="w-3 h-3 ml-0.5" /></Link>
+                </div>
               </div>
-              <div className="w-full bg-brand-border rounded-full h-1.5">
-                <div className={`h-1.5 rounded-full ${c.status === 'completed' ? 'bg-[#a3d482]' : 'bg-[#7ba6f5]'}`} style={{ width: c.status === 'completed' ? '100%' : '60%' }}></div>
-              </div>
-              <div className="text-sm text-brand-muted">
-                Sent {c.status === 'draft' ? 0 : Math.floor(c._count.leads * 0.8)} · 5 hot leads · <Link href={`/campaigns/${c.id}`} className="text-black hover:underline inline-flex items-center">View <ArrowRight className="w-3 h-3 ml-0.5" /></Link>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

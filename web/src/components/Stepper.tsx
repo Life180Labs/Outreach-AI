@@ -25,16 +25,23 @@ export function Stepper({ campaignId }: { campaignId?: string }) {
           isActive = pathname.includes(`/${step.path}`);
         }
 
-        const href = step.path ? `/campaigns/${campaignId || 'new'}/${step.path}` : `/campaigns/${campaignId}`;
-        
+        const href = `/campaigns/${campaignId || 'new'}/${step.path}`;
+        const isCompleted = campaignId || step.path === 'upload';
+
         return (
           <div key={step.label} className="flex-1 text-center">
-            <Link 
-              href={campaignId ? href : '#'}
-              className={`block pb-3 text-sm font-medium border-b-2 ${isActive ? 'text-black border-black' : 'text-brand-muted border-transparent hover:text-black'}`}
-            >
-              {step.label}
-            </Link>
+            {isCompleted ? (
+              <Link 
+                href={href}
+                className={`block pb-3 text-sm font-medium border-b-2 ${isActive ? 'text-black border-black' : 'text-brand-muted border-transparent hover:text-black'}`}
+              >
+                {step.label}
+              </Link>
+            ) : (
+              <span className="block pb-3 text-sm font-medium border-b-2 text-zinc-300 border-transparent cursor-not-allowed">
+                {step.label}
+              </span>
+            )}
           </div>
         );
       })}

@@ -32,13 +32,18 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
             </div>
             
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Sender (Connected account)</label>
-              <div className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black flex items-center gap-2">
-                <div className={`w-2 h-2 rounded-full shrink-0 ${settings?.gmailEmailAddress || settings?.smtpHost ? 'bg-emerald-500' : 'bg-zinc-300'}`}></div>
-                {settings?.gmailEmailAddress || settings?.smtpUser || "No account connected"}
-                <span className="text-brand-muted text-xs ml-auto">
-                  {settings?.smtpHost ? 'SMTP' : settings?.gmailEmailAddress ? 'Gmail' : ''}
-                </span>
+              <label className="text-sm font-semibold text-black">Sender & AI Config</label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${settings?.gmailEmailAddress || settings?.smtpHost ? 'bg-emerald-500' : 'bg-zinc-300'}`}></div>
+                  <span className="truncate text-sm font-medium">{settings?.gmailEmailAddress || settings?.smtpUser || "No account"}</span>
+                  <span className="text-brand-muted text-[10px] ml-auto uppercase">{settings?.smtpHost ? 'SMTP' : 'Gmail'}</span>
+                </div>
+                <div className="bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${settings?.aiProvider ? 'bg-purple-500' : 'bg-zinc-300'}`}></div>
+                  <span className="truncate text-sm font-medium capitalize">{settings?.aiProvider || "gemini"}</span>
+                  <span className="text-brand-muted text-[10px] ml-auto uppercase">AI</span>
+                </div>
               </div>
             </div>
 
@@ -58,15 +63,27 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs font-semibold text-black mb-1">Follow-up 1</p>
-                  <div className="bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm">
-                    Day 3 — if no reply
-                  </div>
+                  <select 
+                    name="followup1Delay"
+                    defaultValue={campaign.followup1Delay}
+                    className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none appearance-none"
+                  >
+                    {(settings?.followupDelayOptions || "1,3,5,7,10,14").split(',').map((d: string) => (
+                      <option key={d} value={d.trim()}>Day {d.trim()} — if no reply</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-black mb-1">Follow-up 2</p>
-                  <div className="bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm">
-                    Day 7 — if no reply
-                  </div>
+                  <select 
+                    name="followup2Delay"
+                    defaultValue={campaign.followup2Delay}
+                    className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none appearance-none"
+                  >
+                    {(settings?.followupDelayOptions || "1,3,5,7,10,14").split(',').map((d: string) => (
+                      <option key={d} value={d.trim()}>Day {d.trim()} — if no reply</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -123,16 +140,24 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-black">Business type <span className="text-brand-muted font-normal">(auto-detected)</span></label>
-              <div className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm">
-                AI Startup / SaaS · editable
-              </div>
+              <input 
+                type="text"
+                name="businessType"
+                defaultValue={campaign.businessType || ""}
+                placeholder="e.g. AI Startup / SaaS"
+                className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none" 
+              />
             </div>
             
             <div className="space-y-2">
               <label className="text-sm font-semibold text-black">Location context <span className="text-brand-muted font-normal">(auto)</span></label>
-              <div className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm">
-                UAE, KSA, Canada · editable
-              </div>
+              <input 
+                type="text"
+                name="locationContext"
+                defaultValue={campaign.locationContext || ""}
+                placeholder="e.g. UAE, KSA, Canada"
+                className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none" 
+              />
             </div>
 
             <button 

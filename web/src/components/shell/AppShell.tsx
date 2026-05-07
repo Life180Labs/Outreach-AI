@@ -28,14 +28,20 @@ export function AppShell({
   return (
     <div className="min-h-full bg-zinc-50">
       <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-4">
             <Link href="/" className="text-sm font-semibold tracking-tight text-zinc-950">
               Outreach AI
             </Link>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6">
             <StatusPill status={accountStatus} label={accountLabel} />
+            <Link href="/campaigns" className="text-sm font-medium text-zinc-700 hover:text-zinc-950">
+              Campaigns
+            </Link>
+            <Link href="/leads" className="text-sm font-medium text-zinc-700 hover:text-zinc-950">
+              Leads
+            </Link>
             <Link href="/settings" className="text-sm font-medium text-zinc-700 hover:text-zinc-950">
               Settings
             </Link>
@@ -43,7 +49,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-6xl px-6 py-10">{children}</main>
+      <main className="mx-auto w-full max-w-7xl px-6 py-10">{children}</main>
     </div>
   );
 }

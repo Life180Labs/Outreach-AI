@@ -18,23 +18,28 @@ export async function saveSettings(formData: FormData) {
     smtpPort: formData.get("smtpPort") ? parseInt(formData.get("smtpPort") as string) : null,
     smtpUser: formData.get("smtpUser") as string,
     smtpPass: formData.get("smtpPass") as string,
+    smtpFromEmail: formData.get("smtpFromEmail") as string,
     
     // Gmail
     gmailEmailAddress: formData.get("gmailEmailAddress") as string,
     gmailRefreshToken: formData.get("gmailRefreshToken") as string,
+    followupDelayOptions: formData.get("followupDelayOptions") as string,
   };
 
-  await prisma.settings.upsert({
-    where: { id: "global" },
-    update: data,
-    create: {
-      id: "global",
-      ...data
-    }
-  });
-
-  revalidatePath("/settings");
-  return { success: true };
+  try {
+    await prisma.settings.upsert({
+      where: { id: "global" },
+      update: data,
+      create: {
+        id: "global",
+        ...data
+      }
+    });
+    revalidatePath("/settings");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 }
 
 export async function testSmtpConnection(formData: FormData) {
