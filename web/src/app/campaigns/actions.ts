@@ -80,10 +80,17 @@ export async function toggleCampaignStatus(id: string) {
   if (!campaign) return;
 
   const newStatus = campaign.status === "active" ? "paused" : "active";
+  const isPaused = newStatus === "paused";
   
   await prisma.campaign.update({
     where: { id },
     data: { status: newStatus }
+  });
+
+  // Also update all leads in this campaign to match
+  await prisma.lead.updateMany({
+    where: { campaignId: id, sent: false, isApproved: true },
+    data: { isPaused }
   });
 
   return newStatus;

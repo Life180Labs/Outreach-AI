@@ -1,7 +1,8 @@
 import { inngest } from "./client";
 import prisma from "@/lib/prisma";
 import { generateEmailDraft } from "@/lib/ai";
-import nodemailer from "nodemailer";
+import { createTransporter, getSenderAddress } from "@/lib/mail";
+import type { Settings } from "@/types";
 import { ImapFlow } from "imapflow";
 
 export const ping = inngest.createFunction(
@@ -13,7 +14,7 @@ export const ping = inngest.createFunction(
 
 export const generateDraftsBatch = inngest.createFunction(
   { id: "generate-drafts-batch", triggers: [{ event: "campaign/generate.drafts" }] },
-  async ({ event, step }: any) => {
+  async ({ event, step }: { event: { data: { campaignId: string } }; step: any }) => {
     const { campaignId } = event.data;
 
     const campaign = await step.run("fetch-campaign", async () => {
@@ -25,27 +26,32 @@ export const generateDraftsBatch = inngest.createFunction(
 
     if (!campaign) return { error: "Campaign not found" };
 
+    // Fetch settings ONCE for the entire batch instead of per-lead
+    const settings = await step.run("fetch-settings", async () => {
+      return await prisma.settings.findUnique({ where: { id: "global" } });
+    });
+
     const leadsToProcess = campaign.leads.filter((l: any) => !l.emailSubject);
 
     for (const lead of leadsToProcess) {
-      // Use unique step ID for every lead to avoid memoization issues
-      await step.run(`gen-${lead.id}-${Date.now()}`, async () => {
+      // Deterministic step ID — safe for Inngest retries/idempotency
+      await step.run(`gen-draft-${lead.id}`, async () => {
         try {
-          // Re-fetch lead to ensure we have fresh data
           const currentLead = await prisma.lead.findUnique({ where: { id: lead.id } });
           if (!currentLead) return;
 
-          const draft = await generateEmailDraft(currentLead, campaign);
+          // Pass cached settings to avoid N+1 DB queries
+          const draft = await generateEmailDraft(currentLead, campaign, "", settings as Settings | null);
           await prisma.lead.update({
             where: { id: currentLead.id },
             data: {
               emailSubject: draft.subject,
               emailBody: draft.body,
               aiRationale: draft.rationale,
-            }
+            },
           });
         } catch (e) {
-          console.error(`Failed to generate draft for ${lead.email}`, e);
+          console.error(`[generateDraftsBatch] Failed for ${lead.email}:`, e);
         }
       });
     }
@@ -56,14 +62,13 @@ export const generateDraftsBatch = inngest.createFunction(
 
 export const sendEmailSequence = inngest.createFunction(
   { id: "send-email-sequence", triggers: [{ event: "campaign/send.sequence" }] },
-  async ({ event, step }: any) => {
+  async ({ event, step }: { event: { data: { campaignId: string } }; step: any }) => {
     const { campaignId } = event.data;
-    console.log(`[sendEmailSequence] Processing campaign ${campaignId}`);
 
     const { campaign, settings } = await step.run("fetch-data", async () => {
       const c = await prisma.campaign.findUnique({
         where: { id: campaignId },
-        include: { leads: { where: { sent: false, isApproved: true } } }
+        include: { leads: { where: { sent: false, isApproved: true } } },
       });
       const s = await prisma.settings.findUnique({ where: { id: "global" } });
       return { campaign: c, settings: s };
@@ -74,34 +79,23 @@ export const sendEmailSequence = inngest.createFunction(
     }
 
     for (const lead of campaign.leads) {
+      // Deterministic step ID
       await step.run(`send-email-${lead.id}`, async () => {
-        const port = settings.smtpPort || (settings.smtpHost ? 587 : 465);
-        const isSecure = settings.smtpSecure !== null ? settings.smtpSecure : (port === 465);
-
-        const transporter = nodemailer.createTransport({
-          host: settings.smtpHost || "smtp.gmail.com",
-          port: port,
-          secure: isSecure,
-          auth: {
-            user: settings.smtpUser || settings.gmailEmailAddress,
-            pass: settings.smtpPass || settings.gmailAppPassword,
-          },
-          connectionTimeout: 10000,
-          tls: { rejectUnauthorized: false }
-        });
+        const transporter = createTransporter(settings as Settings);
+        const from = getSenderAddress(settings as Settings);
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const trackingUrl = `${appUrl}/api/track/open/${lead.id}`;
-        
+
         const htmlBody = `
           <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
-            ${lead.emailBody!.replace(/\n/g, '<br>')}
+            ${lead.emailBody!.replace(/\n/g, "<br>")}
           </div>
           <img src="${trackingUrl}" width="1" height="1" style="display:none !important;" />
         `;
 
         await transporter.sendMail({
-          from: settings.smtpFromEmail || settings.smtpUser || settings.gmailEmailAddress,
+          from,
           to: lead.email,
           subject: lead.emailSubject!,
           html: htmlBody,
@@ -110,7 +104,7 @@ export const sendEmailSequence = inngest.createFunction(
 
         await prisma.lead.update({
           where: { id: lead.id },
-          data: { sent: true }
+          data: { sent: true },
         });
       });
     }
@@ -121,7 +115,7 @@ export const sendEmailSequence = inngest.createFunction(
 
 export const scheduleFollowUps = inngest.createFunction(
   { id: "schedule-follow-ups", triggers: [{ event: "campaign/schedule.followup" }] },
-  async ({ event, step }: any) => {
+  async ({ event, step }: { event: { data: { leadId: string } }; step: any }) => {
     const { leadId } = event.data;
     await step.sleep("wait-3-days", "3d");
 
@@ -133,7 +127,7 @@ export const scheduleFollowUps = inngest.createFunction(
     if (replied) return { status: "replied" };
 
     await step.run("send-followup", async () => {
-      console.log(`Sending Follow-up for Lead ${leadId}`);
+      console.log(`[scheduleFollowUps] Sending follow-up for lead ${leadId}`);
     });
 
     return { status: "completed" };
@@ -147,7 +141,9 @@ export const checkInboxForReplies = inngest.createFunction(
       return await prisma.settings.findUnique({ where: { id: "global" } });
     });
 
-    if (!settings || (!settings.smtpHost && !settings.gmailEmailAddress)) return { error: "No settings" };
+    if (!settings || (!settings.smtpHost && !settings.gmailEmailAddress)) {
+      return { error: "No settings" };
+    }
 
     const client = new ImapFlow({
       host: settings.smtpHost?.replace("smtp.", "imap.") || "imap.gmail.com",
@@ -160,44 +156,55 @@ export const checkInboxForReplies = inngest.createFunction(
       logger: false,
     });
 
-    await client.connect();
+    try {
+      await client.connect();
+    } catch (connectError) {
+      console.error("[checkInboxForReplies] IMAP connect failed:", connectError);
+      return { error: "IMAP connection failed" };
+    }
+
     const lock = await client.getMailboxLock("INBOX");
-    
-    const results = [];
+
+    const results: string[] = [];
     try {
       const activeLeads = await prisma.lead.findMany({
-        where: { 
-          sent: true, 
+        where: {
+          sent: true,
           OR: [
             { replied: false },
-            { replied: true, messages: { none: { role: 'LEAD' } } }
-          ]
+            { replied: true, messages: { none: { role: "LEAD" } } },
+          ],
         },
-        select: { email: true, id: true }
+        select: { email: true, id: true },
       });
 
       for (const lead of activeLeads) {
         const messageUids = await client.search({ from: lead.email });
         if (Array.isArray(messageUids) && messageUids.length > 0) {
-          // Fetch the latest message content
           const lastUid = messageUids[messageUids.length - 1];
           const msg = await client.fetchOne(lastUid, { source: true, envelope: true });
           if (msg && msg.source) {
-            const content = msg.source.toString().split('\r\n\r\n')[1] || "Reply received (Content could not be parsed)";
+            const content =
+              msg.source.toString().split("\r\n\r\n")[1] ||
+              "Reply received (Content could not be parsed)";
 
+            // Deterministic step ID
             await step.run(`mark-replied-${lead.id}`, async () => {
               await prisma.lead.update({
                 where: { id: lead.id },
-                data: { 
-                  replied: true, 
+                data: {
+                  replied: true,
                   status: "Hot",
                   messages: {
                     create: {
-                      role: 'LEAD',
-                      content: content.length > 500 ? content.substring(0, 500) + "..." : content
-                    }
-                  }
-                }
+                      role: "LEAD",
+                      content:
+                        content.length > 500
+                          ? content.substring(0, 500) + "..."
+                          : content,
+                    },
+                  },
+                },
               });
             });
           }
@@ -206,7 +213,7 @@ export const checkInboxForReplies = inngest.createFunction(
       }
     } finally {
       lock.release();
-      await client.logout();
+      await client.logout().catch(() => {});
     }
 
     return { checked: results.length, replies: results };

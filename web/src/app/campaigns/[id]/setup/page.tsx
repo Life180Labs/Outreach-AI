@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
 import { updateCampaignSetup } from "../../actions";
 import { Stepper } from "@/components/Stepper";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Settings2, Sliders, Globe, MessageSquare } from "lucide-react";
+import Link from "next/link";
 
 export default async function CampaignSetupPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -11,62 +12,73 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
   });
   const settings = await prisma.settings.findUnique({ where: { id: "global" } });
 
-  if (!campaign) return <div>Campaign not found</div>;
+  if (!campaign) return <div className="p-8 text-center text-zinc-400">Campaign not found</div>;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="w-full space-y-6">
       <Stepper campaignId={id} />
-      <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <form action={updateCampaignSetup} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <input type="hidden" name="campaignId" value={campaign.id} />
+      
+      <form action={updateCampaignSetup} className="space-y-6">
+        <input type="hidden" name="campaignId" value={campaign.id} />
+
+        {/* Header */}
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-black transition-colors">Campaign</Link>
+            <span className="text-zinc-300">/</span>
+            <span className="text-[10px] font-bold text-black uppercase tracking-widest">Configuration</span>
+          </div>
+          <h1 className="text-2xl font-semibold text-black tracking-tight">{campaign.name || 'Campaign Setup'}</h1>
+          <p className="text-zinc-400 text-sm">Define your outreach strategy and AI context</p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6">
           
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Campaign name</label>
-              <input 
-                type="text"
-                name="campaignName"
-                defaultValue={campaign.name || "Untitled Campaign"}
-                className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black focus:outline-none" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Sender & AI Config</label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${settings?.gmailEmailAddress || settings?.smtpHost ? 'bg-emerald-500' : 'bg-zinc-300'}`}></div>
-                  <span className="truncate text-sm font-medium">{settings?.gmailEmailAddress || settings?.smtpUser || "No account"}</span>
-                  <span className="text-brand-muted text-[10px] ml-auto uppercase">{settings?.smtpHost ? 'SMTP' : 'Gmail'}</span>
+          {/* Left Column: Core Info (7/12) */}
+          <div className="flex-1 lg:w-[58.33%] space-y-6">
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-black">Campaign Identity</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">Define your internal name and outreach context</p>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-1 block">Campaign Name</label>
+                  <input 
+                    type="text"
+                    name="campaignName"
+                    defaultValue={campaign.name || "Untitled Campaign"}
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors" 
+                  />
                 </div>
-                <div className="bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full shrink-0 ${settings?.aiProvider ? 'bg-purple-500' : 'bg-zinc-300'}`}></div>
-                  <span className="truncate text-sm font-medium capitalize">{settings?.aiProvider || "gemini"}</span>
-                  <span className="text-brand-muted text-[10px] ml-auto uppercase">AI</span>
+                
+                <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-1 block">Context for AI <span className="font-normal opacity-50">(anchors personalization)</span></label>
+                  <textarea 
+                    name="context" 
+                    defaultValue={campaign.context || ""}
+                    placeholder="e.g. Offering AI ops support to recently funded startups..."
+                    rows={4}
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors resize-none" 
+                  />
                 </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Context for AI <span className="text-brand-muted font-normal">(anchors personalization)</span></label>
-              <textarea 
-                name="context" 
-                defaultValue={campaign.context || ""}
-                placeholder="e.g. Offering AI ops support to recently funded startups..."
-                rows={3}
-                className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black focus:outline-none resize-none" 
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Follow-up schedule</label>
-              <div className="grid grid-cols-2 gap-4">
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-black">Sequence Logic</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">Configure follow-up timing and sequence steps</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-6">
                 <div>
-                  <p className="text-xs font-semibold text-black mb-1">Follow-up 1</p>
+                  <label className="text-xs font-medium text-zinc-500 mb-1 block">Follow-up 1</label>
                   <select 
                     name="followup1Delay"
                     defaultValue={campaign.followup1Delay}
-                    className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none appearance-none"
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors appearance-none cursor-pointer"
                   >
                     {(settings?.followupDelayOptions || "1,3,5,7,10,14").split(',').map((d: string) => (
                       <option key={d} value={d.trim()}>Day {d.trim()} — if no reply</option>
@@ -74,11 +86,11 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                   </select>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-black mb-1">Follow-up 2</p>
+                  <label className="text-xs font-medium text-zinc-500 mb-1 block">Follow-up 2</label>
                   <select 
                     name="followup2Delay"
                     defaultValue={campaign.followup2Delay}
-                    className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none appearance-none"
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors appearance-none cursor-pointer"
                   >
                     {(settings?.followupDelayOptions || "1,3,5,7,10,14").split(',').map((d: string) => (
                       <option key={d} value={d.trim()}>Day {d.trim()} — if no reply</option>
@@ -89,86 +101,84 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Tone</label>
-              <div className="flex flex-wrap gap-2">
-                <label className="cursor-pointer">
-                  <input type="radio" name="tone" value="Professional" className="peer sr-only" defaultChecked={!campaign.tone || campaign.tone.includes('Professional')} />
-                  <div className="px-4 py-2 rounded-lg border border-brand-border text-sm font-medium transition-colors peer-checked:border-black peer-checked:bg-white peer-checked:shadow-sm bg-white text-brand-muted hover:text-black">
-                    Professional
+          {/* Right Column: Style & Auto-detected (5/12) */}
+          <div className="flex-1 lg:w-[41.66%] space-y-6">
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-black">Tone & Strategy</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">Refine how the AI communicates</p>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-3 block">Tone</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Professional', 'Friendly', 'Direct'].map(t => (
+                      <label key={t} className="cursor-pointer">
+                        <input type="radio" name="tone" value={t} className="peer sr-only" defaultChecked={(!campaign.tone && t === 'Professional') || campaign.tone?.includes(t)} />
+                        <div className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-medium transition-all peer-checked:bg-black peer-checked:text-white peer-checked:border-black text-zinc-500 hover:border-zinc-400">
+                          {t}
+                        </div>
+                      </label>
+                    ))}
                   </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="radio" name="tone" value="Friendly" className="peer sr-only" defaultChecked={campaign.tone?.includes('Friendly')} />
-                  <div className="px-4 py-2 rounded-lg border border-brand-border text-sm font-medium transition-colors peer-checked:border-black peer-checked:bg-white peer-checked:shadow-sm bg-white text-brand-muted hover:text-black">
-                    Friendly
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-3 block">CTA Style</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Book a call', 'Reply back', 'Custom'].map(c => (
+                      <label key={c} className="cursor-pointer">
+                        <input type="radio" name="cta" value={c} className="peer sr-only" defaultChecked={(!campaign.cta && c === 'Book a call') || campaign.cta?.includes(c)} />
+                        <div className="px-4 py-2 rounded-lg border border-zinc-200 text-xs font-medium transition-all peer-checked:bg-black peer-checked:text-white peer-checked:border-black text-zinc-500 hover:border-zinc-400">
+                          {c}
+                        </div>
+                      </label>
+                    ))}
                   </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="radio" name="tone" value="Direct" className="peer sr-only" defaultChecked={campaign.tone?.includes('Direct')} />
-                  <div className="px-4 py-2 rounded-lg border border-brand-border text-sm font-medium transition-colors peer-checked:border-black peer-checked:bg-white peer-checked:shadow-sm bg-white text-brand-muted hover:text-black">
-                    Direct
-                  </div>
-                </label>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">CTA type</label>
-              <div className="flex flex-wrap gap-2">
-                <label className="cursor-pointer">
-                  <input type="radio" name="cta" value="Book a call" className="peer sr-only" defaultChecked={!campaign.cta || campaign.cta.includes('Book')} />
-                  <div className="px-4 py-2 rounded-lg border border-brand-border text-sm font-medium transition-colors peer-checked:border-black peer-checked:bg-white peer-checked:shadow-sm bg-white text-brand-muted hover:text-black">
-                    Book a call
-                  </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="radio" name="cta" value="Reply back" className="peer sr-only" defaultChecked={campaign.cta?.includes('Reply')} />
-                  <div className="px-4 py-2 rounded-lg border border-brand-border text-sm font-medium transition-colors peer-checked:border-black peer-checked:bg-white peer-checked:shadow-sm bg-white text-brand-muted hover:text-black">
-                    Reply back
-                  </div>
-                </label>
-                <label className="cursor-pointer">
-                  <input type="radio" name="cta" value="Custom" className="peer sr-only" defaultChecked={campaign.cta?.includes('Custom')} />
-                  <div className="px-4 py-2 rounded-lg border border-brand-border text-sm font-medium transition-colors peer-checked:border-black peer-checked:bg-white peer-checked:shadow-sm bg-white text-brand-muted hover:text-black">
-                    Custom
-                  </div>
-                </label>
+            <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
+              <div>
+                <h3 className="text-sm font-semibold text-black">Auto-Detected Context</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">Refined by AI during lead ingestion</p>
               </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Business type <span className="text-brand-muted font-normal">(auto-detected)</span></label>
-              <input 
-                type="text"
-                name="businessType"
-                defaultValue={campaign.businessType || ""}
-                placeholder="e.g. AI Startup / SaaS"
-                className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none" 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-black">Location context <span className="text-brand-muted font-normal">(auto)</span></label>
-              <input 
-                type="text"
-                name="locationContext"
-                defaultValue={campaign.locationContext || ""}
-                placeholder="e.g. UAE, KSA, Canada"
-                className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-2.5 text-black text-sm focus:outline-none" 
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-tight mb-1 block">Business Type</label>
+                  <input 
+                    type="text"
+                    name="businessType"
+                    defaultValue={campaign.businessType || ""}
+                    placeholder="e.g. SaaS, Real Estate..."
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors" 
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-tight mb-1 block">Geographic Focus</label>
+                  <input 
+                    type="text"
+                    name="locationContext"
+                    defaultValue={campaign.locationContext || ""}
+                    placeholder="e.g. North America, Global..."
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors" 
+                  />
+                </div>
+              </div>
             </div>
 
             <button 
               type="submit" 
-              className="w-full mt-6 bg-black hover:bg-zinc-800 text-white px-5 py-3 rounded-xl font-bold transition-colors inline-flex items-center justify-center gap-1 shadow-sm"
+              className="w-full bg-black hover:bg-zinc-800 text-white px-5 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-sm active:scale-[0.98]"
             >
-              Generate {campaign._count.leads} emails <ArrowRight className="w-4 h-4" />
+              Generate {campaign._count.leads} Drafts
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
   );
 }

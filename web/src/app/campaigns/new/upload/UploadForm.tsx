@@ -122,7 +122,7 @@ export function UploadForm() {
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div className="space-y-4">
-        <div className="bg-brand-surface border border-brand-border rounded-xl p-8 flex flex-col items-center text-center">
+        <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-8 flex flex-col items-center text-center">
           <p className="text-black font-medium mb-4">Paste Google Sheets link</p>
           <div className="w-full flex gap-2 mb-4">
             <input
@@ -130,7 +130,7 @@ export function UploadForm() {
               value={sheetUrl}
               onChange={e => setSheetUrl(e.target.value)}
               placeholder="https://docs.google.com/spreadsheets/..."
-              className="flex-1 bg-white border border-brand-border rounded-lg px-4 py-2.5 text-black focus:outline-none"
+              className="flex-1 bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-black focus:outline-none"
             />
             <button
               type="button"
@@ -141,16 +141,16 @@ export function UploadForm() {
               {sheetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Import'}
             </button>
           </div>
-          <p className="text-brand-muted text-sm mb-4">or</p>
-          <label className="bg-white border border-brand-border hover:bg-zinc-50 text-black px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer inline-block shadow-sm">
+          <p className="text-zinc-500 text-sm mb-4">or</p>
+          <label className="bg-white border border-zinc-200 hover:bg-zinc-50 text-black px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer inline-block shadow-sm">
             Upload CSV
             <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
           </label>
         </div>
 
-        <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
+        <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6">
           <p className="text-black font-semibold mb-4 text-sm">Supported fields</p>
-          <div className="grid grid-cols-2 gap-y-3 text-sm text-brand-muted">
+          <div className="grid grid-cols-2 gap-y-3 text-sm text-zinc-500">
             <span>First name</span><span>Last name</span>
             <span>Email</span><span>Company</span>
             <span>Sector / type</span><span>Location</span>
@@ -163,13 +163,13 @@ export function UploadForm() {
         <p className="text-black font-semibold text-sm mb-2">Validation results</p>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6">
             <p className="text-4xl font-semibold text-emerald-600 mb-1">{leads.length || '—'}</p>
-            <p className="text-brand-muted text-sm">Valid leads</p>
+            <p className="text-zinc-500 text-sm">Valid leads</p>
           </div>
-          <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-6">
             <p className="text-4xl font-semibold text-red-600 mb-1">{errors.length || '—'}</p>
-            <p className="text-brand-muted text-sm">Errors & Dups</p>
+            <p className="text-zinc-500 text-sm">Errors & Dups</p>
           </div>
         </div>
 
@@ -181,20 +181,20 @@ export function UploadForm() {
         )}
 
         {errors.length > 0 && (
-          <div className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden">
+          <div className="bg-zinc-50 border border-zinc-200 rounded-xl overflow-hidden">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-brand-border">
+              <thead className="border-b border-zinc-200">
                 <tr>
-                  <th className="px-4 py-3 font-semibold text-brand-muted">Name</th>
-                  <th className="px-4 py-3 font-semibold text-brand-muted">Email</th>
-                  <th className="px-4 py-3 font-semibold text-brand-muted">Issue</th>
+                  <th className="px-4 py-3 font-semibold text-zinc-500">Name</th>
+                  <th className="px-4 py-3 font-semibold text-zinc-500">Email</th>
+                  <th className="px-4 py-3 font-semibold text-zinc-500">Issue</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-brand-border">
+              <tbody className="divide-y divide-zinc-200">
                 {errors.slice(0, 5).map((err, i) => (
                   <tr key={i}>
                     <td className="px-4 py-3 font-medium text-black">{err.name}</td>
-                    <td className="px-4 py-3 text-brand-muted truncate max-w-[150px]">{err.email}</td>
+                    <td className="px-4 py-3 text-zinc-500 truncate max-w-[150px]">{err.email}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex bg-red-100 text-red-700 px-2 py-0.5 rounded text-xs font-semibold">
                         {err.issue}
@@ -210,7 +210,7 @@ export function UploadForm() {
         {leads.length > 0 && (
           <div className="flex items-center gap-3 pt-4 justify-end">
             {errors.length > 0 && (
-              <button type="button" className="bg-white border border-brand-border hover:bg-zinc-50 text-black px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm">
+              <button type="button" className="bg-white border border-zinc-200 hover:bg-zinc-50 text-black px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm">
                 Fix errors
               </button>
             )}

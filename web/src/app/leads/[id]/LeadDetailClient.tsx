@@ -1,52 +1,59 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { 
-  X, 
-  Send, 
-  Sparkles, 
-  Clock, 
-  MoreVertical,
+import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Send,
+  Sparkles,
+  Clock,
   Pause,
   Play,
-  ChevronLeft,
-  Calendar,
+  ChevronDown,
   MessageCircle,
-  Zap
+  RefreshCcw,
+  Loader2,
+  Zap,
+  Mail,
+  Building,
+  MapPin,
 } from "lucide-react";
-import Link from "next/link";
-import { updateLeadStatusAction, sendReplyAction, generateAIReplyAction, syncLeadInboxAction } from "./actions";
+import {
+  updateLeadStatusAction,
+  sendReplyAction,
+  generateAIReplyAction,
+  syncLeadInboxAction,
+} from "./actions";
+import type { LeadWithMessages } from "@/types";
 
-export function LeadDetailClient({ lead: initialLead }: { lead: any }) {
+export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages }) {
   const [lead, setLead] = useState(initialLead);
-  const [replyMode, setReplyMode] = useState<'ai' | 'manual'>('ai');
   const [replyText, setReplyText] = useState("");
   const [aiRationale, setAiRationale] = useState("");
+  const [regenComment, setRegenComment] = useState("");
+  const [showRegenInput, setShowRegenInput] = useState(false);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
-  const threadScrollRef = useRef<HTMLDivElement>(null);
+  const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const threadRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (threadScrollRef.current) {
-      threadScrollRef.current.scrollTop = threadScrollRef.current.scrollHeight;
-    }
+    if (threadRef.current) threadRef.current.scrollTop = threadRef.current.scrollHeight;
   }, [lead.messages]);
 
-  useEffect(() => {
-    if (lead.replied && lead.messages.length > 0 && !replyText) {
-      handleGenerateAI();
-    }
+  const showStatus = useCallback((type: "success" | "error", text: string) => {
+    setStatusMessage({ type, text });
+    setTimeout(() => setStatusMessage(null), 4000);
   }, []);
 
-  const handleGenerateAI = async () => {
+  const handleGenerateAI = async (feedback?: string) => {
     setGenerating(true);
-    setReplyMode('ai');
-    try {
-      const { draft, rationale } = await generateAIReplyAction(lead.id);
-      setReplyText(draft);
-      setAiRationale(rationale);
-    } catch (e) {
-      console.error("AI Generation failed", e);
+    setShowRegenInput(false);
+    setRegenComment("");
+    const result = await generateAIReplyAction(lead.id, feedback);
+    if (result.success) {
+      setReplyText(result.data.draft);
+      setAiRationale(result.data.rationale);
+    } else {
+      showStatus("error", result.error);
     }
     setGenerating(false);
   };
@@ -54,281 +61,272 @@ export function LeadDetailClient({ lead: initialLead }: { lead: any }) {
   const handleSendReply = async () => {
     if (!replyText.trim()) return;
     setLoading(true);
-    try {
-      const updatedLead = await sendReplyAction(lead.id, replyText);
-      setLead(updatedLead);
+    const result = await sendReplyAction(lead.id, replyText);
+    if (result.success) {
+      setLead(result.data);
       setReplyText("");
-    } catch (e: any) {
-      alert("Failed to send: " + e.message);
+      setAiRationale("");
+      showStatus("success", "Reply sent");
+    } else {
+      showStatus("error", result.error);
     }
     setLoading(false);
   };
 
   const handleStatusChange = async (newStatus: string) => {
-    const updated = await updateLeadStatusAction(lead.id, newStatus);
-    setLead(updated);
+    const result = await updateLeadStatusAction(lead.id, newStatus);
+    if (result.success) setLead(result.data);
+    else showStatus("error", result.error);
   };
 
+  const handleSync = async () => {
+    setLoading(true);
+    const result = await syncLeadInboxAction(lead.id);
+    if (result.success) {
+      if (result.data.newMessages > 0) {
+        showStatus("success", `${result.data.newMessages} new message(s) synced`);
+        window.location.reload();
+      } else {
+        showStatus("success", "No new messages");
+      }
+    } else {
+      showStatus("error", result.error);
+    }
+    setLoading(false);
+  };
+
+  // Only show the relevant email thread — initial outreach + direct messages
+  const relevantMessages = lead.messages.filter(m => {
+    // Keep all messages that are part of this lead's thread
+    return m.leadId === lead.id;
+  });
+
   return (
-    <div className="flex flex-col gap-6 h-[calc(100vh-100px)] w-full pb-6 px-1 lg:px-8">
-      {/* 1. Navigation & Breadcrumb */}
-      <div className="flex items-center gap-3">
-        <Link href="/leads" className="p-2 bg-white border border-zinc-200 rounded-xl text-zinc-500 hover:text-black transition-all shadow-sm">
-          <ChevronLeft className="w-4 h-4" />
-        </Link>
-        <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-          <Link href="/leads" className="hover:text-black transition-colors">Leads</Link>
-          <span className="text-zinc-200">/</span>
-          <span className="text-zinc-600">Conversation Detail</span>
+    <div className="space-y-6">
+      {/* Status toast */}
+      {statusMessage && (
+        <div className={`fixed top-20 right-6 z-[100] px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium ${
+          statusMessage.type === "success" ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
+        }`} role="alert">
+          {statusMessage.text}
         </div>
-      </div>
+      )}
 
-      {/* 2. Focused Lead Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 px-1">
-        <div className="flex items-center gap-5">
-          <div className="w-16 h-16 rounded-[24px] bg-white border border-zinc-200 flex items-center justify-center text-xl font-black text-black shadow-sm ring-4 ring-zinc-50">
-            {lead.firstName[0]}{lead.lastName?.[0] || ''}
-          </div>
-          <div>
-            <div className="flex items-center gap-3 mb-1.5">
-              <h1 className="text-2xl font-black text-black tracking-tight">{lead.firstName} {lead.lastName}</h1>
-              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black border tracking-wider uppercase ${
-                lead.status === 'Hot' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-zinc-50 text-zinc-500 border-zinc-200'
+      {/* Bento Grid Layout */}
+      <div className="flex flex-col lg:flex-row gap-6">
+
+        {/* Left Column: Lead Info + Thread (4/12) */}
+        <div className="flex-1 lg:w-[33.33%] space-y-4">
+          {/* Lead Profile Card */}
+          <div className="p-6 rounded-2xl border border-zinc-200 bg-white">
+            <div className="flex items-center gap-4 mb-5">
+              <div className="w-12 h-12 rounded-full bg-zinc-100 flex items-center justify-center text-lg font-semibold text-zinc-500">
+                {lead.firstName[0]}{lead.lastName?.[0] || ""}
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg font-semibold text-black truncate">{lead.firstName} {lead.lastName}</h1>
+                <p className="text-xs text-zinc-400">{lead.jobTitle}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <InfoRow icon={Building} label={lead.companyName} />
+              <InfoRow icon={Mail} label={lead.email} />
+              {lead.city && <InfoRow icon={MapPin} label={`${lead.city}${lead.country ? `, ${lead.country}` : ""}`} />}
+            </div>
+
+            <div className="flex items-center gap-2 mt-5 pt-5 border-t border-zinc-100">
+              <span className={`px-2.5 py-1 rounded text-[11px] font-medium ${
+                lead.status === "Hot" ? "bg-emerald-50 text-emerald-700"
+                : lead.status === "Warm" ? "bg-amber-50 text-amber-700"
+                : "bg-zinc-100 text-zinc-500"
               }`}>
-                {lead.status} lead
+                {lead.status}
               </span>
+              {lead.sent && <span className="px-2 py-1 rounded text-[11px] bg-blue-50 text-blue-600 font-medium">Sent</span>}
+              {lead.replied && <span className="px-2 py-1 rounded text-[11px] bg-emerald-50 text-emerald-600 font-medium">Replied</span>}
+              {lead.isPaused && <span className="px-2 py-1 rounded text-[11px] bg-amber-50 text-amber-600 font-medium">Paused</span>}
             </div>
-            <p className="text-sm text-zinc-500 font-bold">
-              {lead.jobTitle} <span className="text-zinc-300 mx-2">·</span> {lead.companyName} <span className="text-zinc-300 mx-2">·</span> <span className="font-medium">{lead.city || 'Global'}</span>
-            </p>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-3 w-full lg:w-auto">
-          <button 
-            onClick={() => handleStatusChange(lead.isPaused ? 'resume' : 'pause')}
-            disabled={loading}
-            className={`flex-1 lg:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest border transition-all shadow-sm active:scale-95 ${
-              lead.isPaused 
-                ? 'bg-amber-50 border-amber-200 text-amber-700 hover:bg-amber-100' 
-                : 'bg-white border-zinc-200 text-zinc-700 hover:border-black'
-            }`}
-          >
-            {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-            {lead.isPaused ? 'Resume' : 'Pause'}
-          </button>
-          <button 
-            onClick={async () => {
-              setLoading(true);
-              const res = await syncLeadInboxAction(lead.id);
-              if (res.success) window.location.reload();
-              setLoading(false);
-            }}
-            disabled={loading}
-            className="flex-1 lg:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest bg-black text-white hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 active:scale-95 disabled:bg-zinc-200"
-          >
-            <Clock className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Sync Inbox
-          </button>
-          <button className="p-3 bg-white border border-zinc-200 rounded-2xl text-zinc-400 hover:text-black transition-all">
-            <MoreVertical className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
 
-      {/* 3. Main Communication Grid */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-8 min-h-0 overflow-hidden">
-        {/* Left: Enhanced Thread */}
-        <div className="lg:col-span-9 flex flex-col min-h-0 space-y-4">
-          <div className="flex items-center justify-between px-1">
-             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Message History</p>
-             <div className="h-[1px] flex-1 bg-zinc-100 mx-4" />
+          {/* Actions Card */}
+          <div className="p-5 rounded-2xl border border-zinc-200 bg-white space-y-3">
+            <p className="text-xs font-medium text-zinc-400 mb-2">Quick Actions</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => handleStatusChange("Hot")} className={`py-2.5 rounded-lg text-xs font-medium border transition-colors ${lead.status === "Hot" ? "bg-emerald-500 text-white border-emerald-500" : "border-zinc-200 text-zinc-600 hover:border-zinc-400"}`}>
+                Mark Hot
+              </button>
+              <button onClick={() => handleStatusChange("Closed")} className="py-2.5 rounded-lg text-xs font-medium border border-zinc-200 text-zinc-600 hover:border-zinc-400 transition-colors">
+                Mark Won
+              </button>
+              <button onClick={() => handleStatusChange(lead.isPaused ? "resume" : "pause")} className="py-2.5 rounded-lg text-xs font-medium border border-zinc-200 text-zinc-600 hover:border-zinc-400 transition-colors flex items-center justify-center gap-1.5">
+                {lead.isPaused ? <Play className="w-3 h-3" /> : <Pause className="w-3 h-3" />}
+                {lead.isPaused ? "Resume" : "Pause"}
+              </button>
+              <button onClick={handleSync} disabled={loading} className="py-2.5 rounded-lg text-xs font-medium border border-zinc-200 text-zinc-600 hover:border-zinc-400 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50">
+                <Clock className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
+                Sync Inbox
+              </button>
+            </div>
           </div>
-          
-          <div 
-            ref={threadScrollRef}
-            className="flex-1 overflow-y-auto space-y-8 pr-6 custom-scrollbar pb-10"
-          >
-            {/* Initial Outreach Card */}
-            {!lead.messages.some((m: any) => m.role === 'USER') && lead.sent && (
-              <div className="group relative">
-                <div className="absolute -left-3 top-0 bottom-0 w-[2px] bg-zinc-100 group-hover:bg-zinc-200 transition-colors" />
-                <div className="bg-zinc-50 border border-zinc-200/60 rounded-[32px] p-8 max-w-[90%] ml-auto shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center">
-                        <Zap className="w-3 h-3 text-white fill-white" />
-                      </div>
-                      <span className="text-[11px] font-black text-black uppercase tracking-widest">Initial Outreach</span>
-                    </div>
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase">May 6 · 9:14am</span>
-                  </div>
-                  <div className="text-sm text-zinc-600 leading-relaxed whitespace-pre-wrap font-medium italic">
-                    {lead.emailBody}
-                  </div>
-                </div>
+
+          {/* AI Rationale */}
+          {aiRationale && (
+            <div className="p-5 rounded-2xl border border-blue-100 bg-blue-50/50">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Zap className="w-3.5 h-3.5 text-blue-500" />
+                <p className="text-[11px] font-medium text-blue-600">AI Strategy</p>
               </div>
-            )}
-
-            {lead.messages.map((msg: any) => (
-              <div key={msg.id} className="group relative">
-                <div className={`absolute top-0 bottom-0 w-[2px] bg-zinc-100 transition-colors ${
-                  msg.role === 'LEAD' ? '-right-3 group-hover:bg-emerald-200' : '-left-3 group-hover:bg-zinc-300'
-                }`} />
-                <div className={`rounded-[32px] p-8 max-w-[90%] shadow-sm transition-all border ${
-                  msg.role === 'LEAD' 
-                    ? 'bg-white border-zinc-200 hover:border-emerald-200' 
-                    : 'bg-zinc-50 border-zinc-200 ml-auto'
-                }`}>
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[11px] font-black text-black uppercase tracking-widest">
-                      {msg.role === 'LEAD' ? `${lead.firstName} ${lead.lastName}` : 'System Outreach'}
-                    </span>
-                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-tighter">
-                      {new Date(msg.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <div className="text-sm text-zinc-700 leading-relaxed whitespace-pre-wrap font-medium">
-                    {msg.content}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Activity Status Bar */}
-          <div className="flex items-center gap-8 py-4 border-t border-zinc-100 mt-auto px-1">
-            <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Sequence Start</span>
+              <p className="text-xs text-blue-800/80 leading-relaxed">{aiRationale}</p>
             </div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div>
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Engagement Detected</span>
-            </div>
-            <div className="flex items-center gap-2.5 opacity-40">
-              <div className="w-2 h-2 rounded-full bg-zinc-300"></div>
-              <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Follow-up Paused</span>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Right: Unified Smart Editor */}
-        <div className="lg:col-span-3 space-y-6 flex flex-col h-full overflow-hidden">
-          <div className="bg-white border border-zinc-200 rounded-[32px] p-6 shadow-xl shadow-zinc-200/20 flex flex-col flex-1 min-h-0 border-t-4 border-t-black">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-xs font-black text-black uppercase tracking-widest">Draft Response</h3>
-                <p className="text-[9px] text-zinc-400 font-bold uppercase mt-1 tracking-tighter">Direct Email Reply</p>
-              </div>
-              <div className="flex bg-zinc-50 p-1.5 rounded-2xl border border-zinc-100">
-                <button 
-                  onClick={() => setReplyMode('ai')}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${replyMode === 'ai' ? 'bg-white text-black shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
-                >
-                  AI
-                </button>
-                <button 
-                  onClick={() => setReplyMode('manual')}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${replyMode === 'manual' ? 'bg-white text-black shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
-                >
-                  Manual
-                </button>
-              </div>
+        {/* Right Column: Thread + Composer (8/12) */}
+        <div className="flex-1 lg:w-[66.66%] flex flex-col min-h-0">
+
+          {/* Message Thread */}
+          <div className="flex-1 rounded-2xl border border-zinc-200 bg-white overflow-hidden flex flex-col" style={{ minHeight: "500px" }}>
+            <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-black">Conversation</h2>
+              <span className="text-[11px] text-zinc-400">{relevantMessages.length + (lead.sent ? 1 : 0)} messages</span>
             </div>
 
-            <div className="flex-1 flex flex-col gap-5 min-h-0 overflow-y-auto pr-1 custom-scrollbar">
-              <div className="flex-1 bg-zinc-50/50 border border-zinc-100 rounded-[24px] p-5 min-h-[200px] flex flex-col focus-within:bg-white focus-within:border-black transition-all">
-                {generating ? (
-                  <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
-                    <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center animate-bounce shadow-xl shadow-black/20">
-                       <Sparkles className="w-5 h-5 text-emerald-400" />
+            <div ref={threadRef} className="flex-1 overflow-y-auto p-6 space-y-5" style={{ scrollbarWidth: "thin", maxHeight: "400px" }}>
+              {/* Initial Outreach */}
+              {lead.sent && lead.emailBody && (
+                <div className="flex justify-end">
+                  <div className="bg-zinc-50 rounded-2xl rounded-tr-sm p-5 max-w-[80%] border border-zinc-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap className="w-3 h-3 text-zinc-400" />
+                      <span className="text-[11px] font-medium text-zinc-500">Initial Outreach</span>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black text-black uppercase tracking-widest">Crafting Intelligence...</p>
-                      <p className="text-[9px] text-zinc-400 font-bold uppercase mt-1">Analyzing context & sentiment</p>
-                    </div>
-                  </div>
-                ) : replyText ? (
-                  <textarea 
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Type your strategic response..."
-                    className="w-full h-full bg-transparent resize-none text-sm text-zinc-800 font-medium leading-relaxed focus:outline-none"
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full gap-5 text-center">
-                    <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-zinc-300" />
-                    </div>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest px-4 leading-relaxed">
-                      {replyMode === 'ai' 
-                        ? "Click below to draft an AI optimized response" 
-                        : "Ready for your manual input"}
-                    </p>
-                    {replyMode === 'ai' && (
-                      <button 
-                        onClick={handleGenerateAI}
-                        className="bg-black text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-800 transition-all shadow-xl shadow-black/10 active:scale-95"
-                      >
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Generate Intelligence
-                      </button>
+                    {lead.emailSubject && (
+                      <p className="text-xs font-semibold text-black mb-2">Subject: {lead.emailSubject}</p>
                     )}
+                    <div className="text-sm text-zinc-700 leading-relaxed whitespace-pre-wrap">{lead.emailBody}</div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {replyMode === 'ai' && aiRationale && (
-                <div className="bg-emerald-50/50 border border-emerald-100/50 rounded-[24px] p-5 animate-in fade-in slide-in-from-bottom-2">
-                  <div className="flex items-center gap-2 mb-3 text-[9px] font-black text-emerald-700 uppercase tracking-widest">
-                    <Zap className="w-3.5 h-3.5 fill-emerald-500" />
-                    AI Strategy Logic
+              {/* Thread Messages */}
+              {relevantMessages.map(msg => (
+                <div key={msg.id} className={`flex ${msg.role === "LEAD" ? "justify-start" : "justify-end"}`}>
+                  <div className={`rounded-2xl p-5 max-w-[80%] border ${
+                    msg.role === "LEAD"
+                      ? "bg-white border-zinc-200 rounded-tl-sm"
+                      : "bg-zinc-50 border-zinc-100 rounded-tr-sm"
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[11px] font-medium text-zinc-500">
+                        {msg.role === "LEAD" ? `${lead.firstName} ${lead.lastName}` : "You"}
+                      </span>
+                      <span className="text-[10px] text-zinc-400 ml-4">
+                        {new Date(msg.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                      </span>
+                    </div>
+                    <div className="text-sm text-zinc-700 leading-relaxed whitespace-pre-wrap">{msg.content}</div>
                   </div>
-                  <p className="text-emerald-900/70 text-[11px] leading-relaxed italic font-medium">
-                    {aiRationale}
-                  </p>
+                </div>
+              ))}
+
+              {relevantMessages.length === 0 && !lead.sent && (
+                <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+                  <MessageCircle className="w-8 h-8 text-zinc-200 mb-3" />
+                  <p className="text-sm text-zinc-400">No messages yet</p>
                 </div>
               )}
             </div>
 
-            <div className="flex flex-col gap-3 mt-8">
-              <button 
-                onClick={handleSendReply}
-                disabled={loading || !replyText.trim()}
-                className="w-full bg-black hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all flex items-center justify-center gap-2 shadow-2xl shadow-black/20 active:scale-95"
-              >
-                {loading ? <Clock className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                Send response
-              </button>
-              <button className="flex items-center justify-center gap-2 px-4 py-3 text-zinc-500 hover:text-black text-[10px] font-black uppercase tracking-widest transition-colors">
-                <Calendar className="w-4 h-4" />
-                Attach Calendar
-              </button>
-            </div>
-          </div>
+            {/* Composer */}
+            <div className="border-t border-zinc-100 p-5 space-y-4">
+              {/* Draft Area */}
+              <div className="relative">
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Write your reply..."
+                  rows={5}
+                  className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm text-black resize-none focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400"
+                  aria-label="Reply content"
+                />
+                {generating && (
+                  <div className="absolute inset-0 bg-white/80 rounded-xl flex items-center justify-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin text-black" />
+                    <span className="text-xs font-medium text-zinc-600">Generating AI draft...</span>
+                  </div>
+                )}
+              </div>
 
-          {/* Quick Decision Actions */}
-          <div className="bg-zinc-50 border border-zinc-200 rounded-[32px] p-6">
-            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-4 px-1">Pipeline Stage</p>
-            <div className="grid grid-cols-2 gap-3">
-              <button 
-                onClick={() => handleStatusChange('Hot')}
-                className={`py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
-                  lead.status === 'Hot' ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-500/20' : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
-                }`}
-              >
-                Interested
-              </button>
-              <button 
-                onClick={() => handleStatusChange('Closed')}
-                className="bg-white border border-zinc-200 hover:border-black text-zinc-600 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
-              >
-                Mark Won
-              </button>
+              {/* Regenerate with comment */}
+              {showRegenInput && (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={regenComment}
+                    onChange={(e) => setRegenComment(e.target.value)}
+                    placeholder="e.g. Make it shorter, more casual..."
+                    className="flex-1 border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-zinc-400 placeholder:text-zinc-400"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && regenComment.trim()) handleGenerateAI(regenComment);
+                    }}
+                  />
+                  <button
+                    onClick={() => handleGenerateAI(regenComment)}
+                    disabled={generating}
+                    className="px-4 py-2 bg-black text-white rounded-lg text-xs font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                  >
+                    Regenerate
+                  </button>
+                  <button onClick={() => { setShowRegenInput(false); setRegenComment(""); }} className="px-3 py-2 text-zinc-400 hover:text-black text-xs">
+                    Cancel
+                  </button>
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleGenerateAI()}
+                  disabled={generating}
+                  className="flex items-center gap-1.5 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 rounded-lg text-xs font-medium text-black transition-colors disabled:opacity-50"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  {replyText ? "Re-draft with AI" : "Generate AI Draft"}
+                </button>
+
+                {replyText && (
+                  <button
+                    onClick={() => setShowRegenInput(!showRegenInput)}
+                    className="flex items-center gap-1.5 px-3 py-2.5 text-zinc-500 hover:text-black text-xs font-medium transition-colors"
+                  >
+                    <RefreshCcw className="w-3.5 h-3.5" />
+                    Regenerate with feedback
+                  </button>
+                )}
+
+                <button
+                  onClick={handleSendReply}
+                  disabled={loading || !replyText.trim()}
+                  className="ml-auto flex items-center gap-1.5 px-5 py-2.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:bg-zinc-200 disabled:text-zinc-400"
+                >
+                  {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Send Reply
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function InfoRow({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <Icon className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+      <span className="text-sm text-zinc-600 truncate">{label}</span>
     </div>
   );
 }

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { startCampaignAction } from "./actions";
+import { Check, Loader2, Rocket, Clock, ShieldAlert, Send, Users, Activity } from "lucide-react";
+import { StopSequencesButton } from "../../../StopSequencesButton";
+import Link from "next/link";
 
 export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any) {
   const [loading, setLoading] = useState(false);
-  const [launched, setLaunched] = useState(false);
 
   const canLaunch = readyLeads > 0 && (settings?.gmailEmailAddress || settings?.smtpHost);
   const pendingLeads = totalLeads - readyLeads;
@@ -13,115 +15,138 @@ export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any
   const handleLaunch = async () => {
     setLoading(true);
     await startCampaignAction(campaign.id);
-    setLaunched(true);
-    setLoading(false);
     window.location.href = `/campaigns/${campaign.id}/sending`;
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-      {/* Left Column */}
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-black font-semibold text-sm mb-3">Campaign summary</h3>
-          <div className="bg-brand-surface border border-brand-border rounded-xl p-6">
-            <div className="space-y-4 text-sm">
-              <div className="flex justify-between items-center border-b border-brand-border pb-3">
-                <span className="text-brand-muted font-medium">Campaign</span>
-                <span className="text-black font-semibold text-right">{campaign.name || 'Untitled'}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-brand-border pb-3">
-                <span className="text-brand-muted font-medium">Total leads</span>
-                <span className="text-black font-semibold text-right">{totalLeads}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-brand-border pb-3">
-                <span className="text-brand-muted font-medium">From</span>
-                <span className="text-black font-semibold text-right">
-                  {settings?.gmailEmailAddress || settings?.smtpUser || 'Not connected'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center border-b border-brand-border pb-3">
-                <span className="text-brand-muted font-medium">Send rate</span>
-                <span className="text-black font-semibold text-right">{settings?.maxEmailsPerHour || 30} / hour (spam-safe)</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-brand-muted font-medium">Est. completion</span>
-                <span className="text-black font-semibold text-right">~{Math.max(1, Math.ceil(totalLeads / (settings?.maxEmailsPerHour || 30)))} hours</span>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-black transition-colors">Campaign</Link>
+          <span className="text-zinc-300">/</span>
+          <span className="text-[10px] font-bold text-black uppercase tracking-widest">Launch Control</span>
         </div>
-
-        <div>
-          <h3 className="text-black font-semibold text-sm mb-3">Follow-up sequence</h3>
-          <div className="space-y-4 pl-1">
-            <div className="relative pl-6 pb-4 border-l-2 border-brand-border">
-              <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-              <h4 className="text-black font-bold text-sm">Day 0 — Initial email</h4>
-              <p className="text-brand-muted text-sm mt-0.5">Sending now</p>
-            </div>
-            <div className="relative pl-6 pb-4 border-l-2 border-brand-border">
-              <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-              <h4 className="text-black font-bold text-sm">Day 3 — Follow-up #1</h4>
-              <p className="text-brand-muted text-sm mt-0.5">Queued · if no reply</p>
-            </div>
-            <div className="relative pl-6">
-              <div className="absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-              <h4 className="text-black font-bold text-sm">Day 7 — Follow-up #2</h4>
-              <p className="text-brand-muted text-sm mt-0.5">Queued · if no reply</p>
-            </div>
-          </div>
-        </div>
+        <h1 className="text-2xl font-semibold text-black tracking-tight">{campaign.name || 'Ready to Launch'}</h1>
+        <p className="text-zinc-400 text-sm">Final review before starting automated outreach</p>
       </div>
 
-      {/* Right Column */}
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-black font-semibold text-sm mb-3">Pre-send checklist</h3>
-          <ul className="space-y-3 mb-6">
-            <li className="flex items-center gap-3 text-sm">
-              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-              <span className="text-black font-medium">Sending account connected</span>
-            </li>
-            <li className="flex items-center gap-3 text-sm">
-              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-              <span className="text-black font-medium">{totalLeads} leads validated</span>
-            </li>
-            <li className="flex items-center gap-3 text-sm">
-              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-              <span className="text-black font-medium">{readyLeads} emails approved after review</span>
-            </li>
-            <li className="flex items-center gap-3 text-sm">
-              <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-              <span className="text-black font-medium">Rate limit set (spam-safe)</span>
-            </li>
-            {pendingLeads > 0 && (
-              <li className="flex items-center gap-3 text-sm">
-                <svg className="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                <span className="text-amber-600 font-medium">{pendingLeads} leads pending manual review</span>
-              </li>
-            )}
-          </ul>
-
-          <button 
-            onClick={handleLaunch} 
-            disabled={loading || !canLaunch}
-            className="w-full bg-black hover:bg-zinc-800 disabled:bg-zinc-300 disabled:text-zinc-500 text-white px-4 py-4 rounded-xl font-bold transition-colors shadow-sm text-base mb-6"
-          >
-            {loading ? 'Launching...' : 'Launch campaign'}
-          </button>
-
-          <div className="p-4 rounded-xl border border-red-200 bg-red-50 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></div>
-              <p className="text-red-900 text-sm font-medium">Kill switch — stop all sequences at any time if something goes wrong.</p>
+      <div className="flex flex-col lg:flex-row gap-6">
+        
+        {/* Left Column: Summary (7/12) */}
+        <div className="flex-1 lg:w-[58.33%] space-y-6">
+          <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold text-black">Campaign Summary</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Final review of your sequence configuration</p>
             </div>
-            <button className="bg-white hover:bg-red-50 border border-red-200 text-red-900 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap shrink-0 shadow-sm">
-              Stop all
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SummaryItem icon={Rocket} label="Campaign" value={campaign.name || "Untitled"} />
+              <SummaryItem icon={Users} label="Total Leads" value={totalLeads} />
+              <SummaryItem icon={Send} label="Sender Address" value={settings?.gmailEmailAddress || settings?.smtpUser || "Not connected"} />
+              <SummaryItem icon={Activity} label="Send Rate" value={`${settings?.maxEmailsPerHour || 30}/hr`} />
+              <SummaryItem icon={Clock} label="Est. Completion" value={`~${Math.max(1, Math.ceil(totalLeads / (settings?.maxEmailsPerHour || 30)))} hours`} />
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold text-black">Sequence Timeline</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Automatic follow-up progression</p>
+            </div>
+            
+            <div className="space-y-6 pl-2">
+              <TimelineStep label="Day 0" title="Initial Outreach" description="Personalized email will be sent immediately." status="active" />
+              <TimelineStep label={`Day ${campaign.followup1Delay || 3}`} title="Follow-up #1" description="Sent only if no reply is detected." status="pending" />
+              <TimelineStep label={`Day ${campaign.followup2Delay || 7}`} title="Follow-up #2" description="Final touchpoint for non-responsive leads." status="pending" />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Checklist & Action (5/12) */}
+        <div className="flex-1 lg:w-[41.66%] space-y-6">
+          <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold text-black">Pre-send Checklist</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Safety checks before starting</p>
+            </div>
+            
+            <ul className="space-y-4">
+              <CheckItem label="Sender account connected" checked={!!(settings?.gmailEmailAddress || settings?.smtpHost)} />
+              <CheckItem label={`${totalLeads} leads validated`} checked={totalLeads > 0} />
+              <CheckItem label={`${readyLeads} drafts approved`} checked={readyLeads > 0} />
+              <CheckItem label="Rate limits configured" checked={!!settings?.maxEmailsPerHour} />
+            </ul>
+
+            {pendingLeads > 0 && (
+              <div className="p-4 rounded-xl border border-amber-100 bg-amber-50/50 flex items-start gap-3">
+                <ShieldAlert className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  <span className="font-semibold">{pendingLeads} leads</span> are still pending review and will <span className="font-semibold">not</span> be sent until approved.
+                </p>
+              </div>
+            )}
+
+            <button 
+              onClick={handleLaunch} 
+              disabled={loading || !canLaunch}
+              className="w-full bg-black hover:bg-zinc-800 text-white px-5 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-sm disabled:bg-zinc-100 disabled:text-zinc-400 disabled:shadow-none active:scale-[0.98]"
+            >
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Rocket className="w-5 h-5" />}
+              Launch Campaign
             </button>
+          </div>
+
+          <div className="p-6 rounded-2xl border border-red-100 bg-red-50/60 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[11px] font-semibold text-red-600 uppercase tracking-wide">Emergency Kill Switch</span>
+            </div>
+            <p className="text-xs text-red-900/60 leading-relaxed">
+              Stop all active outreach cycles immediately if you detect logic errors or drift.
+            </p>
+            <StopSequencesButton variant="button" />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function SummaryItem({ icon: Icon, label, value }: { icon: any; label: string; value: string | number }) {
+  return (
+    <div className="p-3.5 rounded-xl border border-zinc-100 bg-zinc-50/50">
+      <div className="flex items-center gap-2 mb-1.5">
+        <Icon className="w-3 h-3 text-zinc-400" />
+        <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-tight">{label}</span>
+      </div>
+      <p className="text-sm font-semibold text-black truncate">{value}</p>
+    </div>
+  );
+}
+
+function TimelineStep({ label, title, description, status }: { label: string; title: string; description: string; status: 'active' | 'pending' }) {
+  return (
+    <div className="relative pl-6 border-l border-zinc-100 last:border-0 pb-6 last:pb-0">
+      <div className={`absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full border-2 border-white ${status === 'active' ? 'bg-black ring-4 ring-zinc-50' : 'bg-zinc-200'}`} />
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{label}</span>
+        <span className="text-zinc-200">·</span>
+        <h4 className="text-sm font-semibold text-black">{title}</h4>
+      </div>
+      <p className="text-xs text-zinc-500">{description}</p>
+    </div>
+  );
+}
+
+function CheckItem({ label, checked }: { label: string; checked: boolean }) {
+  return (
+    <li className="flex items-center gap-3">
+      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${checked ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-300'}`}>
+        <Check className="w-3 h-3" />
+      </div>
+      <span className={`text-sm font-medium ${checked ? 'text-zinc-700' : 'text-zinc-400'}`}>{label}</span>
+    </li>
   );
 }

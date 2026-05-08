@@ -70,6 +70,7 @@ model Message {
   lead      Lead     @relation(fields: [leadId], references: [id])
   role      String   // "USER" or "LEAD"
   content   String
+  messageId String?  @unique
   createdAt DateTime @default(now())
 }
 

@@ -3,34 +3,50 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, LayoutDashboard, Users, Zap } from "lucide-react";
+import { Settings, LayoutDashboard, Users, Zap, Menu, X } from "lucide-react";
+import { useState } from "react";
 
 type AccountStatus = "connected" | "disconnected";
 
-function StatusPill({ status, label }: { status: AccountStatus, label: string }) {
-  const dotClasses = status === "connected" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-zinc-400";
-
+function StatusPill({ status, label }: { status: AccountStatus; label: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-50 border border-zinc-200 rounded-full transition-all hover:border-zinc-300">
-      <span className={`h-1.5 w-1.5 rounded-full ${dotClasses}`} aria-hidden="true" />
-      <span className="text-[10px] font-bold uppercase tracking-tight text-zinc-500">{label}</span>
+    <div
+      className="flex items-center gap-2 px-2.5 py-1.5 bg-zinc-50 border border-zinc-100 rounded-lg transition-all"
+      role="status"
+    >
+      <div className={`h-1.5 w-1.5 rounded-full ${status === "connected" ? "bg-emerald-500" : "bg-zinc-300"}`} />
+      <span className="text-[10px] font-semibold uppercase tracking-tight text-zinc-500">
+        {label}
+      </span>
     </div>
   );
 }
 
-function NavLink({ href, children, icon: Icon }: { href: string, children: ReactNode, icon: any }) {
+function NavLink({
+  href,
+  children,
+  icon: Icon,
+  onClick,
+}: {
+  href: string;
+  children: ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
+  onClick?: () => void;
+}) {
   const pathname = usePathname();
-  const isActive = pathname === href || pathname?.startsWith(href + "/");
+  const isActive = pathname === href || (href !== "/" && pathname?.startsWith(href));
 
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${isActive
-          ? "bg-black text-white shadow-lg shadow-black/10 scale-[1.02]"
-          : "text-zinc-500 hover:text-black hover:bg-zinc-100"
-        }`}
+      onClick={onClick}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+        isActive
+          ? "bg-black text-white"
+          : "text-zinc-500 hover:text-black hover:bg-zinc-50"
+      }`}
     >
-      <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-zinc-400"}`} />
+      <Icon className="w-4 h-4" />
       {children}
     </Link>
   );
@@ -45,39 +61,65 @@ export function AppShell({
   accountStatus?: AccountStatus;
   accountLabel?: string;
 }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <div className="min-h-screen bg-[#fafafa] flex flex-col">
-      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-zinc-200/50">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between px-6 py-3">
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-zinc-100">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 max-w-[1600px] mx-auto w-full">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center transition-transform group-hover:rotate-12">
-                <Zap className="w-4 h-4 text-white fill-white" />
+            <Link href="/" className="flex items-center gap-2 group shrink-0">
+              <div className="w-7 h-7 bg-black rounded flex items-center justify-center transition-transform group-hover:scale-105">
+                <Zap className="w-3.5 h-3.5 text-white fill-white" />
               </div>
-              <span className="text-sm font-black tracking-tighter uppercase text-black">Antigravity</span>
+              <span className="text-sm font-semibold tracking-tight text-black">
+                Outreach AI
+              </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1">
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
               <NavLink href="/campaigns" icon={LayoutDashboard}>Campaigns</NavLink>
               <NavLink href="/leads" icon={Users}>Leads</NavLink>
             </nav>
           </div>
 
           <div className="flex items-center gap-4">
-            <StatusPill status={accountStatus} label={accountLabel} />
-            <div className="h-4 w-[1px] bg-zinc-200 mx-2" />
+            <div className="hidden sm:block">
+              <StatusPill status={accountStatus} label={accountLabel} />
+            </div>
+            <div className="h-4 w-px bg-zinc-100 hidden sm:block" />
             <Link
               href="/settings"
-              className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-xl transition-all"
-              title="Settings"
+              className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors"
             >
-              <Settings className="w-5 h-5" />
+              <Settings className="w-4 h-4" />
             </Link>
+
+            {/* Mobile menu toggle */}
+            <button
+              className="md:hidden p-2 text-zinc-400 hover:text-black hover:bg-zinc-50 rounded-lg"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile nav dropdown */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden border-t border-zinc-50 bg-white px-4 py-3 space-y-1">
+            <NavLink href="/campaigns" icon={LayoutDashboard} onClick={() => setMobileMenuOpen(false)}>
+              Campaigns
+            </NavLink>
+            <NavLink href="/leads" icon={Users} onClick={() => setMobileMenuOpen(false)}>
+              Leads
+            </NavLink>
+          </nav>
+        )}
       </header>
 
-      <main className="flex-1 w-full max-w-[1600px] mx-auto px-6 py-8">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
         {children}
       </main>
     </div>

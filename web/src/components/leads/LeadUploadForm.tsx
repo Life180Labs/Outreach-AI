@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import type { LeadInput, LeadValidationError } from "@/types/leads";
 import { parseCsv } from "@/features/leads/parseCsv";
 import { validateLeads } from "@/features/leads/validateLeads";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+
 import { ValidationErrorTable } from "@/components/leads/ValidationErrorTable";
 
 type UploadMode = "csv" | "google_sheets";
@@ -147,10 +146,11 @@ export function LeadUploadForm() {
           {mode === "csv" ? (
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-800">CSV file</label>
-              <Input
+              <input
                 type="file"
                 accept=".csv,text/csv"
-                onChange={(e) => setCsvFile(e.target.files?.[0] ?? null)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCsvFile(e.target.files?.[0] ?? null)}
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 text-sm font-medium outline-none file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-black file:text-white"
               />
               <div className="text-xs text-zinc-500">
                 Tip: Use a small batch first. Duplicates by email are blocked to prevent double-sends.
@@ -159,10 +159,11 @@ export function LeadUploadForm() {
           ) : (
             <div className="space-y-2">
               <label className="text-sm font-medium text-zinc-800">Google Sheets link</label>
-              <Input
+              <input
                 placeholder="https://docs.google.com/spreadsheets/d/..."
                 value={googleSheetUrl}
-                onChange={(e) => setGoogleSheetUrl(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGoogleSheetUrl(e.target.value)}
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-black focus:bg-white transition-all"
               />
               <div className="text-xs text-zinc-500">
                 Phase 1: We’ll validate the link format only. Import will be wired through the backend later.
@@ -171,18 +172,18 @@ export function LeadUploadForm() {
           )}
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button type="button" onClick={() => void onValidate()}>
+            <button type="button" onClick={() => void onValidate()} className="px-6 py-3 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-lg shadow-black/5">
               Validate leads
-            </Button>
-            <Button
+            </button>
+            <button
               type="button"
-              variant="secondary"
               disabled={!hasValid}
               onClick={onContinue}
               title={hasValid ? "" : "Validate a file first"}
+              className="px-6 py-3 bg-zinc-100 text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-200 transition-all disabled:opacity-50"
             >
               Continue with valid leads only
-            </Button>
+            </button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">

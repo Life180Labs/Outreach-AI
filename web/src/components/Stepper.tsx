@@ -7,39 +7,35 @@ export function Stepper({ campaignId }: { campaignId?: string }) {
   const pathname = usePathname();
   
   const steps = [
-    { label: "1 · Upload", path: "upload", match: ["upload"] },
-    { label: "2 · Setup", path: "setup", match: ["setup"] },
-    { label: "3 · Review", path: "review", match: ["review"] },
-    { label: "4 · Send", path: "launch", match: ["launch"] },
-    { label: "5 · Monitor", path: "sending", match: ["sending"] }
+    { label: "Upload", path: "upload" },
+    { label: "Configure", path: "setup" },
+    { label: "Review", path: "review" },
+    { label: "Launch", path: "launch" },
+    { label: "Monitor", path: "sending" }
   ];
 
   return (
-    <div className="w-full border-b border-brand-border bg-[#fdfdfc]">
-      <div className="flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-4">
-      {steps.map((step) => {
-        let isActive = false;
-        if (step.path === "") {
-          isActive = pathname.endsWith(`/campaigns/${campaignId}`);
-        } else {
-          isActive = pathname.includes(`/${step.path}`);
-        }
-
+    <div className="w-full border-b border-zinc-200 bg-white">
+      <div className="flex items-center w-full px-2">
+      {steps.map((step, idx) => {
+        const isActive = pathname.includes(`/${step.path}`);
         const href = `/campaigns/${campaignId || 'new'}/${step.path}`;
-        const isCompleted = campaignId || step.path === 'upload';
+        const isCompleted = !!campaignId || step.path === 'upload';
 
         return (
-          <div key={step.label} className="flex-1 text-center">
+          <div key={step.label} className="flex-1">
             {isCompleted ? (
               <Link 
                 href={href}
-                className={`block pb-3 text-sm font-medium border-b-2 ${isActive ? 'text-black border-black' : 'text-brand-muted border-transparent hover:text-black'}`}
+                className={`block py-3 text-xs font-semibold text-center border-b-2 transition-colors ${
+                  isActive ? 'text-black border-black' : 'text-zinc-400 border-transparent hover:text-black hover:border-zinc-200'
+                }`}
               >
-                {step.label}
+                <span className="hidden sm:inline-block mr-1 opacity-40">{idx + 1} ·</span> {step.label}
               </Link>
             ) : (
-              <span className="block pb-3 text-sm font-medium border-b-2 text-zinc-300 border-transparent cursor-not-allowed">
-                {step.label}
+              <span className="block py-3 text-xs font-semibold text-center border-b-2 text-zinc-200 border-transparent cursor-not-allowed">
+                <span className="hidden sm:inline-block mr-1 opacity-40">{idx + 1} ·</span> {step.label}
               </span>
             )}
           </div>

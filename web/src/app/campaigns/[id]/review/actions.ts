@@ -1,99 +1,140 @@
 "use server";
 
 import { generateEmailDraft } from "@/lib/ai";
+import { getTransporterFromSettings } from "@/lib/mail";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import type { ActionResult, Lead } from "@/types";
 
-export async function generateDraftAction(leadId: string, campaignId: string) {
-  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
-  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
-  
-  if (!lead || !campaign) throw new Error("Not found");
+export async function generateDraftAction(
+  leadId: string,
+  campaignId: string
+): Promise<ActionResult<Lead>> {
+  try {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
 
-  const draft = await generateEmailDraft(lead, campaign);
-  
-  const updatedLead = await prisma.lead.update({
-    where: { id: leadId },
-    data: {
-      emailSubject: draft.subject,
-      emailBody: draft.body,
-      aiRationale: draft.rationale,
-      status: "warm",
-    }
-  });
+    if (!lead || !campaign) return { success: false, error: "Lead or campaign not found" };
 
-  revalidatePath(`/campaigns/${campaignId}/review`);
-  return updatedLead;
+    const draft = await generateEmailDraft(lead, campaign);
+
+    const updatedLead = await prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        emailSubject: draft.subject,
+        emailBody: draft.body,
+        aiRationale: draft.rationale,
+        status: "Warm",
+      },
+    });
+
+    revalidatePath(`/campaigns/${campaignId}/review`);
+    return { success: true, data: updatedLead };
+  } catch (error) {
+    console.error("[generateDraft]", error);
+    return { success: false, error: "Failed to generate draft" };
+  }
 }
 
-export async function saveDraftAction(leadId: string, subject: string, body: string, campaignId: string) {
-  await prisma.lead.update({
-    where: { id: leadId },
-    data: { emailSubject: subject, emailBody: body }
-  });
-  revalidatePath(`/campaigns/${campaignId}/review`);
+export async function saveDraftAction(
+  leadId: string,
+  subject: string,
+  body: string,
+  campaignId: string
+): Promise<ActionResult> {
+  try {
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { emailSubject: subject, emailBody: body },
+    });
+    revalidatePath(`/campaigns/${campaignId}/review`);
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("[saveDraft]", error);
+    return { success: false, error: "Failed to save draft" };
+  }
 }
 
-export async function getLeadsAction(campaignId: string) {
+export async function getLeadsAction(campaignId: string): Promise<Lead[]> {
   return await prisma.lead.findMany({
     where: { campaignId },
-    orderBy: { createdAt: 'asc' }
+    orderBy: { createdAt: "asc" },
   });
 }
 
-export async function approveLeadAction(leadId: string, campaignId: string) {
-  await prisma.lead.update({
-    where: { id: leadId },
-    data: { isApproved: true }
-  });
-  revalidatePath(`/campaigns/${campaignId}/review`);
+export async function approveLeadAction(
+  leadId: string,
+  campaignId: string
+): Promise<ActionResult> {
+  try {
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { isApproved: true },
+    });
+    revalidatePath(`/campaigns/${campaignId}/review`);
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("[approveLead]", error);
+    return { success: false, error: "Failed to approve lead" };
+  }
 }
 
-export async function regenerateDraftAction(leadId: string, campaignId: string, userFeedback: string) {
-  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
-  const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
-  
-  if (!lead || !campaign) throw new Error("Not found");
+export async function regenerateDraftAction(
+  leadId: string,
+  campaignId: string,
+  userFeedback: string
+): Promise<ActionResult<Lead>> {
+  try {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
+    const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
 
-  const { generateEmailDraft } = await import("@/lib/ai");
-  const draft = await generateEmailDraft(lead, campaign, userFeedback);
-  
-  return await prisma.lead.update({
-    where: { id: leadId },
-    data: {
-      emailSubject: draft.subject,
-      emailBody: draft.body,
-      aiRationale: draft.rationale,
-      isApproved: false, // Reset approval on regenerate
-    }
-  });
+    if (!lead || !campaign) return { success: false, error: "Lead or campaign not found" };
+
+    const draft = await generateEmailDraft(lead, campaign, userFeedback);
+
+    const updated = await prisma.lead.update({
+      where: { id: leadId },
+      data: {
+        emailSubject: draft.subject,
+        emailBody: draft.body,
+        aiRationale: draft.rationale,
+        isApproved: false, // Reset approval on regenerate
+      },
+    });
+
+    return { success: true, data: updated };
+  } catch (error) {
+    console.error("[regenerateDraft]", error);
+    return { success: false, error: "Failed to regenerate draft" };
+  }
 }
 
-export async function sendTestAction(leadId: string, testEmail: string) {
-  const lead = await prisma.lead.findUnique({ where: { id: leadId } });
-  const settings = await prisma.settings.findUnique({ where: { id: "global" } });
-  
-  if (!lead || !settings) throw new Error("Missing data");
+export async function sendTestAction(
+  leadId: string,
+  testEmail: string
+): Promise<ActionResult> {
+  try {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId } });
 
-  const nodemailer = await import("nodemailer");
-  
-  const transporter = nodemailer.createTransport({
-    host: settings.smtpHost || "smtp.gmail.com",
-    port: settings.smtpPort || 587,
-    secure: settings.smtpPort === 465,
-    auth: {
-      user: settings.smtpUser || settings.gmailEmailAddress || "",
-      pass: settings.smtpPass || "",
-    },
-  });
+    if (!lead) return { success: false, error: "Lead not found" };
 
-  await transporter.sendMail({
-    from: (settings.smtpFromEmail || settings.smtpUser || settings.gmailEmailAddress || "outreach@life180.com") as string,
-    to: testEmail,
-    subject: `[TEST] ${lead.emailSubject}`,
-    text: lead.emailBody!,
-    html: `<div style="font-family:sans-serif">${lead.emailBody?.replace(/\n/g, '<br>')}</div>`
-  });
+    const { transporter, from } = await getTransporterFromSettings();
 
-  return { success: true };
+    await transporter.sendMail({
+      from,
+      to: testEmail,
+      subject: `[TEST] ${lead.emailSubject}`,
+      text: lead.emailBody!,
+      html: `<div style="font-family:sans-serif">${lead.emailBody?.replace(
+        /\n/g,
+        "<br>"
+      )}</div>`,
+    });
+
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("[sendTest]", error);
+    const msg = error instanceof Error ? error.message : "Failed to send test email";
+    return { success: false, error: msg };
+  }
 }

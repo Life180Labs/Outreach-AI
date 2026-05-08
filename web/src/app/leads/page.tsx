@@ -2,72 +2,99 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { LeadsClient } from "./LeadsClient";
 
-export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ q?: string, status?: string }> }) {
+export default async function LeadsPage({ searchParams }: { searchParams: Promise<{ q?: string; status?: string }> }) {
   const { q, status } = await searchParams;
 
-  const where: any = {};
+  const where: any = { AND: [] };
+
   if (q) {
-    where.OR = [
-      { firstName: { contains: q } },
-      { lastName: { contains: q } },
-      { companyName: { contains: q } },
-    ];
+    where.AND.push({
+      OR: [
+        { firstName: { contains: q, mode: 'insensitive' } },
+        { lastName: { contains: q, mode: 'insensitive' } },
+        { companyName: { contains: q, mode: 'insensitive' } },
+      ],
+    });
   }
 
-  if (status === 'hot') {
-    where.OR = [{ replied: true }, { status: 'hot' }];
-  } else if (status === 'warm') {
-    where.AND = [{ opened: true }, { replied: false }];
-  } else if (status === 'cold') {
-    where.AND = [{ opened: false }, { replied: false }];
+  if (status === "hot") {
+    where.AND.push({ OR: [{ replied: true }, { status: "Hot" }] });
+  } else if (status === "warm") {
+    where.AND.push({ opened: true });
+    where.AND.push({ replied: false });
+  } else if (status === "cold") {
+    where.AND.push({ opened: false });
+    where.AND.push({ replied: false });
   }
 
   const leads = await prisma.lead.findMany({
-    where,
-    orderBy: { updatedAt: 'desc' },
+    where: where.AND.length > 0 ? where : {},
+    orderBy: { updatedAt: "desc" },
   });
 
   const allCount = await prisma.lead.count();
-  const hotCount = await prisma.lead.count({ where: { OR: [{ replied: true }, { status: 'hot' }] } });
+  const hotCount = await prisma.lead.count({ where: { OR: [{ replied: true }, { status: "Hot" }] } });
   const warmCount = await prisma.lead.count({ where: { AND: [{ opened: true }, { replied: false }] } });
   const coldCount = await prisma.lead.count({ where: { AND: [{ opened: false }, { replied: false }] } });
 
-  return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full min-h-full">
-      <div className="bg-brand-surface border border-brand-border rounded-xl overflow-hidden p-6">
+  const searchStr = q ? `&q=${encodeURIComponent(q)}` : "";
 
-        <form action="/leads" method="GET" className="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
+  const tabs = [
+    { key: null, label: "All", count: allCount, href: q ? `/leads?q=${encodeURIComponent(q)}` : "/leads" },
+    { key: "hot", label: "Hot", count: hotCount, href: `/leads?status=hot${searchStr}` },
+    { key: "warm", label: "Warm", count: warmCount, href: `/leads?status=warm${searchStr}` },
+    { key: "cold", label: "Cold", count: coldCount, href: `/leads?status=cold${searchStr}` },
+  ];
+
+  return (
+    <div className="w-full space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-black tracking-tight">Leads</h1>
+          <p className="text-zinc-400 text-sm mt-1">Manage and track your outreach interactions</p>
+        </div>
+      </div>
+
+      {/* Filter Row */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <form action="/leads" method="GET" className="flex-1 w-full sm:max-w-sm">
+          {status && <input type="hidden" name="status" value={status} />}
           <input
             type="text"
             name="q"
             defaultValue={q || ""}
-            placeholder="Search by name, company, location..."
-            className="w-full md:max-w-md bg-white border border-brand-border rounded-lg px-4 py-2.5 text-black focus:outline-none text-sm"
+            placeholder="Search by name, company..."
+            className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400"
           />
-
-          <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-            <div className="flex flex-wrap bg-white border border-brand-border rounded-lg overflow-hidden shadow-sm">
-              <Link href="/leads" className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold border-r border-brand-border transition-colors ${!status ? 'bg-[#f8f8f8] text-black' : 'text-brand-muted hover:text-black hover:bg-zinc-50'}`}>
-                All ({allCount})
-              </Link>
-              <Link href="/leads?status=hot" className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold border-r border-brand-border transition-colors ${status === 'hot' ? 'bg-[#eef8ed] text-[#2b6528]' : 'text-brand-muted hover:text-black hover:bg-zinc-50'}`}>
-                Hot ({hotCount})
-              </Link>
-              <Link href="/leads?status=warm" className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold border-r border-brand-border transition-colors ${status === 'warm' ? 'bg-orange-50 text-orange-700' : 'text-brand-muted hover:text-black hover:bg-zinc-50'}`}>
-                Warm ({warmCount})
-              </Link>
-              <Link href="/leads?status=cold" className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${status === 'cold' ? 'bg-zinc-100 text-zinc-700' : 'text-brand-muted hover:text-black hover:bg-zinc-50'}`}>
-                Cold ({coldCount})
-              </Link>
-            </div>
-          </div>
         </form>
 
-        <LeadsClient leads={leads} />
-
-        <div className="pt-6 text-center text-sm text-brand-muted">
-          Showing {leads.length} of {allCount} leads
+        <div className="flex items-center rounded-lg border border-zinc-200 bg-white overflow-hidden">
+          {tabs.map((tab) => {
+            const isActive = (tab.key === null && !status) || tab.key === status;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={`px-4 py-2 text-xs font-medium transition-colors border-r last:border-r-0 border-zinc-200 ${
+                  isActive
+                    ? "bg-black text-white"
+                    : "text-zinc-500 hover:text-black hover:bg-zinc-50"
+                }`}
+              >
+                {tab.label} ({tab.count})
+              </Link>
+            );
+          })}
         </div>
+      </div>
+
+      {/* Table */}
+      <LeadsClient leads={leads} />
+
+      {/* Footer */}
+      <div className="text-center text-xs text-zinc-400 py-4">
+        Showing {leads.length} of {allCount} leads
       </div>
     </div>
   );
