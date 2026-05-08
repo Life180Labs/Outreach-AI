@@ -3,7 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Trash2, ExternalLink, CheckSquare, Square, Loader2, Edit, Pause, Play, ChevronDown, X } from "lucide-react";
+import { 
+  Trash2, 
+  ExternalLink, 
+  CheckSquare, 
+  Square, 
+  Loader2, 
+  Edit, 
+  Pause, 
+  Play, 
+  ChevronDown, 
+  X, 
+  Download,
+  Filter,
+  MoreHorizontal,
+  Users
+} from "lucide-react";
 import { deleteLeadAction, bulkDeleteLeadsAction, bulkUpdateLeadsAction, updateLeadAction } from "../dashboard-actions";
 
 export function LeadsClient({ leads: initialLeads }: { leads: any[] }) {
@@ -98,74 +113,224 @@ export function LeadsClient({ leads: initialLeads }: { leads: any[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-2">
-          {selectedIds.length > 0 && (
-            <div className="relative">
-              <button 
-                onClick={() => setShowBulkMenu(!showBulkMenu)}
-                className="bg-black text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-sm text-sm flex items-center gap-2"
-              >
-                Bulk Actions ({selectedIds.length}) <ChevronDown className="w-4 h-4" />
-              </button>
-              
+      {/* 1. Dashboard Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-2">
+        <div>
+          <h2 className="text-2xl font-black text-black tracking-tight">Leads Database</h2>
+          <p className="text-sm text-zinc-500 font-medium mt-1">Manage and track your outreach interactions</p>
+        </div>
+        
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          {selectedIds.length > 0 ? (
+            <div className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-2xl shadow-xl shadow-black/10 animate-in fade-in slide-in-from-right-4 duration-300">
+              <span className="text-xs font-black uppercase tracking-widest border-r border-white/20 pr-3 mr-1">{selectedIds.length} Selected</span>
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setShowBulkMenu(!showBulkMenu)}
+                  className="flex items-center gap-2 px-2 py-1 hover:bg-white/10 rounded-lg transition-colors text-xs font-bold"
+                >
+                  Actions <ChevronDown className="w-3 h-3" />
+                </button>
+                <button 
+                  onClick={handleExport}
+                  className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Export Selected"
+                >
+                  <Download className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={handleBulkDelete}
+                  className="p-1 hover:bg-white/10 rounded-lg transition-colors text-red-400"
+                  title="Delete Selected"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+
               {showBulkMenu && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-brand-border rounded-xl shadow-xl z-50 overflow-hidden py-1">
-                  <button onClick={() => handleBulkUpdate({ status: 'Hot' })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 transition-colors">Mark as Hot</button>
-                  <button onClick={() => handleBulkUpdate({ status: 'NotInterested' })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 transition-colors">Mark Not Interested</button>
-                  <button onClick={() => handleBulkUpdate({ isPaused: true })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 transition-colors">Pause Follow-ups</button>
-                  <button onClick={() => handleBulkUpdate({ isPaused: false })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 transition-colors">Resume Follow-ups</button>
-                  <hr className="my-1 border-brand-border" />
-                  <button onClick={handleBulkDelete} className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors">Delete Selected</button>
+                <div className="absolute top-full right-0 mt-3 w-56 bg-white border border-zinc-200 rounded-2xl shadow-2xl z-[60] overflow-hidden py-2 text-black animate-in fade-in zoom-in-95 duration-200 origin-top-right">
+                  <div className="px-4 py-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 mb-1">Status Updates</div>
+                  <button onClick={() => handleBulkUpdate({ status: 'Hot' })} className="w-full text-left px-4 py-2 text-sm font-bold hover:bg-zinc-50 transition-colors flex items-center justify-between">Mark as Hot <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /></button>
+                  <button onClick={() => handleBulkUpdate({ status: 'NotInterested' })} className="w-full text-left px-4 py-2 text-sm font-bold hover:bg-zinc-50 transition-colors">Mark Not Interested</button>
+                  <div className="px-4 py-2 text-[10px] font-black text-zinc-400 uppercase tracking-widest border-b border-zinc-100 my-1">Sequences</div>
+                  <button onClick={() => handleBulkUpdate({ isPaused: true })} className="w-full text-left px-4 py-2 text-sm font-bold hover:bg-zinc-50 transition-colors flex items-center gap-2"><Pause className="w-3.5 h-3.5" /> Pause Leads</button>
+                  <button onClick={() => handleBulkUpdate({ isPaused: false })} className="w-full text-left px-4 py-2 text-sm font-bold hover:bg-zinc-50 transition-colors flex items-center gap-2"><Play className="w-3.5 h-3.5" /> Resume Leads</button>
                 </div>
               )}
             </div>
+          ) : (
+            <div className="flex items-center gap-3 w-full md:w-auto">
+              <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-zinc-200 rounded-2xl text-xs font-bold text-zinc-600 hover:border-black transition-all">
+                <Filter className="w-3.5 h-3.5" /> Filter
+              </button>
+              <button 
+                onClick={handleExport}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-black text-white rounded-2xl text-xs font-bold hover:bg-zinc-800 transition-all shadow-lg shadow-black/5"
+              >
+                <Download className="w-3.5 h-3.5" /> Export CSV
+              </button>
+            </div>
           )}
         </div>
-        <button 
-          onClick={handleExport}
-          className="bg-white border border-brand-border hover:bg-zinc-50 text-black px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-sm"
-        >
-          {selectedIds.length > 0 ? "Export Selected" : "Export CSV"}
-        </button>
       </div>
 
-      {/* Edit Modal */}
+      {/* 2. Main Leads Table */}
+      <div className="bg-white border border-zinc-200/50 rounded-3xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr className="bg-zinc-50/50 border-b border-zinc-100">
+                <th className="px-6 py-4 w-12">
+                  <button onClick={toggleSelectAll} className="text-zinc-300 hover:text-black transition-colors">
+                    {selectedIds.length === leads.length && leads.length > 0 ? <CheckSquare className="w-5 h-5 text-black" /> : <Square className="w-5 h-5" />}
+                  </button>
+                </th>
+                <th className="px-4 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Lead Information</th>
+                <th className="px-4 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Organization</th>
+                <th className="px-4 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Current Status</th>
+                <th className="px-4 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Latest Activity</th>
+                <th className="px-4 py-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">Sequence Progress</th>
+                <th className="px-6 py-4 text-right text-[10px] font-black text-zinc-400 uppercase tracking-widest">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {leads.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-20 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Users className="w-10 h-10 text-zinc-200" />
+                      <p className="text-sm text-zinc-400 font-bold uppercase tracking-widest">No Leads Found</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : leads.map(lead => (
+                <tr key={lead.id} className={`group hover:bg-zinc-50/80 transition-all ${selectedIds.includes(lead.id) ? 'bg-zinc-50' : ''}`}>
+                  <td className="px-6 py-5">
+                    <button onClick={() => toggleSelect(lead.id)} className="text-zinc-300 hover:text-black transition-colors">
+                      {selectedIds.includes(lead.id) ? <CheckSquare className="w-5 h-5 text-black" /> : <Square className="w-5 h-5" />}
+                    </button>
+                  </td>
+                  <td className="px-4 py-5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-[10px] font-black text-zinc-400">
+                        {lead.firstName[0]}{lead.lastName?.[0] || ''}
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-black leading-none">{lead.firstName} {lead.lastName}</p>
+                        <p className="text-[11px] text-zinc-500 font-medium mt-1">{lead.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-5">
+                    <p className="text-sm font-bold text-black">{lead.companyName}</p>
+                    <p className="text-[10px] text-zinc-400 font-medium mt-0.5">{lead.jobTitle || 'Decision Maker'}</p>
+                  </td>
+                  <td className="px-4 py-5">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                      lead.replied || lead.status === 'hot' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                      lead.opened ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-zinc-100 text-zinc-500 border-zinc-200'
+                    }`}>
+                      <div className={`w-1 h-1 rounded-full ${lead.replied ? 'bg-emerald-500' : lead.opened ? 'bg-amber-500' : 'bg-zinc-400'}`} />
+                      {lead.replied ? 'Replied' : lead.opened ? 'Opened' : 'Cold'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-5">
+                    <p className="text-xs font-bold text-black">{lead.replied ? 'Replied' : lead.opened ? 'Opened' : lead.sent ? 'Sent' : 'Pending'}</p>
+                    <p className="text-[10px] text-zinc-400 font-medium mt-0.5">
+                      {new Date(lead.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · {new Date(lead.updatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                    </p>
+                  </td>
+                  <td className="px-4 py-5">
+                    {lead.replied || lead.isPaused ? (
+                      <div className="flex items-center gap-2">
+                         <div className="px-2 py-0.5 bg-zinc-100 rounded text-[9px] font-black text-zinc-500 uppercase tracking-tighter">
+                           {lead.isPaused ? 'Paused' : 'Goal Met'}
+                         </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-1.5 w-24">
+                        <div className="flex items-center justify-between text-[9px] font-black text-zinc-400 uppercase">
+                          <span>Day 3</span>
+                          <span>60%</span>
+                        </div>
+                        <div className="w-full h-1 bg-zinc-100 rounded-full overflow-hidden">
+                          <div className="w-[60%] h-full bg-black rounded-full" />
+                        </div>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-5 text-right">
+                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => setEditingLead(lead)}
+                        className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-xl transition-all"
+                        title="Edit Details"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <Link 
+                        href={`/leads/${lead.id}`} 
+                        className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-xl transition-all"
+                        title="View Conversation"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                      <button 
+                        onClick={() => handleDelete(lead.id)}
+                        disabled={loading === lead.id}
+                        className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-50"
+                        title="Delete Lead"
+                      >
+                        {loading === lead.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 3. Edit Modal - UX Optimized */}
       {editingLead && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-brand-border animate-in fade-in zoom-in duration-200">
-            <form onSubmit={handleEditSave} className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-black">Edit Lead Detail</h3>
-                <button type="button" onClick={() => setEditingLead(null)} className="text-zinc-400 hover:text-black">
+        <div className="fixed inset-0 bg-zinc-950/20 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-xl rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200/50 animate-in zoom-in-95 duration-300">
+            <form onSubmit={handleEditSave} className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-black text-black tracking-tight">Refine Lead Details</h3>
+                  <p className="text-xs text-zinc-500 font-medium mt-1">Update primary contact and organization info</p>
+                </div>
+                <button type="button" onClick={() => setEditingLead(null)} className="p-2 bg-zinc-50 text-zinc-400 hover:text-black rounded-full transition-all border border-zinc-100">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-muted uppercase">First Name</label>
-                  <input name="firstName" defaultValue={editingLead.firstName} className="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-sm" />
+              <div className="grid grid-cols-2 gap-5 mb-8">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">First Name</label>
+                  <input name="firstName" defaultValue={editingLead.firstName} className="w-full bg-zinc-50 border border-zinc-200 focus:border-black focus:bg-white transition-all rounded-2xl px-4 py-3 text-sm font-medium outline-none" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-muted uppercase">Last Name</label>
-                  <input name="lastName" defaultValue={editingLead.lastName} className="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-sm" />
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Last Name</label>
+                  <input name="lastName" defaultValue={editingLead.lastName} className="w-full bg-zinc-50 border border-zinc-200 focus:border-black focus:bg-white transition-all rounded-2xl px-4 py-3 text-sm font-medium outline-none" />
                 </div>
-                <div className="col-span-2 space-y-1">
-                  <label className="text-[10px] font-bold text-brand-muted uppercase">Email</label>
-                  <input name="email" defaultValue={editingLead.email} className="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-sm" />
+                <div className="col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Work Email</label>
+                  <input name="email" defaultValue={editingLead.email} className="w-full bg-zinc-50 border border-zinc-200 focus:border-black focus:bg-white transition-all rounded-2xl px-4 py-3 text-sm font-medium outline-none" />
                 </div>
-                <div className="col-span-2 space-y-1">
-                  <label className="text-[10px] font-bold text-brand-muted uppercase">Company</label>
-                  <input name="companyName" defaultValue={editingLead.companyName} className="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-sm" />
+                <div className="col-span-2 space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Organization</label>
+                  <input name="companyName" defaultValue={editingLead.companyName} className="w-full bg-zinc-50 border border-zinc-200 focus:border-black focus:bg-white transition-all rounded-2xl px-4 py-3 text-sm font-medium outline-none" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-muted uppercase">Job Title</label>
-                  <input name="jobTitle" defaultValue={editingLead.jobTitle} className="w-full bg-brand-surface border border-brand-border rounded-xl px-3 py-2 text-sm" />
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Job Title</label>
+                  <input name="jobTitle" defaultValue={editingLead.jobTitle} className="w-full bg-zinc-50 border border-zinc-200 focus:border-black focus:bg-white transition-all rounded-2xl px-4 py-3 text-sm font-medium outline-none" />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-muted uppercase">Status</label>
-                  <select name="status" defaultValue={editingLead.status} className="w-full bg-brand-surface border border-brand-border rounded-lg px-3 py-2 text-sm">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Global Status</label>
+                  <select name="status" defaultValue={editingLead.status} className="w-full bg-zinc-50 border border-zinc-200 focus:border-black focus:bg-white transition-all rounded-2xl px-4 py-3 text-sm font-medium outline-none appearance-none">
                     <option value="Cold">Cold</option>
                     <option value="Hot">Hot</option>
                     <option value="Warm">Warm</option>
@@ -175,104 +340,17 @@ export function LeadsClient({ leads: initialLeads }: { leads: any[] }) {
                 </div>
               </div>
 
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setEditingLead(null)} className="flex-1 bg-zinc-50 text-black py-2.5 rounded-xl font-bold transition-colors text-sm border border-brand-border">Cancel</button>
-                <button type="submit" disabled={loading === 'edit'} className="flex-1 bg-black text-white py-2.5 rounded-xl font-bold transition-colors text-sm flex items-center justify-center gap-2">
+              <div className="flex gap-4">
+                <button type="button" onClick={() => setEditingLead(null)} className="flex-1 px-6 py-4 bg-white text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-zinc-200 hover:border-black transition-all">Cancel</button>
+                <button type="submit" disabled={loading === 'edit'} className="flex-1 px-6 py-4 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 shadow-xl shadow-black/10">
                   {loading === 'edit' && <Loader2 className="w-4 h-4 animate-spin" />}
-                  Save Changes
+                  Save Profile
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm min-w-[900px]">
-          <thead className="border-b border-brand-border text-brand-muted">
-            <tr>
-              <th className="pb-3 w-10">
-                <button onClick={toggleSelectAll} className="text-zinc-400 hover:text-black">
-                  {selectedIds.length === leads.length && leads.length > 0 ? <CheckSquare className="w-5 h-5 text-black" /> : <Square className="w-5 h-5" />}
-                </button>
-              </th>
-              <th className="pb-3 font-semibold">Lead</th>
-              <th className="pb-3 font-semibold">Company</th>
-              <th className="pb-3 font-semibold">Status</th>
-              <th className="pb-3 font-semibold">Last activity</th>
-              <th className="pb-3 font-semibold">Follow-up due</th>
-              <th className="pb-3 font-semibold text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-brand-border">
-            {leads.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="py-12 text-center text-brand-muted italic">No leads found.</td>
-              </tr>
-            ) : leads.map(lead => (
-              <tr key={lead.id} className={`hover:bg-zinc-50 transition-colors ${selectedIds.includes(lead.id) ? 'bg-blue-50/30' : ''}`}>
-                <td className="py-4">
-                  <button onClick={() => toggleSelect(lead.id)} className="text-zinc-400 hover:text-black">
-                    {selectedIds.includes(lead.id) ? <CheckSquare className="w-5 h-5 text-black" /> : <Square className="w-5 h-5" />}
-                  </button>
-                </td>
-                <td className="py-4">
-                  <p className="font-bold text-black leading-tight">{lead.firstName} {lead.lastName}</p>
-                  <p className="text-xs text-brand-muted mt-0.5">{lead.email}</p>
-                </td>
-                <td className="py-4 text-black font-medium">{lead.companyName}</td>
-                <td className="py-4">
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold border ${
-                    lead.replied || lead.status === 'hot' ? 'bg-[#eef8ed] text-[#2b6528] border-[#b2ddab]' : 
-                    lead.opened ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-zinc-100 text-zinc-600 border-zinc-200'
-                  }`}>
-                    {lead.replied ? 'Hot (Replied)' : lead.opened ? 'Warm (Opened)' : 'Cold'}
-                  </span>
-                </td>
-                <td className="py-4 text-black font-medium">
-                  {lead.replied ? 'Replied' : lead.opened ? 'Opened' : lead.sent ? 'Sent' : 'Pending'} 
-                  <div className="text-brand-muted font-normal text-[10px] mt-0.5">
-                    {new Date(lead.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {new Date(lead.updatedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                  </div>
-                </td>
-                <td className="py-4">
-                  {lead.replied || lead.isPaused ? (
-                    <span className="text-brand-muted italic text-xs">{lead.isPaused ? 'Paused (manual)' : 'Paused (replied)'}</span>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                      <span className="text-black font-medium text-xs">Day 3 · queued</span>
-                    </div>
-                  )}
-                </td>
-                <td className="py-4 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <button 
-                      onClick={() => setEditingLead(lead)}
-                      className="p-1.5 text-zinc-400 hover:text-black hover:bg-white rounded-lg border border-transparent hover:border-zinc-200 transition-all"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </button>
-                    <Link 
-                      href={`/leads/${lead.id}`} 
-                      className="p-1.5 text-zinc-400 hover:text-black hover:bg-white rounded-lg border border-transparent hover:border-zinc-200 transition-all"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Link>
-                    <button 
-                      onClick={() => handleDelete(lead.id)}
-                      disabled={loading === lead.id}
-                      className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-white rounded-lg border border-transparent hover:border-zinc-200 transition-all disabled:opacity-50"
-                    >
-                      {loading === lead.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

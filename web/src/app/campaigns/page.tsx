@@ -5,7 +5,7 @@ import { ArrowRight, Inbox, CheckCircle2, PlayCircle, FileText } from "lucide-re
 export default async function CampaignsListPage() {
   const campaigns = await prisma.campaign.findMany({
     orderBy: { updatedAt: 'desc' },
-    include: { 
+    include: {
       _count: { select: { leads: true } },
       leads: { select: { sent: true, status: true } }
     }
@@ -92,15 +92,15 @@ function CampaignCard({ campaign: c }: { campaign: any }) {
         </div>
         <div className={`w-3 h-3 rounded-full ${c.status === 'active' ? 'bg-emerald-500 animate-pulse' : c.status === 'draft' ? 'bg-amber-400' : 'bg-zinc-300'}`}></div>
       </div>
-      
+
       <div className="space-y-1.5">
         <div className="flex justify-between text-[10px] font-bold text-brand-muted uppercase">
           <span>Progress</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <div className="w-full bg-brand-border rounded-full h-1.5 overflow-hidden">
-          <div 
-            className={`h-1.5 rounded-full transition-all duration-1000 ${c.status === 'completed' ? 'bg-emerald-500' : 'bg-brand-primary'}`} 
+          <div
+            className={`h-1.5 rounded-full transition-all duration-1000 ${c.status === 'completed' ? 'bg-emerald-500' : 'bg-brand-primary'}`}
             style={{ width: `${c.status === 'completed' ? 100 : progress}%` }}
           ></div>
         </div>
@@ -108,15 +108,15 @@ function CampaignCard({ campaign: c }: { campaign: any }) {
 
       <div className="flex items-center justify-between pt-5 mt-4 border-t border-zinc-50">
         <div className="flex items-center gap-4 text-xs font-bold text-zinc-600">
-           <div>
-             <span className="text-black">{sentCount}</span> Sent
-           </div>
-           <div>
-             <span className="text-emerald-600">{hotCount}</span> Hot
-           </div>
+          <div>
+            <span className="text-black">{sentCount}</span> Sent
+          </div>
+          <div>
+            <span className="text-emerald-600">{hotCount}</span> Hot
+          </div>
         </div>
-        <Link 
-          href={c.status === 'draft' ? `/campaigns/${c.id}/setup` : `/campaigns/${c.id}`} 
+        <Link
+          href={c.status === 'draft' ? `/campaigns/${c.id}/setup` : `/campaigns/${c.id}`}
           className="text-black hover:bg-zinc-100 p-2 rounded-lg transition-colors"
         >
           <ArrowRight className="w-5 h-5" />

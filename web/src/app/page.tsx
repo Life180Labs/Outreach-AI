@@ -7,11 +7,11 @@ export default async function DashboardPage() {
   const campaigns = await prisma.campaign.findMany({
     orderBy: { updatedAt: 'desc' },
     take: 5,
-    include: { 
-      _count: { 
-        select: { 
-          leads: true 
-        } 
+    include: {
+      _count: {
+        select: {
+          leads: true
+        }
       },
       leads: {
         select: {
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
             Start <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        
+
         <div className="p-6 rounded-2xl border border-brand-border bg-white flex flex-col justify-between items-start h-40">
           <div>
             <h3 className="text-xl font-semibold text-black mb-1">Resume campaign</h3>
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
               Continue <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
-             <button disabled className="bg-white border border-brand-border text-brand-muted px-5 py-2.5 rounded-xl font-medium inline-flex items-center gap-1 text-sm opacity-50 shadow-sm">
+            <button disabled className="bg-white border border-brand-border text-brand-muted px-5 py-2.5 rounded-xl font-medium inline-flex items-center gap-1 text-sm opacity-50 shadow-sm">
               Continue <ArrowRight className="w-4 h-4" />
             </button>
           )}
@@ -79,8 +79,8 @@ export default async function DashboardPage() {
                   <p className="text-brand-muted text-sm">{c._count.leads} leads · {c.status === 'active' ? 'Running' : c.status === 'completed' ? 'Completed' : 'Draft'}</p>
                 </div>
                 <div className="w-full bg-brand-border rounded-full h-1.5">
-                  <div 
-                    className={`h-1.5 rounded-full ${c.status === 'completed' ? 'bg-[#a3d482]' : 'bg-brand-primary'}`} 
+                  <div
+                    className={`h-1.5 rounded-full ${c.status === 'completed' ? 'bg-[#a3d482]' : 'bg-brand-primary'}`}
                     style={{ width: `${c.status === 'completed' ? 100 : progress}%` }}
                   ></div>
                 </div>

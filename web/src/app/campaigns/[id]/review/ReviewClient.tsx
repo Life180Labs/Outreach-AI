@@ -10,7 +10,21 @@ import {
   regenerateDraftAction, 
   sendTestAction 
 } from "./actions";
-import { ArrowRight, Loader2, Sparkles, Check, Send, RefreshCcw, Save, X } from "lucide-react";
+import { 
+  ArrowRight, 
+  Loader2, 
+  Sparkles, 
+  Check, 
+  Send, 
+  RefreshCcw, 
+  Save, 
+  X,
+  ChevronRight,
+  Zap,
+  Mail,
+  User,
+  ExternalLink
+} from "lucide-react";
 import Link from "next/link";
 
 export function ReviewClient({ campaign, initialLeads }: { campaign: any, initialLeads: any[] }) {
@@ -87,215 +101,260 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
   };
 
   return (
-    <div className="flex flex-col h-full relative">
-      <div className="px-4 sm:px-6 mb-4 shrink-0">
-        <div className="bg-[#eef8ed] border border-[#b2ddab] rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></div>
-            <p className="text-[#2b6528] text-xs sm:text-sm font-medium">
-              {draftedLeadsCount} emails generated. {needReviewCount} need review.
+    <div className="flex flex-col h-[calc(100vh-120px)] relative gap-6">
+      {/* 1. Dynamic Status Header */}
+      <div className="px-1 shrink-0">
+        <div className="bg-white border border-zinc-200 rounded-[28px] p-2 pr-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-zinc-200/20">
+          <div className="flex items-center gap-2 pl-4">
+            <div className={`w-2.5 h-2.5 rounded-full ${needReviewCount > 0 ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'} shrink-0 shadow-[0_0_8px_rgba(245,158,11,0.4)]`}></div>
+            <p className="text-zinc-500 text-[11px] font-black uppercase tracking-widest">
+              {draftedLeadsCount} Drafted <span className="text-zinc-300 mx-1">·</span> {needReviewCount} Processing
             </p>
-            {needReviewCount > 0 && (
-              <div className="flex items-center gap-1.5 ml-2 bg-white px-2 py-0.5 rounded-full border border-[#b2ddab]">
-                <Sparkles className="w-3 h-3 text-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tighter">AI is working</span>
-              </div>
-            )}
           </div>
-          <button onClick={() => setShowSidebar(!showSidebar)} className="lg:hidden text-[#2b6528] text-xs font-bold bg-white px-3 py-1 rounded border border-[#b2ddab]">
-            {showSidebar ? 'Hide List' : 'Show Lead List'}
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setShowSidebar(!showSidebar)} className="lg:hidden text-black text-[10px] font-black uppercase tracking-widest bg-zinc-100 px-4 py-2 rounded-xl transition-all">
+              {showSidebar ? 'Hide Queue' : 'Open Queue'}
+            </button>
+            <div className="h-4 w-[1px] bg-zinc-200 hidden sm:block" />
+            <Link href={`/campaigns/${campaign.id}/launch`} className="bg-black text-white px-6 py-2 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-lg shadow-black/10 flex items-center gap-2">
+              Launch Sequence <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden px-4 sm:px-6 gap-4">
-        <div className={`${showSidebar ? 'fixed inset-0 z-50 bg-white' : 'hidden'} lg:relative lg:flex lg:w-72 flex-col border border-brand-border rounded-2xl bg-brand-surface shrink-0 overflow-hidden`}>
-          <div className="p-3 border-b border-brand-border flex items-center justify-between">
-            <p className="text-brand-muted text-[10px] font-semibold uppercase tracking-wider">{leads.length} leads</p>
-            <button onClick={() => setShowSidebar(false)} className="lg:hidden text-zinc-500">✕</button>
+      {/* 2. Main Review Workspace */}
+      <div className="flex flex-1 overflow-hidden gap-8 px-1">
+        {/* Left: Lead Queue Sidebar */}
+        <div className={`${showSidebar ? 'fixed inset-0 z-50 bg-white' : 'hidden'} lg:relative lg:flex lg:w-80 flex-col bg-white border border-zinc-200 rounded-[32px] shrink-0 overflow-hidden shadow-sm`}>
+          <div className="p-5 border-b border-zinc-100 flex items-center justify-between bg-zinc-50/50">
+            <p className="text-black text-[11px] font-black uppercase tracking-widest">{leads.length} Review Queue</p>
+            <button onClick={() => setShowSidebar(false)} className="lg:hidden p-2 bg-white rounded-xl border border-zinc-200">
+               <X className="w-4 h-4" />
+            </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             {leads.map(lead => (
               <button 
                 key={lead.id}
                 onClick={() => { setSelectedLeadId(lead.id); setShowSidebar(false); }}
-                className={`w-full text-left p-4 border-b border-brand-border flex items-start gap-3 transition-colors ${selectedLeadId === lead.id ? 'bg-white border-l-4 border-l-black shadow-sm' : 'hover:bg-zinc-50 border-l-4 border-l-transparent'}`}
+                className={`w-full text-left p-5 border-b border-zinc-50 flex items-start gap-4 transition-all group ${selectedLeadId === lead.id ? 'bg-zinc-50 ring-2 ring-inset ring-black/5' : 'hover:bg-zinc-50/50'}`}
               >
-                <div className="mt-1.5">
-                  <div className={`w-2 h-2 rounded-full ${lead.isApproved ? 'bg-black' : lead.emailSubject ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                <div className="mt-1 relative">
+                  <div className={`w-2.5 h-2.5 rounded-full transition-all ${lead.isApproved ? 'bg-black shadow-[0_0_8px_rgba(0,0,0,0.3)]' : lead.emailSubject ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                  {selectedLeadId === lead.id && <div className="absolute -left-5 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-black rounded-r-full" />}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-black truncate">{lead.firstName} {lead.lastName}</p>
-                  <p className="text-xs text-brand-muted truncate">{lead.companyName}</p>
+                  <p className={`text-sm font-black transition-colors ${selectedLeadId === lead.id ? 'text-black' : 'text-zinc-600 group-hover:text-black'}`}>{lead.firstName} {lead.lastName}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter mt-1 truncate">{lead.companyName}</p>
                 </div>
+                {lead.isApproved && <Check className="w-4 h-4 text-emerald-500 shrink-0" />}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto border border-brand-border rounded-2xl bg-white p-4 sm:p-8 relative min-w-0">
+        {/* Right: Focused Draft Editor */}
+        <div className="flex-1 flex flex-col min-w-0 bg-white border border-zinc-200 rounded-[32px] shadow-sm overflow-hidden relative">
           {selectedLead ? (
-            <div className="max-w-2xl mx-auto w-full">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-brand-surface border border-brand-border flex items-center justify-center font-bold text-black shrink-0">
-                    {selectedLead.firstName[0]}{selectedLead.lastName?.[0] || ''}
+            <div className="flex flex-col h-full">
+              {/* Draft Header */}
+              <div className="p-8 border-b border-zinc-100 bg-zinc-50/30">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center font-black text-black text-lg shadow-sm">
+                      {selectedLead.firstName[0]}{selectedLead.lastName?.[0] || ''}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-xl font-black text-black tracking-tight">{selectedLead.firstName} {selectedLead.lastName}</h2>
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border transition-all ${
+                          selectedLead.isApproved ? 'bg-black text-white border-black' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
+                          {selectedLead.isApproved ? 'Approved' : 'Awaiting Review'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-500 font-bold mt-1.5">{selectedLead.jobTitle} <span className="text-zinc-300 mx-2">·</span> {selectedLead.companyName}</p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h2 className="text-lg font-bold text-black truncate">{selectedLead.firstName} {selectedLead.lastName}</h2>
-                    <p className="text-brand-muted text-sm truncate">{selectedLead.jobTitle} · {selectedLead.companyName}</p>
+                  
+                  <div className="flex items-center gap-3">
+                    <button 
+                      onClick={() => setModal({ type: 'test' })} 
+                      disabled={!!loading} 
+                      className="p-3 bg-white border border-zinc-200 rounded-2xl text-zinc-400 hover:text-black hover:border-black transition-all shadow-sm"
+                      title="Send Test Email"
+                    >
+                      <Mail className="w-5 h-5" />
+                    </button>
+                    <button 
+                      onClick={() => setModal({ type: 'regenerate' })} 
+                      disabled={!!loading} 
+                      className="p-3 bg-white border border-zinc-200 rounded-2xl text-zinc-400 hover:text-black hover:border-black transition-all shadow-sm"
+                      title="Regenerate Draft"
+                    >
+                      <RefreshCcw className="w-5 h-5" />
+                    </button>
+                    <div className="w-[1px] h-6 bg-zinc-200 mx-1" />
+                    <button 
+                      onClick={handleApprove}
+                      disabled={!!loading || selectedLead.isApproved}
+                      className={`px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 ${
+                        selectedLead.isApproved 
+                          ? 'bg-zinc-100 text-zinc-400 border border-zinc-100' 
+                          : 'bg-black text-white hover:bg-zinc-800 shadow-black/10'
+                      }`}
+                    >
+                      {loading === 'approve' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Approve Draft'}
+                    </button>
                   </div>
-                </div>
-                <div className="flex gap-2 shrink-0">
-                  <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-[10px] font-bold border border-blue-200">AI</span>
-                  {selectedLead.isApproved ? (
-                    <span className="bg-black text-white px-2 py-1 rounded text-[10px] font-bold border border-black flex items-center gap-1">
-                      <Check className="w-3 h-3" /> Approved
-                    </span>
-                  ) : selectedLead.emailSubject ? (
-                    <span className="bg-[#eef8ed] text-[#2b6528] px-2 py-1 rounded text-[10px] font-bold border border-[#b2ddab]">Ready</span>
-                  ) : (
-                    <span className="bg-amber-50 text-amber-700 px-2 py-1 rounded text-[10px] font-bold border border-amber-200">Processing...</span>
-                  )}
                 </div>
               </div>
 
-              {selectedLead.emailSubject ? (
-                <form key={`${selectedLead.id}-${selectedLead.emailSubject}`} onSubmit={handleSave} className="space-y-4 animate-in fade-in duration-300">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Subject line</label>
-                    <input type="text" name="subject" defaultValue={selectedLead.emailSubject} className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-3 text-black font-medium focus:outline-none text-sm" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Email body</label>
-                    <textarea name="body" defaultValue={selectedLead.emailBody} rows={8} className="w-full bg-brand-surface border border-brand-border rounded-lg px-4 py-3 text-black text-sm leading-relaxed focus:outline-none resize-none" />
-                  </div>
+              {/* Draft Editor Surface */}
+              <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                {selectedLead.emailSubject ? (
+                  <form key={`${selectedLead.id}-${selectedLead.emailSubject}`} onSubmit={handleSave} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                       {/* Editor Columns */}
+                       <div className="md:col-span-8 space-y-6">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Subject Strategy</label>
+                            <div className="relative group">
+                               <input type="text" name="subject" defaultValue={selectedLead.emailSubject} className="w-full bg-zinc-50 border border-zinc-100 group-hover:border-zinc-300 focus:border-black focus:bg-white transition-all rounded-[20px] px-6 py-4 text-black font-black text-sm outline-none shadow-inner" />
+                               <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <EditIcon className="w-4 h-4 text-zinc-300" />
+                               </div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Email Body Content</label>
+                            <textarea name="body" defaultValue={selectedLead.emailBody} rows={12} className="w-full bg-zinc-50 border border-zinc-100 focus:border-black focus:bg-white transition-all rounded-[28px] px-8 py-6 text-zinc-700 text-sm font-medium leading-relaxed outline-none shadow-inner resize-none" />
+                          </div>
+                          
+                          <div className="flex items-center justify-between pt-4">
+                            <p className="text-[10px] font-bold text-zinc-400 uppercase italic">* Auto-saved to cloud draft store</p>
+                            <button type="submit" disabled={loading === 'save'} className="flex items-center gap-2 px-6 py-3 bg-zinc-100 hover:bg-black hover:text-white text-zinc-600 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95">
+                              {loading === 'save' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Update Draft
+                            </button>
+                          </div>
+                       </div>
 
-                  {selectedLead.aiRationale && (
-                    <div className="bg-[#f2edfa] border border-[#d6c4f0] rounded-xl p-4 flex gap-2">
-                      <div className="text-[#5b32a8] font-medium text-sm w-full">
-                        <div className="flex items-center gap-1.5 mb-1 text-[10px] uppercase font-bold tracking-wider">
-                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                          AI Rationale
-                        </div>
-                        <span className="text-[#6d41c4] italic block mt-1 opacity-90 text-xs">{selectedLead.aiRationale}</span>
-                      </div>
+                       {/* Sidebar Context */}
+                       <div className="md:col-span-4 space-y-6">
+                          {selectedLead.aiRationale && (
+                            <div className="bg-[#fcfaff] border border-[#f3ebff] rounded-[28px] p-6 shadow-sm">
+                              <div className="flex items-center gap-2 mb-4 text-[10px] font-black text-[#6d41c4] uppercase tracking-widest">
+                                <Zap className="w-4 h-4 fill-[#6d41c4]" />
+                                Intelligence Logic
+                              </div>
+                              <p className="text-[#6d41c4]/80 text-[11px] font-medium leading-relaxed italic border-l-2 border-[#d6c4f0] pl-4 py-1">
+                                {selectedLead.aiRationale}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="bg-zinc-50 border border-zinc-100 rounded-[28px] p-6">
+                             <div className="flex items-center gap-2 mb-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                                <User className="w-4 h-4" />
+                                Lead Persona
+                             </div>
+                             <div className="space-y-4">
+                                <div className="p-3 bg-white rounded-2xl border border-zinc-200/50">
+                                   <p className="text-[9px] font-black text-zinc-300 uppercase tracking-tighter mb-1">Status</p>
+                                   <p className="text-xs font-black text-black">Warm (Opened)</p>
+                                </div>
+                                <div className="p-3 bg-white rounded-2xl border border-zinc-200/50">
+                                   <p className="text-[9px] font-black text-zinc-300 uppercase tracking-tighter mb-1">Recent Activity</p>
+                                   <p className="text-xs font-black text-black">Opened Outreach 2h ago</p>
+                                </div>
+                             </div>
+                          </div>
+                       </div>
                     </div>
-                  )}
-
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 pt-2">
-                    <button type="submit" disabled={loading === 'save'} className="bg-white border border-brand-border hover:bg-zinc-50 text-black px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-xs flex items-center gap-2">
-                      {loading === 'save' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />} Save Edits
-                    </button>
-                    <button type="button" onClick={() => setModal({ type: 'regenerate' })} disabled={!!loading} className="bg-white border border-brand-border hover:bg-zinc-50 text-black px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-xs flex items-center gap-2">
-                      {loading === 'regenerate' ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCcw className="w-3 h-3" />} Regenerate
-                    </button>
-                    <button type="button" onClick={() => setModal({ type: 'test' })} disabled={!!loading} className="bg-white border border-brand-border hover:bg-zinc-50 text-black px-4 py-2 rounded-lg font-medium transition-colors shadow-sm text-xs flex items-center gap-2">
-                      {loading === 'test' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Send test
-                    </button>
-                    <div className="flex-1 text-right">
-                      <button 
-                        type="button" 
-                        onClick={handleApprove}
-                        disabled={!!loading || selectedLead.isApproved}
-                        className={`px-6 py-2 rounded-lg font-bold transition-colors shadow-sm text-xs flex items-center gap-2 ml-auto ${selectedLead.isApproved ? 'bg-zinc-100 text-zinc-400' : 'bg-black text-white hover:bg-zinc-800'}`}
-                      >
-                        {loading === 'approve' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />} {selectedLead.isApproved ? 'Approved' : 'Approve'}
-                      </button>
+                  </form>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full gap-6 text-center">
+                    <div className="w-16 h-16 bg-zinc-50 rounded-[28px] flex items-center justify-center border border-zinc-100 shadow-sm">
+                      <Loader2 className="w-8 h-8 animate-spin text-black" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-black uppercase tracking-widest">AI Drafting in Progress</h3>
+                      <p className="text-xs text-zinc-400 font-medium mt-2">Please hold while we synthesize your strategy...</p>
                     </div>
                   </div>
-                </form>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-64 border-2 border-dashed border-brand-border rounded-2xl bg-brand-surface p-6 text-center">
-                  <p className="text-brand-muted mb-4 text-sm font-medium">AI is drafting this email...</p>
-                  <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full text-brand-muted text-sm font-medium">Select a lead from the list to review.</div>
+            <div className="flex flex-col items-center justify-center h-full gap-4 text-center opacity-40">
+              <Sparkles className="w-12 h-12 text-zinc-200" />
+              <p className="text-sm font-black text-zinc-300 uppercase tracking-widest">Select a lead to begin review</p>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Fixed bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 lg:left-auto lg:right-auto lg:relative h-auto min-h-[64px] bg-white border-t border-brand-border flex flex-col sm:flex-row items-center justify-center gap-4 py-4 sm:py-0 px-4 z-20">
-        <Link href={`/campaigns/${campaign.id}/launch`} className="w-full sm:w-auto bg-black hover:bg-zinc-800 text-white px-8 py-3 rounded-xl font-bold transition-colors inline-flex items-center justify-center gap-2 text-sm shadow-sm">
-          Launch Campaign <ArrowRight className="w-4 h-4" />
-        </Link>
-        <span className="text-brand-muted text-xs font-medium">{leads.filter(l => l.isApproved).length} approved · {leads.length - leads.filter(l => l.isApproved).length} pending</span>
-      </div>
-
-      {/* Modal Backdrop */}
+      {/* 3. Global Modals */}
       {modal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-brand-border animate-in fade-in zoom-in duration-200">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-black">
-                  {modal.type === 'regenerate' ? 'Regenerate with AI' : 'Send Test Email'}
-                </h3>
-                <button onClick={() => setModal(null)} className="text-zinc-400 hover:text-black transition-colors">
+        <div className="fixed inset-0 bg-zinc-950/20 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-lg rounded-[32px] shadow-2xl overflow-hidden border border-zinc-200 animate-in zoom-in-95 duration-300">
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <h3 className="text-xl font-black text-black tracking-tight">
+                    {modal.type === 'regenerate' ? 'Redirect Intelligence' : 'Send Test Execution'}
+                  </h3>
+                  <p className="text-xs text-zinc-500 font-medium mt-1">Provide final instructions before processing</p>
+                </div>
+                <button onClick={() => setModal(null)} className="p-2 bg-zinc-50 text-zinc-400 hover:text-black rounded-full border border-zinc-100 transition-all">
                   <X className="w-5 h-5" />
                 </button>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {modal.type === 'regenerate' ? (
                   <>
-                    <p className="text-sm text-brand-muted leading-relaxed">
-                      Tell the AI how to improve this draft. You can ask for tone changes, different length, or to focus on specific points.
-                    </p>
-                    <div className="bg-brand-surface p-3 rounded-lg border border-brand-border">
-                      <p className="text-[10px] font-bold text-brand-muted uppercase mb-1.5">Suggestions</p>
+                    <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+                      <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest mb-3">Suggested Adjustments</p>
                       <div className="flex flex-wrap gap-2">
-                        {['Make it shorter', 'Be more professional', 'More aggressive CTA', 'Add more empathy'].map(s => (
+                        {['Make it shorter', 'Be more professional', 'More aggressive CTA', 'Increase empathy'].map(s => (
                           <button 
                             key={s} 
                             onClick={() => handleRegenerate(s)}
-                            className="bg-white border border-brand-border hover:border-black text-[10px] font-medium px-2 py-1 rounded transition-colors"
+                            className="bg-white border border-emerald-200 hover:border-black text-[10px] font-black uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95"
                           >
                             {s}
                           </button>
                         ))}
                       </div>
                     </div>
-                    <textarea 
-                      autoFocus
-                      placeholder="e.g. Focus more on the automation aspect..."
-                      className="w-full bg-brand-surface border border-brand-border rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black min-h-[100px]"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          handleRegenerate(e.currentTarget.value);
-                        }
-                      }}
-                    />
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Custom Feedback</label>
+                       <textarea 
+                          autoFocus
+                          placeholder="e.g. Focus more on our recent case study..."
+                          className="w-full bg-zinc-50 border border-zinc-200 rounded-[20px] px-6 py-4 text-sm font-medium text-black focus:border-black focus:bg-white outline-none min-h-[120px] transition-all"
+                       />
+                    </div>
                   </>
                 ) : (
-                  <>
-                    <p className="text-sm text-brand-muted">
-                      Where should we send this test email?
-                    </p>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Destination Email</label>
                     <input 
                       type="email"
                       autoFocus
-                      placeholder="your-email@example.com"
-                      className="w-full bg-brand-surface border border-brand-border rounded-xl px-4 py-3 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          handleSendTest(e.currentTarget.value);
-                        }
-                      }}
+                      placeholder="e.g. founder@company.com"
+                      className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-6 py-4 text-sm font-medium text-black focus:border-black focus:bg-white outline-none transition-all"
                     />
-                  </>
+                  </div>
                 )}
               </div>
 
-              <div className="mt-8 flex gap-3">
+              <div className="mt-10 flex gap-4">
                 <button 
                   onClick={() => setModal(null)}
-                  className="flex-1 bg-white border border-brand-border hover:bg-zinc-50 text-black py-2.5 rounded-xl font-bold transition-colors text-sm"
+                  className="flex-1 px-6 py-4 bg-white text-zinc-600 rounded-2xl font-black text-xs uppercase tracking-widest border border-zinc-200 hover:border-black transition-all"
                 >
                   Cancel
                 </button>
@@ -306,9 +365,9 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                     if (modal.type === 'regenerate') handleRegenerate(input.value);
                     else handleSendTest(input.value);
                   }}
-                  className="flex-1 bg-black hover:bg-zinc-800 text-white py-2.5 rounded-xl font-bold transition-colors text-sm"
+                  className="flex-1 px-6 py-4 bg-black text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-800 shadow-xl shadow-black/10 transition-all active:scale-95"
                 >
-                  {modal.type === 'regenerate' ? 'Generate' : 'Send Test'}
+                  {modal.type === 'regenerate' ? 'Regenerate Now' : 'Send Test Now'}
                 </button>
               </div>
             </div>
@@ -316,5 +375,13 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
         </div>
       )}
     </div>
+  );
+}
+
+function EditIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+    </svg>
   );
 }

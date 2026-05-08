@@ -19,10 +19,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
   const sentCount = leads.filter(l => l.sent).length;
   const openedCount = leads.filter(l => l.opened).length;
   const repliedCount = leads.filter(l => l.replied).length;
-  
+
   const openRate = sentCount > 0 ? Math.round((openedCount / sentCount) * 100) : 0;
   const replyRate = sentCount > 0 ? Math.round((repliedCount / sentCount) * 100) : 0;
-  
+
   const hotLeads = leads.filter(l => l.status === "hot" || l.replied).slice(0, 5);
   const hotCount = hotLeads.length;
 
@@ -31,9 +31,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-black">{campaign.name || 'Untitled'}</h1>
-          <span className={`px-2.5 py-1 rounded-md text-xs font-bold border capitalize ${
-            campaign.status === 'active' ? 'bg-[#eef8ed] text-[#2b6528] border-[#b2ddab]' : 'bg-zinc-100 text-zinc-600 border-zinc-200'
-          }`}>
+          <span className={`px-2.5 py-1 rounded-md text-xs font-bold border capitalize ${campaign.status === 'active' ? 'bg-[#eef8ed] text-[#2b6528] border-[#b2ddab]' : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+            }`}>
             {campaign.status}
           </span>
         </div>
@@ -84,7 +83,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                 <div className="h-2.5 bg-[#e0dcd1] rounded-full" style={{ width: '100%' }}></div>
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between text-sm font-semibold text-black mb-1.5">
                 <span>Opened</span>
@@ -132,9 +131,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className={`px-2 py-0.5 rounded text-xs font-bold border ${
-                    lead.replied ? 'bg-[#eef8ed] text-[#2b6528] border-[#b2ddab]' : 'bg-orange-50 text-orange-700 border-orange-200'
-                  }`}>
+                  <span className={`px-2 py-0.5 rounded text-xs font-bold border ${lead.replied ? 'bg-[#eef8ed] text-[#2b6528] border-[#b2ddab]' : 'bg-orange-50 text-orange-700 border-orange-200'
+                    }`}>
                     {lead.replied ? 'Replied' : 'Opened'}
                   </span>
                   <Link href={`/leads/${lead.id}`} className="bg-black text-white px-3 py-1.5 rounded-lg text-xs font-bold flex items-center hover:bg-zinc-800 transition shadow-sm">
