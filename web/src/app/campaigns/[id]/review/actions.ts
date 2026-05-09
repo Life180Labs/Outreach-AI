@@ -79,6 +79,26 @@ export async function approveLeadAction(
   }
 }
 
+export async function approveAllLeadsAction(
+  campaignId: string
+): Promise<ActionResult<{ count: number }>> {
+  try {
+    const result = await prisma.lead.updateMany({
+      where: {
+        campaignId,
+        isApproved: false,
+        emailSubject: { not: null },
+      },
+      data: { isApproved: true },
+    });
+    revalidatePath(`/campaigns/${campaignId}/review`);
+    return { success: true, data: { count: result.count } };
+  } catch (error) {
+    console.error("[approveAllLeads]", error);
+    return { success: false, error: "Failed to approve all leads" };
+  }
+}
+
 export async function regenerateDraftAction(
   leadId: string,
   campaignId: string,
@@ -120,16 +140,19 @@ export async function sendTestAction(
 
     const { transporter, from } = await getTransporterFromSettings();
 
+    // Use shared branded email template with Life180 Labs signature
+    const { formatEmailHTML } = await import("@/lib/email-signature");
+    const html = formatEmailHTML(lead.emailBody || "");
+
     await transporter.sendMail({
       from,
       to: testEmail,
       subject: `[TEST] ${lead.emailSubject}`,
       text: lead.emailBody!,
-      html: `<div style="font-family:sans-serif">${lead.emailBody?.replace(
-        /\n/g,
-        "<br>"
-      )}</div>`,
+      html,
     });
+
+
 
     return { success: true, data: undefined };
   } catch (error) {

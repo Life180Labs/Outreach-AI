@@ -87,12 +87,10 @@ export const sendEmailSequence = inngest.createFunction(
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const trackingUrl = `${appUrl}/api/track/open/${lead.id}`;
 
-        const htmlBody = `
-          <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
-            ${lead.emailBody!.replace(/\n/g, "<br>")}
-          </div>
-          <img src="${trackingUrl}" width="1" height="1" style="display:none !important;" />
-        `;
+        const { formatEmailHTML } = await import("@/lib/email-signature");
+        const htmlBody = formatEmailHTML(lead.emailBody!) +
+          `<img src="${trackingUrl}" width="1" height="1" style="display:none !important;" />`;
+
 
         await transporter.sendMail({
           from,

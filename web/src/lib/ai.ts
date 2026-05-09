@@ -35,8 +35,11 @@ export async function generateEmailDraft(
     draft = await generateWithGemini(lead, campaign, settings.geminiApiKey, userFeedback);
   }
 
+  const signature = `\n\nBest regards,\n\nGTM Team | Life180 Labs\nhello@life180labs.com\n📞 +91 98765 43210`;
+
   return {
     ...draft,
+    body: draft.body.includes("Best regards") ? draft.body : draft.body + signature,
     rationale: `[${settings.aiProvider || 'gemini'}] ${draft.rationale}`,
   };
 }
@@ -46,23 +49,30 @@ function getPrompts(lead: Lead, campaign: Campaign | null, userFeedback: string 
 Your goal is to write hyper-personalized, high-converting outreach emails.
 
 CRITICAL FORMATTING RULES:
-1. STRUCTURE: Every email MUST follow this structure:
-   - Salutation: "Hi [First Name],"
-   - Opening Hook: Mention a specific detail from the "Lead Notes" or their company background immediately.
-   - The Value: Connect our business profile to their specific problem.
-   - The Ask: A clear, low-friction call to action (e.g., "Would you be open to a 10-minute chat?").
-   - Sign-off: "Best regards," (do not include a name, user will add it).
+1. STRUCTURE: Every email MUST follow this exact structure with proper paragraph breaks:
+   - Line 1: "Hi [First Name]," followed by a blank line.
+   - Paragraph 1 (Opening Hook): Mention a specific detail from the "Lead Notes" or their company background. End with a blank line.
+   - Paragraph 2 (The Value): Connect our business profile to their specific need. End with a blank line.
+   - Paragraph 3 (The Ask): A clear, low-friction CTA (e.g., "Would you be open to a quick 10-minute chat next week?"). End with a blank line.
+   - Sign-off block (ALWAYS include exactly this):
+     "Best regards,"
+     (blank line after)
 
-2. STYLE:
+2. FORMATTING:
+   - Use "\\n\\n" between paragraphs for clear visual separation.
+   - Each paragraph should be 1-2 sentences max.
+   - The body must be well-structured and easy to scan.
+
+3. STYLE:
    - NO generic templates.
    - NO fluff like "I hope this email finds you well" or "I'm reaching out because".
    - NO corporate jargon (leverage, synergy, etc.).
-   - LENGTH: Under 100 words.
+   - LENGTH: 60-100 words.
 
 Return your response in pure JSON format exactly like this:
 {
   "subject": "Curiosity-driven, specific subject line (max 6 words)",
-  "body": "Full professional email body following the structure above",
+  "body": "Full professional email body with proper paragraph breaks using \\n\\n",
   "rationale": "Strategic reason why this specific approach was used for this lead"
 }`;
 

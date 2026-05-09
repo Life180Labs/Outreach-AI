@@ -97,12 +97,14 @@ export async function sendReplyAction(
     if (!lead) return { success: false, error: "Lead not found" };
 
     const { transporter, from } = await getTransporterFromSettings();
+    const { formatEmailHTML } = await import("@/lib/email-signature");
 
     await transporter.sendMail({
       from,
       to: lead.email,
       subject: `Re: ${lead.emailSubject || "Quick question"}`,
       text: content,
+      html: formatEmailHTML(content),
     });
 
     const updatedLead = await prisma.lead.update({

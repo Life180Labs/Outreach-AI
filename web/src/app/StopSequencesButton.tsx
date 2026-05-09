@@ -41,17 +41,17 @@ export function StopSequencesButton({ variant = "card" }: { variant?: "card" | "
           </div>
           <div>
             <p className="text-sm font-semibold text-red-900">Stop All Sequences</p>
-            <p className="text-xs text-red-400 mt-0.5">Pauses all active outreach immediately</p>
+            <p className="text-xs text-red-600 mt-0.5">Pauses all active outreach immediately</p>
           </div>
         </button>
       ) : (
         <button
           onClick={() => setShowModal(true)}
-          className="h-9 px-3.5 bg-red-50 border border-red-100 hover:bg-red-100 text-red-600 rounded-lg text-xs font-semibold transition-colors flex items-center gap-2 shadow-sm"
+          className="h-9 px-5 bg-red-50 border border-red-200 hover:bg-red-100 text-red-600 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
           title="Emergency Stop All"
         >
           <OctagonX className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Stop All</span>
+          Stop All
         </button>
       )}
 

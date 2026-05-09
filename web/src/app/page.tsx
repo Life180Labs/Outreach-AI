@@ -24,7 +24,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-black tracking-tight">Dashboard</h1>
-        <p className="text-zinc-400 text-sm mt-1">Overview of your outreach performance</p>
+        <p className="text-blue-600 text-sm mt-1">Overview of your outreach performance</p>
       </div>
 
       {/* Bento Grid — Row 1: Stats */}
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-black">New Campaign</p>
-            <p className="text-xs text-zinc-400 mt-0.5">Upload leads, configure AI, and launch</p>
+            <p className="text-xs text-blue-600/70 mt-0.5">Upload leads, configure AI, and launch</p>
           </div>
         </Link>
 
@@ -61,7 +61,7 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-black">Resume Campaign</p>
-            <p className="text-xs text-zinc-400 mt-0.5 truncate">
+            <p className="text-xs text-blue-600/70 mt-0.5 truncate">
               {lastCampaign?.name || "No recent campaigns"}
             </p>
           </div>
@@ -100,7 +100,7 @@ export default async function DashboardPage() {
                   <div className="flex items-start justify-between mb-5">
                     <div className="min-w-0">
                       <h3 className="text-sm font-semibold text-black truncate">{c.name || "Untitled"}</h3>
-                      <p className="text-xs text-zinc-400 mt-0.5">{c._count.leads} leads · {c.status}</p>
+                      <p className="text-xs text-blue-600/70 mt-0.5">{c._count.leads} leads · {c.status}</p>
                     </div>
                     <div className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${c.status === "active" ? "bg-emerald-500" : c.status === "draft" ? "bg-amber-400" : "bg-zinc-300"}`} />
                   </div>
@@ -136,7 +136,7 @@ function StatCard({ label, value, icon: Icon, accent }: { label: string; value: 
         <Icon className={`w-4 h-4 ${accent || "text-zinc-400"}`} />
       </div>
       <p className={`text-2xl font-semibold tabular-nums ${accent || "text-black"}`}>{value}</p>
-      <p className="text-xs text-zinc-400 mt-0.5">{label}</p>
+      <p className="text-xs text-blue-600 font-medium mt-0.5">{label}</p>
     </div>
   );
 }
