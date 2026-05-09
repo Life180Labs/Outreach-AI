@@ -78,11 +78,34 @@ export const sendEmailSequence = inngest.createFunction(
       return { error: "Missing campaign or sending configuration" };
     }
 
+    // Create a single transporter pool for the entire campaign to reuse connections
+    const transporter = createTransporter(settings as Settings);
+    const from = getSenderAddress(settings as Settings);
+
+    // Verify connection once before starting the loop to catch auth/host errors early
+    try {
+      await transporter.verify();
+    } catch (verifyError) {
+      console.error("[SMTP Verify Failed]", verifyError);
+      return { error: "SMTP connection failed. Check your settings." };
+    }
+
     for (const lead of campaign.leads) {
       // Deterministic step ID
       await step.run(`send-email-${lead.id}`, async () => {
-        const transporter = createTransporter(settings as Settings);
-        const from = getSenderAddress(settings as Settings);
+        // Re-fetch lead status
+        const currentLead = await prisma.lead.findUnique({
+          where: { id: lead.id },
+          select: { sent: true }
+        });
+
+        if (currentLead?.sent) return { skipped: true, reason: "Already sent" };
+
+        // Mark as 'Processing' in UI by updating timestamp
+        await prisma.lead.update({
+          where: { id: lead.id },
+          data: { updatedAt: new Date() }
+        });
 
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
         const trackingUrl = `${appUrl}/api/track/open/${lead.id}`;
@@ -91,19 +114,34 @@ export const sendEmailSequence = inngest.createFunction(
         const htmlBody = formatEmailHTML(lead.emailBody!) +
           `<img src="${trackingUrl}" width="1" height="1" style="display:none !important;" />`;
 
+        try {
+          // Send mail relying on the transporter's own timeouts
+          const info = await transporter.sendMail({
+            from,
+            to: lead.email,
+            subject: lead.emailSubject!,
+            html: htmlBody,
+            text: lead.emailBody!,
+          });
 
-        await transporter.sendMail({
-          from,
-          to: lead.email,
-          subject: lead.emailSubject!,
-          html: htmlBody,
-          text: lead.emailBody!,
-        });
-
-        await prisma.lead.update({
-          where: { id: lead.id },
-          data: { sent: true },
-        });
+          await prisma.lead.update({
+            where: { id: lead.id },
+            data: { 
+              sent: true,
+              messages: {
+                create: {
+                  role: "USER",
+                  content: lead.emailBody!,
+                  messageId: info.messageId,
+                }
+              }
+            },
+          });
+        } catch (mailError: any) {
+          console.error(`[sendMail Error] Lead: ${lead.email}`, mailError);
+          // If we hit a timeout, throw to retry. Idempotency check above prevents duplicates.
+          throw mailError;
+        }
       });
     }
 
@@ -173,7 +211,7 @@ export const checkInboxForReplies = inngest.createFunction(
             { replied: true, messages: { none: { role: "LEAD" } } },
           ],
         },
-        select: { email: true, id: true },
+        select: { email: true, id: true, emailSubject: true, messages: true },
       });
 
       for (const lead of activeLeads) {
@@ -181,7 +219,18 @@ export const checkInboxForReplies = inngest.createFunction(
         if (Array.isArray(messageUids) && messageUids.length > 0) {
           const lastUid = messageUids[messageUids.length - 1];
           const msg = await client.fetchOne(lastUid, { source: true, envelope: true });
-          if (msg && msg.source) {
+          
+          if (msg && msg.source && msg.envelope) {
+            // Verify this email is related to our campaign thread
+            const cleanSubject = lead.emailSubject ? lead.emailSubject.replace(/^(re:\s*|fwd:\s*)+/i, '').trim().toLowerCase() : "";
+            const incomingSubject = msg.envelope?.subject ? msg.envelope.subject.toLowerCase() : "";
+            const isRelatedBySubject = cleanSubject && incomingSubject.includes(cleanSubject);
+            const isInReplyToUs = msg.envelope?.inReplyTo && lead.messages.some(m => m.messageId === msg.envelope?.inReplyTo);
+
+            if (!isRelatedBySubject && !isInReplyToUs) {
+               continue; // Skip unrelated emails
+            }
+
             const content =
               msg.source.toString().split("\r\n\r\n")[1] ||
               "Reply received (Content could not be parsed)";

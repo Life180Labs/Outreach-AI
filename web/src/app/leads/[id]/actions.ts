@@ -135,7 +135,7 @@ export async function syncLeadInboxAction(
   try {
     const lead = await prisma.lead.findUnique({
       where: { id: leadId },
-      include: { campaign: true },
+      include: { campaign: true, messages: true },
     });
     const settings = await prisma.settings.findUnique({
       where: { id: "global" },
@@ -155,15 +155,21 @@ export async function syncLeadInboxAction(
       },
       logger: false,
       emitLogs: false,
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
     });
 
     let newMessageCount = 0;
 
     try {
-      await client.connect();
+      // Use a timeout for the entire connection process
+      await Promise.race([
+        client.connect(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Connection timeout")), 15000))
+      ]);
     } catch (connectError) {
       console.error("[syncInbox] IMAP connect failed:", connectError);
-      return { success: false, error: "Could not connect to inbox. Check SMTP/IMAP settings." };
+      return { success: false, error: "Inbox connection timed out. Please check your settings." };
     }
 
     const lock = await client.getMailboxLock("INBOX");
@@ -177,6 +183,17 @@ export async function syncLeadInboxAction(
           if (!msg || !msg.source) continue;
 
           const messageId = msg.envelope?.messageId;
+          
+          // Verify this email is related to our campaign thread
+          const cleanSubject = lead.emailSubject ? lead.emailSubject.replace(/^(re:\s*|fwd:\s*)+/i, '').trim().toLowerCase() : "";
+          const incomingSubject = msg.envelope?.subject ? msg.envelope.subject.toLowerCase() : "";
+          const isRelatedBySubject = cleanSubject && incomingSubject.includes(cleanSubject);
+          const isInReplyToUs = msg.envelope?.inReplyTo && lead.messages.some(m => m.messageId === msg.envelope.inReplyTo);
+
+          if (!isRelatedBySubject && !isInReplyToUs) {
+             continue; // Skip unrelated emails
+          }
+
           let content = msg.source.toString();
 
           // Deduplicate by messageId if available

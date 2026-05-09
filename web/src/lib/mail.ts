@@ -33,10 +33,17 @@ export function createTransporter(settings: MailSettings): Transporter {
       user: settings.smtpUser || settings.gmailEmailAddress || "",
       pass: settings.smtpPass || settings.gmailRefreshToken || "",
     },
-    connectionTimeout: 10000,
-    greetingTimeout: 5000,
-    socketTimeout: 10000,
-    tls: { rejectUnauthorized: false },
+    // Use a single connection pool for Gmail/SMTP stability
+    pool: true,
+    maxConnections: 1, 
+    maxMessages: 100,
+    connectionTimeout: 30000, // 30s connection timeout
+    greetingTimeout: 30000,   // 30s greeting timeout
+    socketTimeout: 60000,     // 60s socket timeout
+    debug: true,
+    tls: { 
+      rejectUnauthorized: false,
+    },
   });
 }
 

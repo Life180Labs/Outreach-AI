@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Plus, RotateCcw, OctagonX, BarChart3, Users, Send, Flame } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { StopSequencesButton } from "./StopSequencesButton";
+import { CampaignsClient } from "./campaigns/CampaignsClient";
 
 export default async function DashboardPage() {
   const campaigns = await prisma.campaign.findMany({
@@ -79,49 +80,14 @@ export default async function DashboardPage() {
             View all →
           </Link>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div>
           {campaigns.length === 0 ? (
             <div className="col-span-full py-16 border border-dashed border-zinc-200 rounded-2xl flex flex-col items-center justify-center text-zinc-400 gap-2">
               <BarChart3 className="w-6 h-6 opacity-30" />
               <p className="text-sm">No campaigns yet</p>
             </div>
           ) : (
-            campaigns.map((c) => {
-              const sentCount = c.leads.filter((l) => l.sent).length;
-              const hotCount = c.leads.filter((l) => l.status === "Hot" || l.status === "hot").length;
-              const progress = c._count.leads > 0 ? Math.round((sentCount / c._count.leads) * 100) : 0;
-
-              return (
-                <Link
-                  key={c.id}
-                  href={c.status === "draft" ? `/campaigns/${c.id}/setup` : `/campaigns/${c.id}`}
-                  className="group p-5 rounded-2xl border border-zinc-200 bg-white hover:border-zinc-400 transition-all"
-                >
-                  <div className="flex items-start justify-between mb-5">
-                    <div className="min-w-0">
-                      <h3 className="text-sm font-semibold text-black truncate">{c.name || "Untitled"}</h3>
-                      <p className="text-xs text-blue-600/70 mt-0.5">{c._count.leads} leads · {c.status}</p>
-                    </div>
-                    <div className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${c.status === "active" ? "bg-emerald-500" : c.status === "draft" ? "bg-amber-400" : "bg-zinc-300"}`} />
-                  </div>
-
-                  <div className="mb-4">
-                    <div className="w-full bg-zinc-100 rounded-full h-1.5 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-700 ${c.status === "completed" ? "bg-emerald-500" : "bg-black"}`}
-                        style={{ width: `${c.status === "completed" ? 100 : progress}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-xs text-zinc-500">
-                    <span><span className="font-semibold text-black">{sentCount}</span> sent</span>
-                    <span><span className="font-semibold text-emerald-600">{hotCount}</span> hot</span>
-                    <ArrowRight className="w-3.5 h-3.5 ml-auto text-zinc-300 group-hover:text-black transition-colors" />
-                  </div>
-                </Link>
-              );
-            })
+            <CampaignsClient campaigns={campaigns} />
           )}
         </div>
       </div>

@@ -16,6 +16,7 @@ import {
   X,
   Download,
   Users,
+  AlertTriangle,
 } from "lucide-react";
 import {
   deleteLeadAction,
@@ -49,7 +50,7 @@ const LeadRow = memo(function LeadRow({
       <td className="px-4 py-4">
         <button
           onClick={() => onSelect(lead.id)}
-          className="text-zinc-300 hover:text-black transition-colors"
+          className="text-zinc-400 hover:text-black transition-colors"
           aria-label={`Select ${lead.firstName} ${lead.lastName}`}
         >
           {selected ? <CheckSquare className="w-4 h-4 text-black" /> : <Square className="w-4 h-4" />}
@@ -57,18 +58,18 @@ const LeadRow = memo(function LeadRow({
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-[11px] font-semibold text-zinc-500">
+          <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-[11px] font-semibold text-zinc-700">
             {lead.firstName[0]}{lead.lastName?.[0] || ""}
           </div>
           <div>
             <p className="text-sm font-medium text-black">{lead.firstName} {lead.lastName}</p>
-            <p className="text-xs text-zinc-400">{lead.email}</p>
+            <p className="text-xs text-zinc-600">{lead.email}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-4">
         <p className="text-sm text-black">{lead.companyName}</p>
-        <p className="text-xs text-zinc-400">{lead.jobTitle || "—"}</p>
+        <p className="text-xs text-zinc-600">{lead.jobTitle || "—"}</p>
       </td>
       <td className="px-4 py-4">
         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium ${
@@ -76,19 +77,19 @@ const LeadRow = memo(function LeadRow({
             ? "bg-emerald-50 text-emerald-700"
             : lead.opened
             ? "bg-amber-50 text-amber-700"
-            : "bg-zinc-100 text-zinc-500"
+            : "bg-zinc-100 text-zinc-600"
         }`}>
           <div className={`w-1.5 h-1.5 rounded-full ${
-            lead.replied ? "bg-emerald-500" : lead.opened ? "bg-amber-500" : "bg-zinc-400"
+            lead.replied ? "bg-emerald-500" : lead.opened ? "bg-amber-500" : "bg-zinc-500"
           }`} />
           {lead.replied ? "Replied" : lead.opened ? "Opened" : "Cold"}
         </span>
       </td>
       <td className="px-4 py-4">
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-zinc-600">
           {lead.replied ? "Replied" : lead.opened ? "Opened" : lead.sent ? "Sent" : "Pending"}
         </p>
-        <p className="text-[11px] text-zinc-400 mt-0.5">
+        <p className="text-[11px] text-zinc-500 mt-0.5">
           {new Date(lead.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </p>
       </td>
@@ -96,21 +97,21 @@ const LeadRow = memo(function LeadRow({
         <div className="flex items-center gap-1">
           <button
             onClick={() => onEdit(lead)}
-            className="p-1.5 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
+            className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
             aria-label={`Edit ${lead.firstName}`}
           >
             <Edit className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onPause(lead.id, !lead.isPaused)}
-            className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" : "text-zinc-400 hover:text-black hover:bg-zinc-100"}`}
+            className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" : "text-zinc-500 hover:text-black hover:bg-zinc-100"}`}
             aria-label={lead.isPaused ? "Resume sequence" : "Pause sequence"}
           >
             {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
           </button>
           <Link
             href={`/leads/${lead.id}`}
-            className="p-1.5 text-zinc-400 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
+            className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
             aria-label={`View ${lead.firstName}`}
           >
             <ExternalLink className="w-3.5 h-3.5" />
@@ -118,7 +119,7 @@ const LeadRow = memo(function LeadRow({
           <button
             onClick={() => onDelete(lead.id)}
             disabled={loading}
-            className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50"
+            className="p-1.5 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50"
             aria-label={`Delete ${lead.firstName}`}
           >
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -207,6 +208,7 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [showBulkMenu, setShowBulkMenu] = useState(false);
+  const [modalState, setModalState] = useState<{ isOpen: boolean; type: 'single' | 'bulk'; id?: string }>({ isOpen: false, type: 'single' });
   const router = useRouter();
 
   // Sync state with server-side filtered data
@@ -215,23 +217,31 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
     setSelectedIds([]); // Clear selection when filter changes
   }, [initialLeads]);
 
-  const handleDelete = useCallback(async (id: string) => {
-    if (!confirm("Delete this lead?")) return;
-    setLoading(id);
-    const result = await deleteLeadAction(id);
-    setLoading(null);
-    if (result.success) setLeads(prev => prev.filter(l => l.id !== id));
+  const handleDelete = useCallback((id: string) => {
+    setModalState({ isOpen: true, type: 'single', id });
   }, []);
 
-  const handleBulkDelete = async () => {
-    if (!confirm(`Delete ${selectedIds.length} leads?`)) return;
-    setLoading("bulk");
-    const result = await bulkDeleteLeadsAction(selectedIds);
-    if (result.success) {
-      setLeads(prev => prev.filter(l => !selectedIds.includes(l.id)));
-      setSelectedIds([]);
+  const handleBulkDeleteClick = () => {
+    setModalState({ isOpen: true, type: 'bulk' });
+  };
+
+  const confirmDelete = async () => {
+    if (modalState.type === 'single' && modalState.id) {
+      const id = modalState.id;
+      setLoading(id);
+      const result = await deleteLeadAction(id);
+      setLoading(null);
+      if (result.success) setLeads(prev => prev.filter(l => l.id !== id));
+    } else if (modalState.type === 'bulk') {
+      setLoading("bulk");
+      const result = await bulkDeleteLeadsAction(selectedIds);
+      if (result.success) {
+        setLeads(prev => prev.filter(l => !selectedIds.includes(l.id)));
+        setSelectedIds([]);
+      }
+      setLoading(null);
     }
-    setLoading(null);
+    setModalState({ isOpen: false, type: 'single' });
   };
 
   const toggleSelect = useCallback((id: string) => {
@@ -288,7 +298,48 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
   };
 
   return (
-    <div className="space-y-4">
+    <>
+      {modalState.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl border border-zinc-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-black">
+                    {modalState.type === 'bulk' ? `Delete ${selectedIds.length} Leads?` : "Delete Lead?"}
+                  </h3>
+                  <p className="text-sm text-zinc-600 mt-1">
+                    This action cannot be undone. This will permanently delete the lead and all associated messages.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-zinc-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-zinc-200">
+              <button
+                onClick={() => setModalState({ isOpen: false, type: 'single' })}
+                disabled={!!loading}
+                className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={!!loading}
+                style={{ backgroundColor: "#dc2626", color: "#ffffff" }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+              >
+                {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                Delete {modalState.type === 'bulk' ? 'All' : ''}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4">
       {/* Bulk toolbar */}
       {selectedIds.length > 0 && (
         <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900 text-white rounded-xl">
@@ -311,7 +362,7 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
           <button onClick={handleExport} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors">
             <Download className="w-3.5 h-3.5" /> Export
           </button>
-          <button onClick={handleBulkDelete} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors text-red-300 hover:text-red-200 ml-auto">
+          <button onClick={handleBulkDeleteClick} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors text-red-300 hover:text-red-200 ml-auto">
             <Trash2 className="w-3.5 h-3.5" /> Delete
           </button>
         </div>
@@ -322,25 +373,25 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
         <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           <table className="w-full text-left min-w-[800px]">
             <thead>
-              <tr className="border-b border-zinc-100">
+              <tr className="border-b border-zinc-200 bg-zinc-50">
                 <th className="px-4 py-3 w-10">
-                  <button onClick={toggleSelectAll} className="text-zinc-300 hover:text-black transition-colors" aria-label="Select all">
+                  <button onClick={toggleSelectAll} className="text-zinc-500 hover:text-black transition-colors" aria-label="Select all">
                     {selectedIds.length === leads.length && leads.length > 0 ? <CheckSquare className="w-4 h-4 text-black" /> : <Square className="w-4 h-4" />}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-xs font-medium text-zinc-400">Contact</th>
-                <th className="px-4 py-3 text-xs font-medium text-zinc-400">Company</th>
-                <th className="px-4 py-3 text-xs font-medium text-zinc-400">Status</th>
-                <th className="px-4 py-3 text-xs font-medium text-zinc-400">Activity</th>
-                <th className="px-4 py-3 text-xs font-medium text-zinc-400">Actions</th>
+                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Contact</th>
+                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Company</th>
+                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Status</th>
+                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Activity</th>
+                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {leads.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center">
-                    <Users className="w-8 h-8 text-zinc-200 mx-auto mb-2" />
-                    <p className="text-sm text-zinc-400">No leads found</p>
+                    <Users className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
+                    <p className="text-sm text-zinc-500">No leads found</p>
                   </td>
                 </tr>
               ) : (
@@ -365,7 +416,7 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
       {/* Export button when no selection */}
       {selectedIds.length === 0 && leads.length > 0 && (
         <div className="flex justify-end">
-          <button onClick={handleExport} className="text-xs font-medium text-zinc-500 hover:text-black flex items-center gap-1.5 transition-colors">
+          <button onClick={handleExport} className="text-xs font-medium text-zinc-600 hover:text-black flex items-center gap-1.5 transition-colors">
             <Download className="w-3.5 h-3.5" /> Export CSV
           </button>
         </div>
@@ -375,5 +426,6 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
         <EditLeadModal lead={editingLead} loading={loading === "edit"} onSave={handleEditSave} onClose={() => setEditingLead(null)} />
       )}
     </div>
+    </>
   );
 }

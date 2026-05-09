@@ -2,6 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import { 
   getLeadsAction, 
   saveDraftAction, 
@@ -346,26 +350,20 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                     </div>
                     <div className="flex-1 flex flex-col min-h-0">
                       <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest mb-1.5 block">Message</label>
-                      <textarea 
-                        name="body" 
-                        value={editBody}
-                        onChange={(e) => setEditBody(e.target.value)}
-                        className="w-full bg-white border border-zinc-200 rounded-t-xl px-4 py-4 text-sm text-zinc-700 leading-relaxed focus:outline-none focus:border-zinc-400 transition-colors resize-none border-b-0"
-                        style={{ minHeight: '250px' }}
-                      />
-                      {/* Branded Signature Preview */}
-                      <div className="bg-zinc-50/50 border border-zinc-200 border-t-0 rounded-b-xl p-4 flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-white border border-zinc-200 overflow-hidden shrink-0 shadow-sm flex items-center justify-center">
-                          <img src="/logo-life180.png" alt="Life180 Labs" className="w-10 h-10 object-contain" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-black leading-tight">GTM Team Life180 Labs</p>
-                          <div className="mt-2 space-y-0.5 text-[11px] text-zinc-400">
-                            <p>hello@life180labs.com</p>
-                            <p>📞 +91 98765 43210</p>
-                            <p className="font-bold text-zinc-500 text-[9px] uppercase tracking-wider pt-1">AI FOR OPERATORS</p>
-                          </div>
-                        </div>
+                      <div className="w-full bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400 [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-editor]:min-h-[300px] [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed">
+                        <ReactQuill 
+                          theme="snow" 
+                          value={editBody} 
+                          onChange={setEditBody}
+                          modules={{
+                            toolbar: [
+                              ['bold', 'italic', 'underline', 'strike'],
+                              [{ list: 'ordered' }, { list: 'bullet' }],
+                              ['link', 'image'],
+                              ['clean']
+                            ]
+                          }}
+                        />
                       </div>
                     </div>
                   </div>

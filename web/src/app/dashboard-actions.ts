@@ -97,15 +97,19 @@ export async function syncCampaignInboxAction(
 
     const { syncLeadInboxAction } = await import("./leads/[id]/actions");
 
-    let synced = 0;
-    for (const lead of leads) {
-      try {
-        const result = await syncLeadInboxAction(lead.id);
-        if (result.success && result.data.newMessages > 0) synced++;
-      } catch (e) {
-        console.error(`[syncCampaignInbox] Failed for ${lead.email}`, e);
-      }
-    }
+    const results = await Promise.all(
+      leads.map(async (lead) => {
+        try {
+          const result = await syncLeadInboxAction(lead.id);
+          return result.success && result.data.newMessages > 0;
+        } catch (e) {
+          console.error(`[syncCampaignInbox] Failed for ${lead.email}`, e);
+          return false;
+        }
+      })
+    );
+
+    const synced = results.filter(Boolean).length;
 
     revalidatePath(`/campaigns/${campaignId}`);
     return { success: true, data: { synced } };
@@ -114,3 +118,28 @@ export async function syncCampaignInboxAction(
     return { success: false, error: "Failed to sync campaign inbox" };
   }
 }
+
+export async function deleteCampaignAction(id: string): Promise<ActionResult> {
+  try {
+    await prisma.campaign.delete({ where: { id } });
+    revalidatePath("/");
+    revalidatePath("/campaigns");
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("[deleteCampaign]", error);
+    return { success: false, error: "Failed to delete campaign" };
+  }
+}
+
+export async function bulkDeleteCampaignsAction(ids: string[]): Promise<ActionResult> {
+  try {
+    await prisma.campaign.deleteMany({ where: { id: { in: ids } } });
+    revalidatePath("/");
+    revalidatePath("/campaigns");
+    return { success: true, data: undefined };
+  } catch (error) {
+    console.error("[bulkDeleteCampaigns]", error);
+    return { success: false, error: "Failed to delete campaigns" };
+  }
+}
+

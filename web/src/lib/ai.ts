@@ -35,11 +35,8 @@ export async function generateEmailDraft(
     draft = await generateWithGemini(lead, campaign, settings.geminiApiKey, userFeedback);
   }
 
-  const signature = `\n\nBest regards,\n\nGTM Team | Life180 Labs\nhello@life180labs.com\n📞 +91 98765 43210`;
-
   return {
     ...draft,
-    body: draft.body.includes("Best regards") ? draft.body : draft.body + signature,
     rationale: `[${settings.aiProvider || 'gemini'}] ${draft.rationale}`,
   };
 }
