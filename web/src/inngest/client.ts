@@ -2,6 +2,5 @@ import { Inngest } from "inngest";
 
 export const inngest = new Inngest({ 
   id: "outreach-ai",
-  eventKey: process.env.INNGEST_EVENT_KEY || "local",
-  env: process.env.NODE_ENV === "production" ? "production" : undefined
+  eventKey: process.env.INNGEST_EVENT_KEY,
 });
