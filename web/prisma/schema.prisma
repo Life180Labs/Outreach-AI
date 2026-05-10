@@ -15,6 +15,7 @@ model Campaign {
   status    String         @default("draft")
   tone      String?
   cta       String?
+  senderName String?        @default("The Life180 Team")
   context          String?
   businessType     String?
   locationContext  String?

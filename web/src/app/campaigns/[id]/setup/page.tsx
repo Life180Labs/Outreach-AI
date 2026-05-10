@@ -52,6 +52,17 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                     className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors" 
                   />
                 </div>
+
+                <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-1 block">AI Author / Sender Name</label>
+                  <input 
+                    type="text"
+                    name="senderName"
+                    defaultValue={campaign.senderName || "The Life180 Team"}
+                    placeholder="e.g. Your Name or 'GTM Team'"
+                    className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors" 
+                  />
+                </div>
                 
                 <div>
                   <label className="text-xs font-medium text-zinc-500 mb-1 block">Context for AI <span className="font-normal opacity-50">(anchors personalization)</span></label>

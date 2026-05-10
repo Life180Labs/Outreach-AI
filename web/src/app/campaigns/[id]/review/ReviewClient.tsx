@@ -72,7 +72,22 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
   useEffect(() => {
     if (selectedLead) {
       setEditSubject(selectedLead.emailSubject || "");
-      setEditBody(selectedLead.emailBody || "");
+      
+      // Convert plain text to HTML for ReactQuill if it's not already HTML
+      let body = selectedLead.emailBody || "";
+      if (body && !body.includes('<p>') && !body.includes('<br>')) {
+        // Ensure "Hi [Name]," is followed by a break
+        body = body.replace(/^(Hi\s+[^,]+,)\s*/i, '$1\n\n');
+        
+        // ReactQuill removes margins from <p> tags. 
+        // To show a visual blank line, we must insert <p><br></p> between paragraphs.
+        body = body
+          .split(/\n\n+/)
+          .filter(p => p.trim())
+          .map(p => `<p>${p.trim().replace(/\n/g, '<br>')}</p>`)
+          .join('<p><br></p>');
+      }
+      setEditBody(body);
     }
   }, [selectedLeadId, selectedLead?.emailSubject, selectedLead?.emailBody]);
 
@@ -202,7 +217,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6" style={{ height: 'calc(100vh - 260px)', minHeight: '500px' }}>
+      <div className="flex flex-col lg:flex-row gap-6" style={{ height: 'calc(100vh - 220px)', minHeight: '650px' }}>
         
         {/* Left: Queue (4/12) */}
         <div className="flex-1 lg:w-[33.33%] lg:max-w-[33.33%] flex flex-col rounded-2xl border border-zinc-200 bg-white overflow-hidden">
@@ -349,37 +364,49 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                       />
                     </div>
                     <div className="flex-1 flex flex-col min-h-0">
-                      <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest mb-1.5 block">Message</label>
-                      <div className="w-full bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400 [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-editor]:min-h-[300px] [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed">
-                        <ReactQuill 
-                          theme="snow" 
-                          value={editBody} 
-                          onChange={setEditBody}
-                          modules={{
-                            toolbar: [
-                              ['bold', 'italic', 'underline', 'strike'],
-                              [{ list: 'ordered' }, { list: 'bullet' }],
-                              ['link', 'image'],
-                              ['clean']
-                            ]
-                          }}
-                        />
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Message Body</label>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-100 rounded text-[10px] font-medium text-zinc-500">
+                          <Check className="w-3 h-3 text-emerald-500" />
+                          Signature will be auto-added
+                        </div>
+                      </div>
+                      <div className="flex-1 min-h-[400px] bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400">
+                        <div className="h-full flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
+                          <ReactQuill 
+                            theme="snow" 
+                            value={editBody} 
+                            onChange={setEditBody}
+                            modules={{
+                              toolbar: [
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ list: 'ordered' }, { list: 'bullet' }],
+                                ['link', 'image'],
+                                ['clean']
+                              ]
+                            }}
+                            className="h-full flex flex-col"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Fixed footer: rationale + save button — always visible */}
-                  <div className="px-6 py-4 border-t border-zinc-100 flex items-center justify-between shrink-0 bg-white">
-                    <div className="flex items-center gap-1.5 min-w-0 flex-1 mr-4">
-                      <Zap className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                      <p className="text-[10px] font-medium text-blue-600 uppercase tracking-tight truncate break-words">
-                        {selectedLead.aiRationale || 'Drafted by Outreach AI'}
+                  <div className="px-6 py-4 border-t border-zinc-100 flex items-center justify-between shrink-0 bg-zinc-50/50">
+                    <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded-md shrink-0">
+                        <Zap className="w-3 h-3 text-blue-600" />
+                        <span className="text-[10px] font-bold text-blue-700 uppercase tracking-tight">AI Strategy</span>
+                      </div>
+                      <p className="text-[11px] font-medium text-zinc-500 italic line-clamp-2">
+                        "{selectedLead.aiRationale || 'Highly personalized based on lead notes'}"
                       </p>
                     </div>
                     <button 
                       type="submit" 
                       disabled={loading === 'save'} 
-                      className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-xs font-medium transition-all flex items-center gap-2 shrink-0 shadow-sm"
+                      className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 shadow-sm hover:shadow-md active:scale-[0.98]"
                     >
                       {loading === 'save' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                       Save Changes

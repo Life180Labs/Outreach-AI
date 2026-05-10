@@ -42,62 +42,61 @@ export async function generateEmailDraft(
 }
 
 function getPrompts(lead: Lead, campaign: Campaign | null, userFeedback: string = "") {
+  // Ensure the name is formatted properly for the prompt instructions
+  const firstName = lead.firstName 
+    ? lead.firstName.charAt(0).toUpperCase() + lead.firstName.slice(1).toLowerCase() 
+    : "there";
+
   const systemPrompt = `You are a world-class B2B cold email copywriter. 
-Your goal is to write hyper-personalized, high-converting outreach emails.
+Your goal is to write hyper-personalized, high-converting outreach emails that feel 100% human and 0% automated.
 
 CRITICAL FORMATTING RULES:
-1. STRUCTURE: Every email MUST follow this exact structure with proper paragraph breaks:
-   - Line 1: "Hi [First Name]," followed by a blank line.
-   - Paragraph 1 (Opening Hook): Mention a specific detail from the "Lead Notes" or their company background. End with a blank line.
-   - Paragraph 2 (The Value): Connect our business profile to their specific need. End with a blank line.
-   - Paragraph 3 (The Ask): A clear, low-friction CTA (e.g., "Would you be open to a quick 10-minute chat next week?"). End with a blank line.
-   - Sign-off block (ALWAYS include exactly this):
-     "Best regards,"
-     (blank line after)
+1. STRUCTURE: Every section MUST be separated by EXACTLY TWO newlines ("\\n\\n"):
+   - SECTION 1: "Hi ${firstName},"
+   - SECTION 2: Opening Hook (Personalized based on Lead Notes).
+   - SECTION 3: The Value (Connection to our business).
+   - SECTION 4: The Ask (Low-friction CTA).
+   - SECTION 5: Sign-off ("Best regards,\\n${campaign?.senderName || 'The Life180 Team'}").
 
 2. FORMATTING:
-   - Use "\\n\\n" between paragraphs for clear visual separation.
-   - Each paragraph should be 1-2 sentences max.
-   - The body must be well-structured and easy to scan.
+   - YOU MUST USE "\\n\\n" between every section listed above.
+   - Paragraphs MUST be 1-2 sentences max. Total body should be under 100 words.
+   - NO placeholders like "[Name]". Use the data or skip.
 
-3. STYLE:
-   - NO generic templates.
-   - NO fluff like "I hope this email finds you well" or "I'm reaching out because".
-   - NO corporate jargon (leverage, synergy, etc.).
-   - LENGTH: 60-100 words.
+3. STYLE & TONE (THE "HUMAN" CHECK):
+   - USE THE REQUESTED TONE: ${campaign?.tone || 'Professional'}.
+   - NO "I hope this email finds you well" or "I'm reaching out to".
+   - NO "leveraging", "synergy", "cutting-edge", or "robust".
+   - Speak like a helpful person, not a marketing department.
+   - Use natural transitions.
 
-Return your response in pure JSON format exactly like this:
+Return your response in pure JSON format:
 {
-  "subject": "Curiosity-driven, specific subject line (max 6 words)",
-  "body": "Full professional email body with proper paragraph breaks using \\n\\n",
-  "rationale": "Strategic reason why this specific approach was used for this lead"
+  "subject": "Short, curiosity-driven subject line (no emojis, <6 words)",
+  "body": "The full email body starting from 'Hi ${firstName},' and ending with the sign-off.",
+  "rationale": "One sentence explaining why this hook works for this lead"
 }`;
 
-  const userPrompt = `Lead ID: ${lead.id}
-Lead Email: ${lead.email}
+  const userPrompt = `Lead Name: ${lead.firstName} ${lead.lastName}
+Lead Company: ${lead.companyName}
+Lead Title: ${lead.jobTitle}
+Lead Notes: ${lead.notes || 'No specific notes'}
 
---- INDIVIDUAL LEAD DATA (PRIORITY) ---
-Name: ${lead.firstName} ${lead.lastName}
-Company: ${lead.companyName}
-Title: ${lead.jobTitle}
-Specific Lead Notes: ${lead.notes || 'No specific notes provided for this lead'}
-Individual Sector/Type: ${lead.sector || 'Unknown'}
-Individual Location: ${lead.city ? lead.city + ', ' + (lead.country || '') : 'Unknown'}
+--- CAMPAIGN STRATEGY ---
+Our Business Context: ${campaign?.businessType || 'B2B Services'}
+Our Goal: ${campaign?.context || 'Start a conversation'}
+Desired Tone: ${campaign?.tone || 'Professional'}
+Call to Action (CTA): ${campaign?.cta || 'Book a call'}
+Sender Name: ${campaign?.senderName || 'The Life180 Team'}
 
---- GLOBAL CAMPAIGN CONTEXT (BACKGROUND) ---
-Our Business Profile: ${campaign?.businessType || ''}
-Overall Campaign Goal: ${campaign?.context || ''}
-General Location Focus: ${campaign?.locationContext || ''}
+${userFeedback ? `REVISION FEEDBACK: ${userFeedback}` : ''}
 
-${userFeedback ? `--- SPECIAL REVISION INSTRUCTION ---
-${userFeedback}` : ''}
-
---- TASK ---
-Write a highly personalized, 1-to-1 email to this specific individual. 
-- Use the "Specific Lead Notes" as your primary anchor for personalization.
-- If the "Lead Notes" mention a specific problem or interest, you MUST address it.
-- Do NOT use generic templates. Every email must feel unique to this specific person.
-- Output JSON ONLY.`;
+TASK:
+Write the email now. 
+1. Use the "Lead Notes" as the primary anchor for personalization.
+2. Ensure the tone is ${campaign?.tone || 'Professional'}.
+3. The email MUST end with the sign-off: "Best regards, ${campaign?.senderName || 'The Life180 Team'}".
+Output JSON ONLY.`;
 
   return { systemPrompt, userPrompt };
 }

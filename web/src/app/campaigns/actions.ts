@@ -57,6 +57,7 @@ export async function updateCampaignSetup(formData: FormData) {
       name: formData.get("campaignName") as string,
       tone: formData.get("tone") as string,
       cta: formData.get("cta") as string,
+      senderName: formData.get("senderName") as string,
       context: formData.get("context") as string,
       businessType: formData.get("businessType") as string,
       locationContext: formData.get("locationContext") as string,

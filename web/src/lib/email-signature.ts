@@ -3,27 +3,48 @@
  * The signature is added here to ensure all emails have it by default.
  */
 export function formatEmailHTML(body: string): string {
-  let innerHtml = body || "";
+  if (!body) return "";
   
+  let innerHtml = body.trim();
+  
+  // Normalize newlines to \n
+  innerHtml = innerHtml.replace(/\r\n/g, "\n");
+
   // Basic check if it's already HTML (e.g. from Rich Text Editor)
-  if (!innerHtml.trim().startsWith('<') && !innerHtml.includes('</p>')) {
+  // If it starts with <p, <div, or contains common HTML tags, we assume it's HTML
+  const isHtml = /<[a-z][\s\S]*>/i.test(innerHtml) || innerHtml.includes('</p>');
+
+  if (!isHtml) {
     innerHtml = innerHtml
       .split(/\n\n+/)
       .filter(p => p.trim())
-      .map(p => `<p style="margin:0 0 14px 0;line-height:1.6">${p.replace(/\n/g, "<br>")}</p>`)
+      .map(p => `<p style="margin:0 0 16px 0; line-height:1.6; color:#374151;">${p.replace(/\n/g, "<br>")}</p>`)
       .join("");
   }
 
   const signatureHtml = `
-    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e4e4e7;">
-      <p style="margin:0;font-weight:700;font-size:15px;color:#18181b;">GTM Team | Life180 Labs</p>
-      <div style="margin:8px 0 0 0;font-size:12px;color:#71717a;">
-        <p style="margin:0;"><a href="mailto:hello@life180labs.com" style="color:#0ea5e9;text-decoration:none;">hello@life180labs.com</a></p>
-        <p style="margin:4px 0 0 0;">📞 +91 98765 43210</p>
+    <div style="margin-top:32px; padding-top:20px; border-top:1px solid #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <table border="0" cellpadding="0" cellspacing="0" role="presentation">
+        <tr>
+          <td style="vertical-align: top; padding-right: 12px;">
+            <div style="width: 3px; height: 40px; background-color: #000000; border-radius: 2px;"></div>
+          </td>
+          <td>
+            <p style="margin:0; font-weight:700; font-size:15px; color:#111827; letter-spacing:-0.01em;">GTM Team</p>
+            <p style="margin:2px 0 0 0; font-size:13px; font-weight:500; color:#6b7280;">Life180 Labs</p>
+          </td>
+        </tr>
+      </table>
+      <div style="margin-top:12px; font-size:12px; color:#9ca3af;">
+        <p style="margin:0;">
+          <a href="mailto:hello@life180labs.com" style="color:#2563eb; text-decoration:none; font-weight:500;">hello@life180labs.com</a>
+          <span style="margin:0 8px; color:#e5e7eb;">|</span>
+          <span>+91 98765 43210</span>
+        </p>
       </div>
     </div>`;
 
-  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#18181b;max-width:600px">
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; color:#1f2937; max-width:600px; margin:0 auto; line-height:1.6;">
     ${innerHtml}
     ${signatureHtml}
   </div>`;
