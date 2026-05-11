@@ -11,6 +11,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
     include: { _count: { select: { leads: true } } }
   });
   const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+  const strategies = await prisma.strategy.findMany({ orderBy: { name: 'asc' } });
 
   if (!campaign) return <div className="p-8 text-center text-zinc-400">Campaign not found</div>;
 
@@ -121,6 +122,20 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
               </div>
 
               <div className="space-y-6">
+                <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-2 block">AI Outreach Strategy</label>
+                  <select 
+                    name="strategyId"
+                    defaultValue={campaign.strategyId || ""}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors cursor-pointer"
+                  >
+                    <option value="">Global Default</option>
+                    {strategies.map(s => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-zinc-400 mt-2 italic">Select a proven strategy from the Prompt Engineering Studio</p>
+                </div>
                 <div>
                   <label className="text-xs font-medium text-zinc-500 mb-3 block">Tone</label>
                   <div className="flex flex-wrap gap-2">

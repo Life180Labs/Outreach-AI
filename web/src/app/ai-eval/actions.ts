@@ -110,10 +110,36 @@ Return ONLY a JSON object with the improved fields:
   }
 }
 
+export async function saveAsNewStrategyAction(name: string, data: any) {
+  try {
+    const strategy = await prisma.strategy.create({
+      data: {
+        name,
+        role: data.role,
+        product: data.product,
+        persona: data.persona,
+        painPoint: data.painPoint,
+        socialProof: data.socialProof,
+        tone: data.tone,
+        cta: data.cta,
+      }
+    });
+    revalidatePath("/ai-eval");
+    return { success: true, data: strategy };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getInitialDataAction() {
   const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+  const strategies = await prisma.strategy.findMany({
+    orderBy: { createdAt: "desc" }
+  });
+
   return { 
     basePrompt: settings?.basePrompt || "",
+    strategies,
     structured: {
       role: settings?.promptRole || "",
       product: settings?.promptProduct || "",

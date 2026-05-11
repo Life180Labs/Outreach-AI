@@ -44,7 +44,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
   const [testEmail, setTestEmail] = useState("");
   const [showTestInput, setShowTestInput] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
+  const [viewMode, setViewMode] = useState<'edit'>('edit');
   
   // Controlled form fields — ensures regenerated content updates immediately
   const [editSubject, setEditSubject] = useState("");
@@ -78,11 +78,18 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
       // Convert plain text to HTML for ReactQuill if it's not already HTML
       let body = selectedLead.emailBody || "";
       if (body && !body.includes('<p>') && !body.includes('<br>')) {
-        // Ensure "Hi [Name]," is followed by a break
-        body = body.replace(/^(Hi\s+[^,]+,)\s*/i, '$1\n\n');
+        // 1. Normalize greeting - Ensure "Hi [Name]," is capitalized and has breaks
+        body = body.trim().replace(/^(hi)\s+/i, 'Hi ');
         
-        // ReactQuill removes margins from <p> tags. 
-        // To show a visual blank line, we must insert <p><br></p> between paragraphs.
+        // 2. Ensure greeting has proper spacing
+        if (!body.includes('\n\n')) {
+          body = body.replace(/^(Hi\s+[^,]+,)\s*/i, '$1\n\n');
+        }
+
+        // 3. Fix capitalization of first letter after greeting or breaks
+        body = body.replace(/([.!?\n]\s*)([a-z])/g, (match, p1, p2) => p1 + p2.toUpperCase());
+        
+        // 4. Wrap paragraphs
         body = body
           .split(/\n\n+/)
           .filter(p => p.trim())
@@ -369,89 +376,24 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                       <div className="flex-1 flex flex-col min-h-[400px]">
                         <div className="flex items-center justify-between mb-2">
                           <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Message Content</label>
-                          <div className="flex bg-zinc-100 p-1 rounded-lg">
-                            <button 
-                              type="button"
-                              onClick={() => setViewMode('edit')}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold transition-all ${viewMode === 'edit' ? 'bg-white text-black shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-                            >
-                              <Edit3 className="w-3 h-3" />
-                              EDITOR
-                            </button>
-                            <button 
-                              type="button"
-                              onClick={() => setViewMode('preview')}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold transition-all ${viewMode === 'preview' ? 'bg-white text-black shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
-                            >
-                              <Eye className="w-3 h-3" />
-                              PREVIEW
-                            </button>
-                          </div>
                         </div>
 
                         <div className="flex-1 bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400 flex flex-col">
-                          {viewMode === 'edit' ? (
-                            <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
-                              <ReactQuill 
-                                theme="snow" 
-                                value={editBody} 
-                                onChange={setEditBody}
-                                modules={{
-                                  toolbar: [
-                                    ['bold', 'italic', 'underline', 'strike'],
-                                    [{ list: 'ordered' }, { list: 'bullet' }],
-                                    ['link', 'clean']
-                                  ]
-                                }}
-                                className="h-full flex flex-col"
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex-1 overflow-y-auto bg-white border border-zinc-200 rounded-xl flex flex-col">
-                              {/* Match Editor Header Height/Style */}
-                              <div className="h-[42px] bg-zinc-50/50 border-b border-zinc-200 px-4 flex items-center shrink-0">
-                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Client Preview</span>
-                              </div>
-                              <div className="flex-1 overflow-y-auto bg-zinc-50/20 p-4 sm:p-8">
-                                <div className="max-w-[600px] mx-auto bg-white shadow-sm border border-zinc-200 rounded-2xl overflow-hidden text-left font-sans antialiased" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
-                                  <div className="p-8 sm:p-10">
-                                    <div 
-                                      className="text-[15px] text-[#1f2937] leading-[1.6]"
-                                      dangerouslySetInnerHTML={{ 
-                                        // Robust stripping for existing drafts
-                                        __html: editBody.replace(/(?:<p>)?\s*(?:Best regards|Sincerely|Best|Cheers|Kind regards),?\s*(?:<br\/?>|<\/p>)?\s*(?:<strong>)?(?:The Life180 Team|Anirban|Ghosh)?(?:<\/strong>)?(?:<\/p>)?\s*$/i, "").trim()
-                                      }}
-                                    />
-                                    
-                                    {/* Unified Professional Signature - Exact same as lib/mail.ts */}
-                                    <div className="mt-8 pt-6 border-t border-[#f3f4f6]">
-                                      <p className="m-0 mb-5 text-[#374151] text-[15px] leading-normal">Best regards,<br/><strong>{campaign.senderName || 'The Life180 Team'}</strong></p>
-                                      <table border={0} cellPadding={0} cellSpacing={0} role="presentation">
-                                        <tbody>
-                                          <tr>
-                                            <td className="align-top pr-3">
-                                              <div className="w-[3px] h-10 bg-black rounded-sm" />
-                                            </td>
-                                            <td>
-                                              <p className="m-0 font-bold text-[15px] text-[#111827] tracking-tight">GTM Team</p>
-                                              <p className="m-0 mt-0.5 text-[13px] font-medium text-[#6b7280]">Life180 Labs</p>
-                                            </td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
-                                      <div className="mt-3 text-[12px] text-[#9ca3af]">
-                                        <p className="m-0">
-                                          <span className="text-[#2563eb] font-medium">hello@life180labs.com</span>
-                                          <span className="mx-2 text-[#e5e7eb]">|</span>
-                                          <span>+91 98765 43210</span>
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                          <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
+                            <ReactQuill 
+                              theme="snow" 
+                              value={editBody} 
+                              onChange={setEditBody}
+                              modules={{
+                                toolbar: [
+                                  ['bold', 'italic', 'underline', 'strike'],
+                                  [{ list: 'ordered' }, { list: 'bullet' }],
+                                  ['link', 'clean']
+                                ]
+                              }}
+                              className="h-full flex flex-col"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>

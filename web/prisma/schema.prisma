@@ -30,6 +30,10 @@ model Campaign {
   // Link to specific accounts if needed in future
   aiProviderId     String?
   smtpAccountId    String?
+
+  // Strategy Link
+  strategyId    String?
+  strategy      Strategy?  @relation(fields: [strategyId], references: [id])
 }
 
 model Lead {
@@ -125,6 +129,22 @@ model Settings {
 
   // New multi-account relations
   accounts             Account[]
+}
+
+model Strategy {
+  id           String   @id @default(cuid())
+  name         String
+  role         String?
+  product      String?
+  persona      String?
+  painPoint    String?
+  socialProof  String?
+  tone         String?
+  cta          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  campaigns    Campaign[]
 }
 
 model Account {

@@ -20,7 +20,7 @@ export const generateDraftsBatch = inngest.createFunction(
     const campaign = await step.run("fetch-campaign", async () => {
       return await prisma.campaign.findUnique({
         where: { id: campaignId },
-        include: { leads: true },
+        include: { leads: true, strategy: true },
       });
     });
 

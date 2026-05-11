@@ -55,6 +55,7 @@ export async function updateCampaignSetup(formData: FormData) {
     where: { id },
     data: {
       name: formData.get("campaignName") as string,
+      strategyId: formData.get("strategyId") as string || null,
       tone: formData.get("tone") as string,
       cta: formData.get("cta") as string,
       senderName: formData.get("senderName") as string,

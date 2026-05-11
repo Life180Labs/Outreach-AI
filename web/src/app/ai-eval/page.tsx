@@ -2,13 +2,18 @@
 
 import { useState, useEffect } from "react";
 import { Zap, Loader2, Check, AlertCircle, Play, ShieldCheck, Search, Sparkles, Save, FileText, Target, Info, Layers, UserCircle, Briefcase, HelpCircle, Layout } from "lucide-react";
-import { runEvaluationAction, saveStructuredPromptAction, getInitialDataAction, refineStructuredPromptAction } from "./actions";
+import { runEvaluationAction, saveStructuredPromptAction, getInitialDataAction, refineStructuredPromptAction, saveAsNewStrategyAction } from "./actions";
 
 export default function AiEvalPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [refining, setRefining] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [strategies, setStrategies] = useState<any[]>([]);
+  const [activeStrategyId, setActiveStrategyId] = useState<string | null>(null);
+  const [showSaveNameModal, setShowSaveNameModal] = useState(false);
+  const [newStrategyName, setNewStrategyName] = useState("");
+  
   const [result, setResult] = useState<{ score: number; feedback: string; draft: string; subject?: string; rationale?: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'structured' | 'preview'>('structured');
 
@@ -26,6 +31,7 @@ export default function AiEvalPage() {
   useEffect(() => {
     async function load() {
       const data = await getInitialDataAction();
+      setStrategies(data.strategies || []);
       if (data.structured) {
         setForm(prev => ({
           ...prev,
@@ -41,6 +47,23 @@ export default function AiEvalPage() {
     }
     load();
   }, []);
+
+  const handleSaveNewStrategy = async () => {
+    if (!newStrategyName.trim()) return;
+    setSaving(true);
+    const res = await saveAsNewStrategyAction(newStrategyName, form);
+    if (res.success && res.data) {
+      setStrategies([(res as any).data, ...strategies]);
+      setActiveStrategyId((res as any).data.id);
+      setShowSaveNameModal(false);
+      setNewStrategyName("");
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } else {
+      alert("Error: " + (res as any).error);
+    }
+    setSaving(false);
+  };
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -69,10 +92,10 @@ Output Format:
   const handleTest = async () => {
     setLoading(true);
     const res = await runEvaluationAction(builtPrompt, form.testNotes);
-    if (res.success) {
-      setResult(res.data);
+    if (res.success && res.data) {
+      setResult(res.data as any);
     } else {
-      alert("Error: " + res.error);
+      alert("Error: " + (res as any).error);
     }
     setLoading(false);
   };
@@ -91,7 +114,7 @@ Output Format:
     if (!result?.feedback) return;
     setRefining(true);
     const res = await refineStructuredPromptAction(form, result.feedback);
-    if (res.success) {
+    if (res.success && res.data) {
       setForm(prev => ({
         ...prev,
         ...res.data
@@ -99,7 +122,7 @@ Output Format:
       // Clear results so user can test the new prompt
       setResult(null);
     } else {
-      alert("Refinement failed: " + res.error);
+      alert("Refinement failed: " + (res as any).error);
     }
     setRefining(false);
   };
@@ -122,6 +145,55 @@ Output Format:
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
           {saved ? "STRATEGY SAVED" : "SAVE TO ALL CAMPAIGNS"}
         </button>
+      </div>
+
+      {/* Strategy Library */}
+      <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex items-center gap-4 flex-1 min-w-0">
+          <div className="bg-white p-2 rounded-lg border border-zinc-200">
+            <Layout className="w-5 h-5 text-zinc-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Active Strategy</p>
+            <select 
+              value={activeStrategyId || ""}
+              onChange={(e) => {
+                const id = e.target.value;
+                setActiveStrategyId(id);
+                if (id) {
+                  const s = strategies.find(x => x.id === id);
+                  if (s) {
+                    setForm({
+                      role: s.role || "",
+                      product: s.product || "",
+                      persona: s.persona || "",
+                      painPoint: s.painPoint || "",
+                      socialProof: s.socialProof || "",
+                      tone: s.tone || "",
+                      cta: s.cta || "",
+                      testNotes: form.testNotes
+                    });
+                  }
+                }
+              }}
+              className="bg-transparent border-none text-sm font-semibold text-black focus:outline-none p-0 w-full"
+            >
+              <option value="">Default (Global Settings)</option>
+              {strategies.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => setShowSaveNameModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 text-zinc-600 rounded-lg text-[11px] font-bold hover:text-black hover:border-zinc-400 transition-all"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            SAVE AS NEW STRATEGY
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
@@ -357,6 +429,50 @@ Output Format:
           )}
         </div>
       </div>
+
+      {/* Save Strategy Modal */}
+      {showSaveNameModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            <div className="p-6 border-b border-zinc-100">
+              <h3 className="text-lg font-bold text-black flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-emerald-500" />
+                Save as New Strategy
+              </h3>
+              <p className="text-zinc-500 text-sm mt-1">Give this strategy a name to identify it across all campaigns.</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5 block">Strategy Name</label>
+                <input 
+                  autoFocus
+                  type="text"
+                  value={newStrategyName}
+                  onChange={(e) => setNewStrategyName(e.target.value)}
+                  placeholder="e.g. Q3 Tech Sales Strategy"
+                  className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-zinc-400 transition-all"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveNewStrategy()}
+                />
+              </div>
+            </div>
+            <div className="p-6 bg-zinc-50 flex items-center justify-end gap-3">
+              <button 
+                onClick={() => setShowSaveNameModal(false)}
+                className="px-4 py-2 text-zinc-500 hover:text-black text-sm font-semibold transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleSaveNewStrategy}
+                disabled={saving || !newStrategyName.trim()}
+                className="px-6 py-2 bg-black text-white rounded-xl text-sm font-bold hover:bg-zinc-800 transition-all disabled:opacity-50"
+              >
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save Strategy"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

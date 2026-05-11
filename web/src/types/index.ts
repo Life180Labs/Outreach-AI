@@ -9,6 +9,8 @@ export type Campaign = Prisma.CampaignGetPayload<{}>;
 export type Message = Prisma.MessageGetPayload<{}>;
 
 export type Settings = Prisma.SettingsGetPayload<{}>;
+export type Strategy = Prisma.StrategyGetPayload<{}>;
+export type CampaignWithStrategy = Prisma.CampaignGetPayload<{ include: { strategy: true } }>;
 
 // ─── Composite Types (with relations) ───
 
