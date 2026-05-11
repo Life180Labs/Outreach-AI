@@ -118,13 +118,22 @@ export function CampaignsClient({ campaigns }: { campaigns: any[] }) {
             const hotCount = c.leads?.filter((l: any) => l.status === "hot" || l.status === "Hot").length || 0;
             const totalLeads = c._count?.leads || 0;
             const progress = totalLeads > 0 ? Math.round((sentCount / totalLeads) * 100) : 0;
+            const hasErrors = c._count?.errors > 0;
             const isSelected = selectedIds.includes(c.id);
 
             return (
               <div
                 key={c.id}
-                className={`group relative p-5 rounded-2xl border transition-all ${
-                  isSelected ? 'border-blue-600 bg-blue-50/30' : 'border-zinc-300 bg-white hover:border-zinc-500'
+                className={`group relative p-5 rounded-2xl border-2 transition-all ${
+                  isSelected 
+                    ? 'border-blue-600 bg-blue-50/50 shadow-lg' 
+                    : hasErrors
+                      ? 'border-red-100 bg-red-50/30 hover:border-red-300'
+                      : c.status === 'active' 
+                        ? 'border-emerald-100 bg-emerald-50/30 hover:border-emerald-300' 
+                        : c.status === 'draft'
+                          ? 'border-amber-100 bg-amber-50/30 hover:border-amber-300'
+                          : 'border-zinc-200 bg-zinc-50/30 hover:border-zinc-400'
                 }`}
               >
                 {/* Select & Delete Overlay */}
@@ -174,9 +183,11 @@ export function CampaignsClient({ campaigns }: { campaigns: any[] }) {
                       <span>Progress</span>
                       <span className="text-zinc-800">{progress}%</span>
                     </div>
-                    <div className="w-full bg-zinc-200 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden border border-zinc-200">
                       <div
-                        className={`h-full rounded-full transition-all duration-700 ${c.status === "completed" ? "bg-emerald-500" : "bg-blue-600"}`}
+                        className={`h-full rounded-full transition-all duration-700 ${
+                          hasErrors ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]" : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"
+                        }`}
                         style={{ width: `${c.status === "completed" ? 100 : progress}%` }}
                       />
                     </div>

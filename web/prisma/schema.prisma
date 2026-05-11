@@ -10,22 +10,26 @@ datasource db {
 
 
 model Campaign {
-  id        String         @id @default(cuid())
-  name      String?
-  status    String         @default("draft")
-  tone      String?
-  cta       String?
-  senderName String?        @default("The Life180 Team")
+  id               String            @id @default(cuid())
+  name             String?
+  status           String            @default("draft")
+  tone             String?
+  cta              String?
+  senderName       String?           @default("The Life180 Team")
   context          String?
   businessType     String?
   locationContext  String?
-  followup1Delay   Int            @default(3)
-  followup2Delay   Int            @default(7)
-  createdAt        DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  followup1Delay   Int               @default(3)
+  followup2Delay   Int               @default(7)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
-  leads     Lead[]
-  errors    LeadUploadError[]
+  leads            Lead[]
+  errors           LeadUploadError[]
+  
+  // Link to specific accounts if needed in future
+  aiProviderId     String?
+  smtpAccountId    String?
 }
 
 model Lead {
@@ -91,15 +95,15 @@ model LeadUploadError {
 
 model Settings {
   id                   String @id @default("global")
-  gmailAccessToken     String?
-  gmailRefreshToken    String?
+  
+  // Legacy fields (kept for backward compatibility during migration)
   gmailEmailAddress    String?
+  gmailRefreshToken    String?
   geminiApiKey         String?
   groqApiKey           String?
   openaiApiKey         String?
   claudeApiKey         String?
   aiProvider           String  @default("gemini")
-  
   smtpHost             String?
   smtpPort             Int?
   smtpUser             String?
@@ -108,4 +112,25 @@ model Settings {
   
   maxEmailsPerHour     Int @default(50)
   followupDelayOptions String @default("1,3,5,7,10,14")
+
+  // New multi-account relations
+  accounts             Account[]
 }
+
+model Account {
+  id          String   @id @default(cuid())
+  settingsId  String   @default("global")
+  settings    Settings @relation(fields: [settingsId], references: [id])
+  
+  type        String   // "SMTP", "GMAIL", "AI"
+  name        String   // Friendly name for the account
+  provider    String   // "gemini", "groq", "openai", "claude" or "custom"
+  
+  // Config stored as JSON
+  config      String   // JSON string of keys, host, port, etc.
+  
+  isActive    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

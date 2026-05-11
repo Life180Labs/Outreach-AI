@@ -44,7 +44,7 @@ export function formatEmailHTML(body: string, senderName: string = "The Life180 
       </div>
     </div>`;
 
-  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; color:#1f2937; max-width:600px; margin:0 auto; line-height:1.6;">
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; font-size:15px; color:#1f2937; max-width:600px; margin:0; line-height:1.6; padding: 32px; border: 1px solid #e5e7eb; border-radius: 16px; background-color: #ffffff;">
     ${innerHtml}
     ${signatureHtml}
   </div>`;

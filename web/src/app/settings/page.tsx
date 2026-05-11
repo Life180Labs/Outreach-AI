@@ -2,7 +2,10 @@ import prisma from "@/lib/prisma";
 import { SettingsClient } from "./SettingsClient";
 
 export default async function SettingsPage() {
-  const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+  const settings = await prisma.settings.findUnique({ 
+    where: { id: "global" },
+    include: { accounts: { orderBy: { createdAt: 'desc' } } }
+  });
 
   return (
     <div className="w-full space-y-6">

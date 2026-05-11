@@ -143,11 +143,16 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 }
 
 function StatCard({ label, value, icon: Icon, color, bg, border }: any) {
+  const isGreen = color?.includes("emerald");
+  
   return (
-    <div className={`p-5 rounded-2xl border ${border || 'border-zinc-200'} ${bg || 'bg-white'}`}>
-      <Icon className={`w-4 h-4 ${color || 'text-zinc-400'} mb-3`} />
-      <p className={`text-2xl font-semibold tabular-nums ${color || 'text-black'}`}>{value}</p>
-      <p className="text-[11px] font-medium text-blue-600 uppercase tracking-wide mt-1">{label}</p>
+    <div className={`p-5 rounded-2xl border-2 transition-all ${
+      isGreen ? "bg-emerald-50/50 border-emerald-100" : 
+      bg || "bg-zinc-50/50 border-zinc-100"
+    }`}>
+      <Icon className={`w-5 h-5 ${color || 'text-zinc-400'} mb-3`} />
+      <p className={`text-3xl font-bold tabular-nums ${color || 'text-black'}`}>{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mt-1">{label}</p>
     </div>
   );
 }
@@ -156,13 +161,13 @@ function FunnelStep({ label, value, total, color, activeColor }: any) {
   const percent = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div>
-      <div className="flex justify-between text-xs font-medium text-zinc-500 mb-2">
+      <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">
         <span>{label}</span>
-        <span className="text-black font-semibold">{value} <span className="text-zinc-300 font-normal ml-1">({percent}%)</span></span>
+        <span className="text-black">{value} <span className="text-zinc-300 font-normal ml-1">({percent}%)</span></span>
       </div>
-      <div className={`w-full ${color} rounded-full h-2 overflow-hidden`}>
+      <div className="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden border border-zinc-200">
         <div 
-          className={`h-full ${activeColor || 'bg-zinc-900'} rounded-full transition-all duration-1000`} 
+          className="h-full bg-emerald-500 rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(16,185,129,0.3)]" 
           style={{ width: `${percent}%` }} 
         />
       </div>

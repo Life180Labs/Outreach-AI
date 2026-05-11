@@ -81,6 +81,7 @@ export function AppShell({
             <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
               <NavLink href="/campaigns" icon={LayoutDashboard}>Campaigns</NavLink>
               <NavLink href="/leads" icon={Users}>Leads</NavLink>
+              <NavLink href="/ai-eval" icon={Zap}>AI Eval</NavLink>
             </nav>
           </div>
 
@@ -121,6 +122,14 @@ export function AppShell({
 
       <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 sm:px-6 py-8">
         {children}
+        <footer className="mt-16 pt-8 border-t border-zinc-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-zinc-400 font-medium">
+          <p>© life180labs 2026</p>
+          <div className="flex items-center gap-6">
+            <span className="hover:text-black cursor-pointer transition-colors">Privacy Policy</span>
+            <span className="hover:text-black cursor-pointer transition-colors">Terms of Service</span>
+            <span className="hover:text-black cursor-pointer transition-colors">Support</span>
+          </div>
+        </footer>
       </main>
     </div>
   );

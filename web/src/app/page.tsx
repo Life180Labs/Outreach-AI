@@ -9,7 +9,7 @@ export default async function DashboardPage() {
     orderBy: { updatedAt: "desc" },
     take: 8,
     include: {
-      _count: { select: { leads: true } },
+      _count: { select: { leads: true, errors: true } },
       leads: { select: { sent: true, status: true, replied: true } },
     },
   });
@@ -96,13 +96,20 @@ export default async function DashboardPage() {
 }
 
 function StatCard({ label, value, icon: Icon, accent }: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; accent?: string }) {
+  const isGreen = accent?.includes("emerald");
+  const isBlue = accent?.includes("blue");
+  
   return (
-    <div className="p-5 rounded-2xl border border-zinc-200 bg-white">
+    <div className={`p-5 rounded-2xl border-2 transition-all ${
+      isGreen ? "bg-emerald-50/50 border-emerald-100" : 
+      isBlue ? "bg-blue-50/50 border-blue-100" : 
+      "bg-zinc-50/50 border-zinc-100"
+    }`}>
       <div className="flex items-center justify-between mb-3">
-        <Icon className={`w-4 h-4 ${accent || "text-zinc-400"}`} />
+        <Icon className={`w-5 h-5 ${accent || "text-zinc-400"}`} />
       </div>
-      <p className={`text-2xl font-semibold tabular-nums ${accent || "text-black"}`}>{value}</p>
-      <p className="text-xs text-blue-600 font-medium mt-0.5">{label}</p>
+      <p className={`text-3xl font-bold tabular-nums ${accent || "text-black"}`}>{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mt-1">{label}</p>
     </div>
   );
 }

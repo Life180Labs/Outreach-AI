@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { saveSettings, testSmtpConnection } from "./actions";
-import { Check, Loader2, Zap, AlertCircle } from "lucide-react";
+import { Check, Loader2, Zap, AlertCircle, Eye, EyeOff, Globe, Mail } from "lucide-react";
+import { AccountManager } from "./AccountManager";
 
-export function SettingsClient({ settings }: { settings: Record<string, unknown> | null }) {
+export function SettingsClient({ settings }: { settings: any }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -152,6 +153,9 @@ export function SettingsClient({ settings }: { settings: Record<string, unknown>
           </button>
         </div>
       </div>
+      <div className="pt-8 border-t border-zinc-100">
+        <AccountManager accounts={settings?.accounts || []} />
+      </div>
     </form>
   );
 }
@@ -159,11 +163,26 @@ export function SettingsClient({ settings }: { settings: Record<string, unknown>
 function FieldInput({ label, name, type = "text", defaultValue = "", placeholder = "" }: {
   label: string; name: string; type?: string; defaultValue?: string; placeholder?: string;
 }) {
+  const [show, setShow] = useState(false);
+  const isPassword = type === "password";
+  const finalType = isPassword ? (show ? "text" : "password") : type;
+
   return (
     <div>
       <label htmlFor={name} className="text-xs font-medium text-zinc-500 mb-1 block">{label}</label>
-      <input id={name} type={type} name={name} defaultValue={defaultValue} placeholder={placeholder}
-        className="w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400" />
+      <div className="relative">
+        <input id={name} type={finalType} name={name} defaultValue={defaultValue} placeholder={placeholder}
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400" />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black transition-colors"
+          >
+            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
