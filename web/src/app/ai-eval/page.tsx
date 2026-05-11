@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Zap, Loader2, Check, AlertCircle, Play, ShieldCheck, Search, Sparkles, Save, FileText, Target, Info, Layers, UserCircle, Briefcase, HelpCircle, Layout } from "lucide-react";
-import { runEvaluationAction, saveStructuredPromptAction, getInitialDataAction } from "./actions";
+import { runEvaluationAction, saveStructuredPromptAction, getInitialDataAction, refineStructuredPromptAction } from "./actions";
 
 export default function AiEvalPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [refining, setRefining] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [result, setResult] = useState<{ score: number; feedback: string; draft: string; subject?: string } | null>(null);
+  const [result, setResult] = useState<{ score: number; feedback: string; draft: string; subject?: string; rationale?: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'structured' | 'preview'>('structured');
 
   const [form, setForm] = useState({
@@ -84,6 +85,23 @@ Output Format:
       setTimeout(() => setSaved(false), 3000);
     }
     setSaving(false);
+  };
+
+  const handleRefine = async () => {
+    if (!result?.feedback) return;
+    setRefining(true);
+    const res = await refineStructuredPromptAction(form, result.feedback);
+    if (res.success) {
+      setForm(prev => ({
+        ...prev,
+        ...res.data
+      }));
+      // Clear results so user can test the new prompt
+      setResult(null);
+    } else {
+      alert("Refinement failed: " + res.error);
+    }
+    setRefining(false);
   };
 
   return (
@@ -262,9 +280,19 @@ Output Format:
                       <span className="text-[10px] text-zinc-400 mb-1 font-bold">SCORE</span>
                     </div>
                   </div>
-                  <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm col-span-2">
-                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">AI Auditor Feedback</p>
-                    <p className="text-xs text-zinc-600 line-clamp-2">{result.feedback}</p>
+                  <div className="bg-white border border-zinc-200 rounded-2xl p-4 shadow-sm col-span-2 flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">AI Auditor Feedback</p>
+                      <p className="text-xs text-zinc-600 line-clamp-2">{result.feedback}</p>
+                    </div>
+                    <button
+                      onClick={handleRefine}
+                      disabled={refining}
+                      className="shrink-0 flex items-center gap-2 px-3 py-2 bg-zinc-900 text-white rounded-lg text-[10px] font-bold hover:bg-black transition-all disabled:opacity-50"
+                    >
+                      {refining ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+                      SMART FIX
+                    </button>
                   </div>
                </div>
 

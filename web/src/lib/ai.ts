@@ -88,28 +88,20 @@ Your goal is to write hyper-personalized, high-converting outreach emails that f
 CRITICAL INSTRUCTIONS:
 1. USE LEAD NOTES: You MUST anchor the email's hook in the specific "Lead Notes" provided. This is your primary source of personalization.
 2. USE CAMPAIGN STRATEGY: Align your tone, value proposition, and call-to-action with the "AI Author Prompt" (Campaign Context).
-3. DO NOT INCLUDE SIGN-OFF: Write ONLY the body of the email. Stop immediately after the Call to Action. DO NOT write "Best regards," "Sincerely," or any name at the end. The system appends a signature automatically.
+3. STYLE & TONE: Use a peer-to-peer, conversational tone. No "I hope this finds you well". No marketing jargon like "synergy" or "cutting-edge".`) + 
+`
 
-CRITICAL FORMATTING RULES:
-1. STRUCTURE: Every section MUST be separated by EXACTLY TWO newlines ("\\n\\n"):
+UNIVERSAL QUALITY CONSTRAINTS (MANDATORY):
+1. CTA PROFESSIONALISM: If the CTA is "Book a call", DO NOT just write "Book a call". Instead, craft a professional, low-friction question like "Would you be open to a brief chat?" or "Worth a quick look?".
+2. CAPITALIZATION: Every sentence MUST start with a capital letter.
+3. STRUCTURE: Every section MUST be separated by EXACTLY TWO newlines ("\\n\\n"):
    - SECTION 1: "Hi ${firstName},"
    - SECTION 2: Opening Hook (Personalized based on Lead Notes).
    - SECTION 3: The Value (Connection to our business based on Campaign Strategy).
-   - SECTION 4: The Ask (Low-friction CTA).
+   - SECTION 4: The Ask (Professional, low-friction CTA).
+4. DO NOT INCLUDE SIGN-OFF: Write ONLY the body. Stop immediately after the CTA. No "Best regards".
 
-2. FORMATTING:
-   - YOU MUST USE "\\n\\n" between every section listed above.
-   - Paragraphs MUST be 1-2 sentences max. Total body should be under 100 words.
-   - NO placeholders like "[Name]". Use the data or skip.
-
-3. STYLE & TONE (THE "HUMAN" CHECK):
-   - USE THE REQUESTED TONE: ${campaign?.tone || 'Professional'}.
-   - NO "I hope this email finds you well" or "I'm reaching out to".
-   - NO "leveraging", "synergy", "cutting-edge", or "robust".
-   - Speak like a helpful person, not a marketing department.`) + 
-`
-
-IMPORTANT: Your response MUST be a valid JSON object with the following fields:
+IMPORTANT: Your response MUST be a valid JSON object:
 {
   "subject": "A curiosity-driven subject line",
   "body": "The full email body starting from 'Hi ${firstName},' and ending with the CTA.",
@@ -254,4 +246,42 @@ async function generateWithGroq(lead: Lead, campaign: Campaign | null, apiKey: s
     console.error("[Groq] Generation failed:", e);
     return { ...FALLBACK_DRAFT, rationale: "Groq API error" };
   }
+}
+
+export async function refinePromptWithAI(prompt: string, provider?: string, apiKey?: string): Promise<any> {
+  if (!apiKey) throw new Error("API key missing for refinement");
+
+  const actualProvider = provider || "gemini";
+
+  if (actualProvider === "openai") {
+    const openai = new OpenAI({ apiKey });
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+    return JSON.parse(res.choices[0].message.content || "{}");
+  } 
+  
+  if (actualProvider === "groq") {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }
+      }),
+    });
+    const data = await response.json();
+    return JSON.parse(data.choices[0].message.content || "{}");
+  }
+
+  // Default to Gemini
+  const ai = new GoogleGenAI({ apiKey });
+  const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const response = await model.generateContent(prompt);
+  const text = response.response.text();
+  const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleaned);
 }

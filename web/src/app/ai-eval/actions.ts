@@ -59,6 +59,57 @@ export async function saveStructuredPromptAction(data: any) {
   }
 }
 
+export async function refineStructuredPromptAction(currentForm: any, feedback: string) {
+  try {
+    const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    if (!settings) throw new Error("Settings not found");
+
+    const provider = settings.aiProvider || "gemini";
+    let apiKey = "";
+
+    if (provider === "openai") apiKey = settings.openaiApiKey || process.env.OPENAI_API_KEY || "";
+    else if (provider === "groq") apiKey = settings.groqApiKey || process.env.GROQ_API_KEY || "";
+    else if (provider === "claude") apiKey = settings.claudeApiKey || process.env.CLAUDE_API_KEY || "";
+    else apiKey = settings.geminiApiKey || process.env.GEMINI_API_KEY || "";
+
+    if (!apiKey) throw new Error(`${provider} API key missing. Please set it in Settings or .env`);
+
+    const prompt = `You are a Prompt Engineering Expert. 
+I have a B2B outreach strategy that received the following feedback from an auditor: "${feedback}"
+
+CURRENT STRATEGY:
+- Role: ${currentForm.role}
+- Product: ${currentForm.product}
+- Persona: ${currentForm.persona}
+- Pain Point: ${currentForm.painPoint}
+- Social Proof: ${currentForm.socialProof}
+- Tone: ${currentForm.tone}
+- CTA: ${currentForm.cta}
+
+TASK:
+Improve the strategy fields to address the auditor's feedback and reach 99% quality. 
+Keep the tone peer-to-peer and direct. Avoid all marketing fluff.
+
+Return ONLY a JSON object with the improved fields:
+{
+  "role": "...",
+  "product": "...",
+  "persona": "...",
+  "painPoint": "...",
+  "socialProof": "...",
+  "tone": "...",
+  "cta": "..."
+}`;
+
+    const { refinePromptWithAI } = await import("@/lib/ai");
+    const improved = await refinePromptWithAI(prompt, provider, apiKey);
+
+    return { success: true, data: improved };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}
+
 export async function getInitialDataAction() {
   const settings = await prisma.settings.findUnique({ where: { id: "global" } });
   return { 
