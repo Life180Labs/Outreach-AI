@@ -111,7 +111,7 @@ export const sendEmailSequence = inngest.createFunction(
         const trackingUrl = `${appUrl}/api/track/open/${lead.id}`;
 
         const { formatEmailHTML } = await import("@/lib/email-signature");
-        const htmlBody = formatEmailHTML(lead.emailBody!) +
+        const htmlBody = formatEmailHTML(lead.emailBody!, campaign.senderName || undefined) +
           `<img src="${trackingUrl}" width="1" height="1" style="display:none !important;" />`;
 
         try {

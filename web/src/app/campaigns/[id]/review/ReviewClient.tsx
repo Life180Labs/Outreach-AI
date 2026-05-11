@@ -27,9 +27,10 @@ import {
   Mail,
   User,
   Zap,
-  ChevronLeft,
   ChevronRight,
-  Inbox
+  Inbox,
+  Eye,
+  Edit3
 } from "lucide-react";
 import Link from "next/link";
 import type { Lead } from "@/types";
@@ -43,6 +44,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
   const [testEmail, setTestEmail] = useState("");
   const [showTestInput, setShowTestInput] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   
   // Controlled form fields — ensures regenerated content updates immediately
   const [editSubject, setEditSubject] = useState("");
@@ -364,29 +366,73 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                       />
                     </div>
                     <div className="flex-1 flex flex-col min-h-0">
-                      <div className="flex items-center justify-between mb-1.5">
-                        <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Message Body</label>
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-100 rounded text-[10px] font-medium text-zinc-500">
-                          <Check className="w-3 h-3 text-emerald-500" />
-                          Signature will be auto-added
+                      <div className="flex-1 flex flex-col min-h-[400px]">
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Message Content</label>
+                          <div className="flex bg-zinc-100 p-1 rounded-lg">
+                            <button 
+                              type="button"
+                              onClick={() => setViewMode('edit')}
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold transition-all ${viewMode === 'edit' ? 'bg-white text-black shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            >
+                              <Edit3 className="w-3 h-3" />
+                              EDITOR
+                            </button>
+                            <button 
+                              type="button"
+                              onClick={() => setViewMode('preview')}
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-[10px] font-bold transition-all ${viewMode === 'preview' ? 'bg-white text-black shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}
+                            >
+                              <Eye className="w-3 h-3" />
+                              PREVIEW
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex-1 min-h-[400px] bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400">
-                        <div className="h-full flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
-                          <ReactQuill 
-                            theme="snow" 
-                            value={editBody} 
-                            onChange={setEditBody}
-                            modules={{
-                              toolbar: [
-                                ['bold', 'italic', 'underline', 'strike'],
-                                [{ list: 'ordered' }, { list: 'bullet' }],
-                                ['link', 'image'],
-                                ['clean']
-                              ]
-                            }}
-                            className="h-full flex flex-col"
-                          />
+
+                        <div className="flex-1 bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400 flex flex-col">
+                          {viewMode === 'edit' ? (
+                            <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
+                              <ReactQuill 
+                                theme="snow" 
+                                value={editBody} 
+                                onChange={setEditBody}
+                                modules={{
+                                  toolbar: [
+                                    ['bold', 'italic', 'underline', 'strike'],
+                                    [{ list: 'ordered' }, { list: 'bullet' }],
+                                    ['link', 'clean']
+                                  ]
+                                }}
+                                className="h-full flex flex-col"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-1 bg-zinc-50/30 overflow-y-auto p-8">
+                              <div className="max-w-[600px] mx-auto bg-white shadow-sm border border-zinc-100 rounded-lg p-8 font-sans">
+                                <div 
+                                  className="text-[15px] text-zinc-800 leading-relaxed space-y-4"
+                                  dangerouslySetInnerHTML={{ __html: editBody }}
+                                />
+                                
+                                {/* Signature Preview */}
+                                <div className="mt-8 pt-6 border-t border-zinc-100">
+                                  <p className="text-[15px] text-zinc-700 mb-5">Best regards,<br/><strong>{campaign.senderName || 'The Life180 Team'}</strong></p>
+                                  <div className="flex gap-3">
+                                    <div className="w-[3px] h-10 bg-black rounded-sm" />
+                                    <div>
+                                      <p className="text-[15px] font-bold text-zinc-900 leading-tight">GTM Team</p>
+                                      <p className="text-[13px] font-medium text-zinc-500">Life180 Labs</p>
+                                    </div>
+                                  </div>
+                                  <div className="mt-3 text-[12px] text-zinc-400">
+                                    <span className="text-blue-600 font-medium">hello@life180labs.com</span>
+                                    <span className="mx-2 text-zinc-200">|</span>
+                                    <span>+91 98765 43210</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

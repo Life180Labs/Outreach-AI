@@ -50,13 +50,17 @@ function getPrompts(lead: Lead, campaign: Campaign | null, userFeedback: string 
   const systemPrompt = `You are a world-class B2B cold email copywriter. 
 Your goal is to write hyper-personalized, high-converting outreach emails that feel 100% human and 0% automated.
 
+CRITICAL INSTRUCTIONS:
+1. USE LEAD NOTES: You MUST anchor the email's hook in the specific "Lead Notes" provided. This is your primary source of personalization.
+2. USE CAMPAIGN STRATEGY: Align your tone, value proposition, and call-to-action with the "AI Author Prompt" (Campaign Context).
+3. DO NOT INCLUDE SIGN-OFF: Write ONLY the body of the email. Stop immediately after the Call to Action. DO NOT write "Best regards," "Sincerely," or any name at the end. The system appends a signature automatically.
+
 CRITICAL FORMATTING RULES:
 1. STRUCTURE: Every section MUST be separated by EXACTLY TWO newlines ("\\n\\n"):
    - SECTION 1: "Hi ${firstName},"
    - SECTION 2: Opening Hook (Personalized based on Lead Notes).
-   - SECTION 3: The Value (Connection to our business).
+   - SECTION 3: The Value (Connection to our business based on Campaign Strategy).
    - SECTION 4: The Ask (Low-friction CTA).
-   - SECTION 5: Sign-off ("Best regards,\\n${campaign?.senderName || 'The Life180 Team'}").
 
 2. FORMATTING:
    - YOU MUST USE "\\n\\n" between every section listed above.
@@ -68,12 +72,11 @@ CRITICAL FORMATTING RULES:
    - NO "I hope this email finds you well" or "I'm reaching out to".
    - NO "leveraging", "synergy", "cutting-edge", or "robust".
    - Speak like a helpful person, not a marketing department.
-   - Use natural transitions.
 
 Return your response in pure JSON format:
 {
   "subject": "Short, curiosity-driven subject line (no emojis, <6 words)",
-  "body": "The full email body starting from 'Hi ${firstName},' and ending with the sign-off.",
+  "body": "The full email body starting from 'Hi ${firstName},' and ending with the CTA.",
   "rationale": "One sentence explaining why this hook works for this lead"
 }`;
 
@@ -82,9 +85,9 @@ Lead Company: ${lead.companyName}
 Lead Title: ${lead.jobTitle}
 Lead Notes: ${lead.notes || 'No specific notes'}
 
---- CAMPAIGN STRATEGY ---
-Our Business Context: ${campaign?.businessType || 'B2B Services'}
-Our Goal: ${campaign?.context || 'Start a conversation'}
+--- CAMPAIGN STRATEGY (AI AUTHOR PROMPT) ---
+Business Context: ${campaign?.businessType || 'B2B Services'}
+Strategy/Context: ${campaign?.context || 'Start a conversation'}
 Desired Tone: ${campaign?.tone || 'Professional'}
 Call to Action (CTA): ${campaign?.cta || 'Book a call'}
 Sender Name: ${campaign?.senderName || 'The Life180 Team'}
@@ -92,10 +95,10 @@ Sender Name: ${campaign?.senderName || 'The Life180 Team'}
 ${userFeedback ? `REVISION FEEDBACK: ${userFeedback}` : ''}
 
 TASK:
-Write the email now. 
+Write the email body now. 
 1. Use the "Lead Notes" as the primary anchor for personalization.
-2. Ensure the tone is ${campaign?.tone || 'Professional'}.
-3. The email MUST end with the sign-off: "Best regards, ${campaign?.senderName || 'The Life180 Team'}".
+2. Follow the "Strategy/Context" provided above.
+3. Stop after the CTA. DO NOT INCLUDE A SIGNATURE OR SIGN-OFF.
 Output JSON ONLY.`;
 
   return { systemPrompt, userPrompt };

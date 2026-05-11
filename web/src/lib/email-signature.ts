@@ -2,7 +2,7 @@
  * Wraps plain-text or HTML email body in properly formatted HTML.
  * The signature is added here to ensure all emails have it by default.
  */
-export function formatEmailHTML(body: string): string {
+export function formatEmailHTML(body: string, senderName: string = "The Life180 Team"): string {
   if (!body) return "";
   
   let innerHtml = body.trim();
@@ -11,7 +11,6 @@ export function formatEmailHTML(body: string): string {
   innerHtml = innerHtml.replace(/\r\n/g, "\n");
 
   // Basic check if it's already HTML (e.g. from Rich Text Editor)
-  // If it starts with <p, <div, or contains common HTML tags, we assume it's HTML
   const isHtml = /<[a-z][\s\S]*>/i.test(innerHtml) || innerHtml.includes('</p>');
 
   if (!isHtml) {
@@ -24,6 +23,7 @@ export function formatEmailHTML(body: string): string {
 
   const signatureHtml = `
     <div style="margin-top:32px; padding-top:20px; border-top:1px solid #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+      <p style="margin:0 0 20px 0; color:#374151; font-size:15px;">Best regards,<br><strong>${senderName}</strong></p>
       <table border="0" cellpadding="0" cellspacing="0" role="presentation">
         <tr>
           <td style="vertical-align: top; padding-right: 12px;">
