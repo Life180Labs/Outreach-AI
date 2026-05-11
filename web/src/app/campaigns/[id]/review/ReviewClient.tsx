@@ -407,27 +407,46 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                               />
                             </div>
                           ) : (
-                            <div className="flex-1 bg-zinc-50/30 overflow-y-auto p-8">
-                              <div className="max-w-[600px] mx-auto bg-white shadow-sm border border-zinc-100 rounded-lg p-8 font-sans">
-                                <div 
-                                  className="text-[15px] text-zinc-800 leading-relaxed space-y-4"
-                                  dangerouslySetInnerHTML={{ __html: editBody }}
-                                />
-                                
-                                {/* Signature Preview */}
-                                <div className="mt-8 pt-6 border-t border-zinc-100">
-                                  <p className="text-[15px] text-zinc-700 mb-5">Best regards,<br/><strong>{campaign.senderName || 'The Life180 Team'}</strong></p>
-                                  <div className="flex gap-3">
-                                    <div className="w-[3px] h-10 bg-black rounded-sm" />
-                                    <div>
-                                      <p className="text-[15px] font-bold text-zinc-900 leading-tight">GTM Team</p>
-                                      <p className="text-[13px] font-medium text-zinc-500">Life180 Labs</p>
+                            <div className="flex-1 overflow-y-auto bg-white border border-zinc-200 rounded-xl flex flex-col">
+                              {/* Match Editor Header Height/Style */}
+                              <div className="h-[42px] bg-zinc-50/50 border-b border-zinc-200 px-4 flex items-center shrink-0">
+                                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Client Preview</span>
+                              </div>
+                              <div className="flex-1 overflow-y-auto bg-zinc-50/20 p-4 sm:p-8">
+                                <div className="max-w-[600px] mx-auto bg-white shadow-sm border border-zinc-200 rounded-2xl overflow-hidden text-left font-sans antialiased" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
+                                  <div className="p-8 sm:p-10">
+                                    <div 
+                                      className="text-[15px] text-[#1f2937] leading-[1.6]"
+                                      dangerouslySetInnerHTML={{ 
+                                        // Robust stripping for existing drafts
+                                        __html: editBody.replace(/(?:<p>)?\s*(?:Best regards|Sincerely|Best|Cheers|Kind regards),?\s*(?:<br\/?>|<\/p>)?\s*(?:<strong>)?(?:The Life180 Team|Anirban|Ghosh)?(?:<\/strong>)?(?:<\/p>)?\s*$/i, "").trim()
+                                      }}
+                                    />
+                                    
+                                    {/* Unified Professional Signature - Exact same as lib/mail.ts */}
+                                    <div className="mt-8 pt-6 border-t border-[#f3f4f6]">
+                                      <p className="m-0 mb-5 text-[#374151] text-[15px] leading-normal">Best regards,<br/><strong>{campaign.senderName || 'The Life180 Team'}</strong></p>
+                                      <table border={0} cellPadding={0} cellSpacing={0} role="presentation">
+                                        <tbody>
+                                          <tr>
+                                            <td className="align-top pr-3">
+                                              <div className="w-[3px] h-10 bg-black rounded-sm" />
+                                            </td>
+                                            <td>
+                                              <p className="m-0 font-bold text-[15px] text-[#111827] tracking-tight">GTM Team</p>
+                                              <p className="m-0 mt-0.5 text-[13px] font-medium text-[#6b7280]">Life180 Labs</p>
+                                            </td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                      <div className="mt-3 text-[12px] text-[#9ca3af]">
+                                        <p className="m-0">
+                                          <span className="text-[#2563eb] font-medium">hello@life180labs.com</span>
+                                          <span className="mx-2 text-[#e5e7eb]">|</span>
+                                          <span>+91 98765 43210</span>
+                                        </p>
+                                      </div>
                                     </div>
-                                  </div>
-                                  <div className="mt-3 text-[12px] text-zinc-400">
-                                    <span className="text-blue-600 font-medium">hello@life180labs.com</span>
-                                    <span className="mx-2 text-zinc-200">|</span>
-                                    <span>+91 98765 43210</span>
                                   </div>
                                 </div>
                               </div>

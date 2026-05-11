@@ -67,3 +67,45 @@ export async function testSmtpConnection(formData: FormData) {
     return { success: false, error: error.message };
   }
 }
+
+export async function addAccount(formData: FormData) {
+  const type = formData.get("type") as string;
+  const name = formData.get("name") as string;
+  const provider = formData.get("provider") as string;
+  const config = formData.get("config") as string; // JSON string
+
+  try {
+    // Ensure the global settings record exists first
+    await prisma.settings.upsert({
+      where: { id: "global" },
+      update: {},
+      create: { id: "global" }
+    });
+
+    const account = await prisma.account.create({
+      data: {
+        type,
+        name,
+        provider,
+        config,
+        isActive: true,
+        settingsId: "global"
+      }
+    });
+    revalidatePath("/settings");
+    return { success: true, account };
+  } catch (error: any) {
+    console.error("[addAccount] Failed:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteAccount(id: string) {
+  try {
+    await prisma.account.delete({ where: { id } });
+    revalidatePath("/settings");
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+}

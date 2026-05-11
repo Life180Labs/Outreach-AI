@@ -112,6 +112,16 @@ model Settings {
   
   maxEmailsPerHour     Int @default(50)
   followupDelayOptions String @default("1,3,5,7,10,14")
+  basePrompt           String? @default("You are a world-class B2B copywriter. Anchor the hook in lead notes. Use short sentences.")
+  
+  // Structured Prompt Fields
+  promptRole           String? @default("Elite B2B sales copywriter specializing in highly technical GTM cold outreach.")
+  promptProduct        String? @default("Life180: Advanced AI-driven outreach automation.")
+  promptPersona        String? @default("VP of Sales, Growth Lead, or Founder.")
+  promptPainPoint      String? @default("Low reply rates and time-consuming manual research.")
+  promptSocialProof    String? @default("Helped 50+ SaaS companies double their pipeline.")
+  promptTone           String? @default("Peer-to-peer, conversational, and direct.")
+  promptCta            String? @default("Is this on your radar for Q3?")
 
   // New multi-account relations
   accounts             Account[]

@@ -45,13 +45,17 @@ export function SettingsClient({ settings }: { settings: any }) {
   const val = (key: string) => (settings?.[key] as string) || "";
 
   return (
+    <>
     <form onSubmit={handleSave} className="space-y-6 pb-24">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* SMTP */}
         <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div>
-            <h3 className="text-sm font-semibold text-black">SMTP Configuration</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">Primary outbound email transport</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-black">SMTP Configuration</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Primary outbound email transport</p>
+            </div>
+            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <FieldInput label="SMTP Host" name="smtpHost" defaultValue={val("smtpHost")} placeholder="smtp.sendgrid.net" />
@@ -83,9 +87,12 @@ export function SettingsClient({ settings }: { settings: any }) {
 
         {/* Gmail */}
         <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div>
-            <h3 className="text-sm font-semibold text-black">Gmail Configuration</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">Alternative transport via Google App Passwords</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-black">Gmail Configuration</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Alternative transport via Google App Passwords</p>
+            </div>
+            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
           </div>
           <div className="space-y-4">
             <FieldInput label="Gmail Address" name="gmailEmailAddress" type="email" defaultValue={val("gmailEmailAddress")} placeholder="you@gmail.com" />
@@ -95,9 +102,12 @@ export function SettingsClient({ settings }: { settings: any }) {
 
         {/* Sending Controls */}
         <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div>
-            <h3 className="text-sm font-semibold text-black">Sending Controls</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">Rate limits and follow-up timing</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-black">Sending Controls</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Rate limits and follow-up timing</p>
+            </div>
+            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
           </div>
           <div>
             <div className="flex justify-between items-baseline mb-3">
@@ -116,9 +126,12 @@ export function SettingsClient({ settings }: { settings: any }) {
 
         {/* AI Provider */}
         <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div>
-            <h3 className="text-sm font-semibold text-black">AI Provider</h3>
-            <p className="text-xs text-zinc-400 mt-0.5">Select provider and configure API keys</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-black">AI Provider</h3>
+              <p className="text-xs text-zinc-400 mt-0.5">Select provider and configure API keys</p>
+            </div>
+            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
           </div>
           <div className="grid grid-cols-4 gap-2">
             {(["gemini", "groq", "openai", "claude"] as const).map(provider => (
@@ -140,23 +153,32 @@ export function SettingsClient({ settings }: { settings: any }) {
       </div>
 
       {/* Save Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-zinc-200 py-4 px-6 z-50">
-        <div className="flex items-center justify-end gap-4 max-w-7xl mx-auto">
-          {saved && <span className="text-emerald-600 text-xs font-medium flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Saved</span>}
-          <button
-            type="submit"
-            disabled={saving}
-            className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-            {saved ? "Saved" : "Save Settings"}
-          </button>
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-black/90 backdrop-blur-md border border-white/10 rounded-full px-6 py-3 shadow-2xl flex items-center gap-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Settings</span>
+            <span className="text-xs text-white font-medium">Unsaved Changes</span>
+          </div>
+          <div className="h-8 w-px bg-white/10" />
+          <div className="flex items-center gap-3">
+            {saved && <span className="text-emerald-400 text-xs font-bold flex items-center gap-1 animate-in zoom-in-95"><Check className="w-3.5 h-3.5" /> Saved</span>}
+            <button
+              type="submit"
+              disabled={saving}
+              className="bg-white text-black px-5 py-2 rounded-full text-xs font-bold hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+              {saved ? "SUCCESS" : "SAVE ALL CHANGES"}
+            </button>
+          </div>
         </div>
       </div>
-      <div className="pt-8 border-t border-zinc-100">
-        <AccountManager accounts={settings?.accounts || []} />
-      </div>
     </form>
+    
+    <div className="pt-8 border-t border-zinc-100">
+      <AccountManager accounts={settings?.accounts || []} />
+    </div>
+    </>
   );
 }
 
@@ -168,16 +190,22 @@ function FieldInput({ label, name, type = "text", defaultValue = "", placeholder
   const finalType = isPassword ? (show ? "text" : "password") : type;
 
   return (
-    <div>
+    <div className="w-full">
       <label htmlFor={name} className="text-xs font-medium text-zinc-500 mb-1 block">{label}</label>
-      <div className="relative">
-        <input id={name} type={finalType} name={name} defaultValue={defaultValue} placeholder={placeholder}
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400" />
+      <div className="flex items-center w-full border border-zinc-200 rounded-lg bg-white focus-within:border-zinc-400 transition-colors overflow-hidden">
+        <input 
+          id={name} 
+          type={finalType} 
+          name={name} 
+          defaultValue={defaultValue} 
+          placeholder={placeholder}
+          className="flex-1 bg-transparent border-none px-3 py-2.5 text-sm text-black focus:outline-none placeholder:text-zinc-400 min-w-0" 
+        />
         {isPassword && (
           <button
             type="button"
             onClick={() => setShow(!show)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-black transition-colors"
+            className="px-3 py-2.5 text-zinc-400 hover:text-black transition-colors shrink-0"
           >
             {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -186,3 +214,4 @@ function FieldInput({ label, name, type = "text", defaultValue = "", placeholder
     </div>
   );
 }
+

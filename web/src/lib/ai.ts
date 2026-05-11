@@ -20,19 +20,54 @@ export async function generateEmailDraft(
     throw new Error("AI settings not configured. Go to Settings to add an API key.");
   }
 
+  return runGeneration(lead, campaign, settings, userFeedback);
+}
+
+export async function testEmailGeneration(
+  promptOverride: string,
+  leadNotes: string,
+  cachedSettings?: Settings | null
+): Promise<EmailDraft> {
+  const settings = cachedSettings ?? await prisma.settings.findUnique({ where: { id: "global" } });
+  if (!settings) throw new Error("Settings not found");
+
+  const mockLead = {
+    firstName: "Test",
+    lastName: "User",
+    companyName: "Test Co",
+    jobTitle: "CEO",
+    notes: leadNotes,
+  } as Lead;
+
+  const mockCampaign = {
+    context: promptOverride,
+    tone: "Professional",
+    cta: "Book a call",
+  } as any;
+
+  return runGeneration(mockLead, mockCampaign, settings, "", promptOverride);
+}
+
+async function runGeneration(
+  lead: Lead,
+  campaign: Campaign | null,
+  settings: Settings,
+  userFeedback: string = "",
+  promptOverride?: string
+): Promise<EmailDraft> {
   let draft: EmailDraft;
 
   if (settings.aiProvider === "openai" && settings.openaiApiKey) {
-    draft = await generateWithOpenAI(lead, campaign, settings.openaiApiKey, userFeedback);
+    draft = await generateWithOpenAI(lead, campaign, settings.openaiApiKey, userFeedback, promptOverride || settings.basePrompt || undefined);
   } else if (settings.aiProvider === "claude" && settings.claudeApiKey) {
-    draft = await generateWithClaude(lead, campaign, settings.claudeApiKey, userFeedback);
+    draft = await generateWithClaude(lead, campaign, settings.claudeApiKey, userFeedback, promptOverride || settings.basePrompt || undefined);
   } else if (settings.aiProvider === "groq" && settings.groqApiKey) {
-    draft = await generateWithGroq(lead, campaign, settings.groqApiKey, userFeedback);
+    draft = await generateWithGroq(lead, campaign, settings.groqApiKey, userFeedback, promptOverride || settings.basePrompt || undefined);
   } else {
     if (!settings.geminiApiKey) {
       throw new Error("Gemini API Key is not configured (Default Provider)");
     }
-    draft = await generateWithGemini(lead, campaign, settings.geminiApiKey, userFeedback);
+    draft = await generateWithGemini(lead, campaign, settings.geminiApiKey, userFeedback, promptOverride || settings.basePrompt || undefined);
   }
 
   return {
@@ -41,13 +76,13 @@ export async function generateEmailDraft(
   };
 }
 
-function getPrompts(lead: Lead, campaign: Campaign | null, userFeedback: string = "") {
+function getPrompts(lead: Lead, campaign: Campaign | null, userFeedback: string = "", basePromptOverride?: string) {
   // Ensure the name is formatted properly for the prompt instructions
   const firstName = lead.firstName 
     ? lead.firstName.charAt(0).toUpperCase() + lead.firstName.slice(1).toLowerCase() 
     : "there";
 
-  const systemPrompt = `You are a world-class B2B cold email copywriter. 
+  const systemPrompt = (basePromptOverride || `You are a world-class B2B cold email copywriter. 
 Your goal is to write hyper-personalized, high-converting outreach emails that feel 100% human and 0% automated.
 
 CRITICAL INSTRUCTIONS:
@@ -71,13 +106,14 @@ CRITICAL FORMATTING RULES:
    - USE THE REQUESTED TONE: ${campaign?.tone || 'Professional'}.
    - NO "I hope this email finds you well" or "I'm reaching out to".
    - NO "leveraging", "synergy", "cutting-edge", or "robust".
-   - Speak like a helpful person, not a marketing department.
+   - Speak like a helpful person, not a marketing department.`) + 
+`
 
-Return your response in pure JSON format:
+IMPORTANT: Your response MUST be a valid JSON object with the following fields:
 {
-  "subject": "Short, curiosity-driven subject line (no emojis, <6 words)",
+  "subject": "A curiosity-driven subject line",
   "body": "The full email body starting from 'Hi ${firstName},' and ending with the CTA.",
-  "rationale": "One sentence explaining why this hook works for this lead"
+  "rationale": "A brief explanation of the personalization strategy used"
 }`;
 
   const userPrompt = `Lead Name: ${lead.firstName} ${lead.lastName}
@@ -98,7 +134,7 @@ TASK:
 Write the email body now. 
 1. Use the "Lead Notes" as the primary anchor for personalization.
 2. Follow the "Strategy/Context" provided above.
-3. Stop after the CTA. DO NOT INCLUDE A SIGNATURE OR SIGN-OFF.
+3. Stop immediately after the final period of your CTA. DO NOT WRITE "Best regards", "Sincerely", your name, or ANY other sign-off. The system handles the signature.
 Output JSON ONLY.`;
 
   return { systemPrompt, userPrompt };
@@ -124,9 +160,9 @@ function safeParseJSON(text: string): EmailDraft {
   }
 }
 
-async function generateWithOpenAI(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = ""): Promise<EmailDraft> {
+async function generateWithOpenAI(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = "", promptOverride?: string): Promise<EmailDraft> {
   const openai = new OpenAI({ apiKey });
-  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback);
+  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback, promptOverride);
 
   try {
     const response = await openai.chat.completions.create({
@@ -146,9 +182,9 @@ async function generateWithOpenAI(lead: Lead, campaign: Campaign | null, apiKey:
   }
 }
 
-async function generateWithClaude(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = ""): Promise<EmailDraft> {
+async function generateWithClaude(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = "", promptOverride?: string): Promise<EmailDraft> {
   const anthropic = new Anthropic({ apiKey });
-  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback);
+  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback, promptOverride);
 
   try {
     const response = await anthropic.messages.create({
@@ -168,9 +204,9 @@ async function generateWithClaude(lead: Lead, campaign: Campaign | null, apiKey:
   }
 }
 
-async function generateWithGemini(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = ""): Promise<EmailDraft> {
+async function generateWithGemini(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = "", promptOverride?: string): Promise<EmailDraft> {
   const ai = new GoogleGenAI({ apiKey });
-  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback);
+  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback, promptOverride);
   
   try {
     const response = await ai.models.generateContent({
@@ -185,8 +221,8 @@ async function generateWithGemini(lead: Lead, campaign: Campaign | null, apiKey:
   }
 }
 
-async function generateWithGroq(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = ""): Promise<EmailDraft> {
-  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback);
+async function generateWithGroq(lead: Lead, campaign: Campaign | null, apiKey: string, userFeedback: string = "", promptOverride?: string): Promise<EmailDraft> {
+  const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback, promptOverride);
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
