@@ -118,7 +118,7 @@ export function CampaignsClient({ campaigns }: { campaigns: any[] }) {
             const hotCount = c.leads?.filter((l: any) => l.status === "hot" || l.status === "Hot").length || 0;
             const totalLeads = c._count?.leads || 0;
             const progress = totalLeads > 0 ? Math.round((sentCount / totalLeads) * 100) : 0;
-            const hasErrors = c._count?.errors > 0;
+            const hasErrors = (c._count?.errors || 0) > 0;
             const isSelected = selectedIds.includes(c.id);
 
             return (

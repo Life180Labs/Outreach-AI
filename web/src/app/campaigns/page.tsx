@@ -7,7 +7,7 @@ export default async function CampaignsListPage() {
   const campaigns = await prisma.campaign.findMany({
     orderBy: { updatedAt: "desc" },
     include: {
-      _count: { select: { leads: true } },
+      _count: { select: { leads: true, errors: true } },
       leads: { select: { sent: true, status: true } },
     },
   });
