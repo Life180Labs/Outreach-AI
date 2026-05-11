@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { ArrowRight, Plus, RotateCcw, OctagonX, BarChart3, Users, Send, Flame } from "lucide-react";
 import prisma from "@/lib/prisma";

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { ArrowRight, Plus, PlayCircle, CheckCircle2, FileText } from "lucide-react";
