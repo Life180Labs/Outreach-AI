@@ -41,7 +41,7 @@ export class SmtpService {
         });
 
         // Parse the JSON config and remove the password so it never reaches the browser
-        return accounts.map((acc) => {
+        return accounts.map((acc: any) => {
             const config = JSON.parse(acc.config);
             return {
                 id: acc.id,

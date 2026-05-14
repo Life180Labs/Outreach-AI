@@ -19,7 +19,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
 
 
   // 2. Fetch campaign securely (ensuring it belongs to the logged-in user)
-  const campaign = await prisma.campaign.findUnique({
+  const campaign = await prisma.campaign.findFirst({
     where: { id, userId },
     include: { _count: { select: { leads: true } } }
   });
@@ -98,16 +98,14 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                         className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors appearance-none cursor-pointer"
                       >
                         <option value="" disabled>Select an email account...</option>
-                        {smtpAccounts.map(acc => {
-                          const config = JSON.parse(acc.config);
-                          return (
-                            <option key={acc.id} value={acc.id}>
-                              {acc.name} ({config.user})
-                            </option>
-                          );
-                        })}
+                        {smtpAccounts.map((acc: any) => (
+                          <option key={acc.id} value={acc.id}>
+                            {acc.name} ({JSON.parse(acc.config).user})
+                          </option>
+                        ))}
                       </select>
                     </div>
+
                     {smtpAccounts.length === 0 && (
                       <p className="text-[10px] text-red-500 mt-1.5 flex items-center gap-1">
                         No SMTP accounts. <Link href="/settings" className="underline hover:text-red-700">Add one in Settings.</Link>

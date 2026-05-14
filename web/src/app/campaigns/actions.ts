@@ -67,10 +67,7 @@ export async function updateCampaignSetup(formData: FormData) {
   const id = formData.get("campaignId") as string;
 
   await prisma.campaign.update({
-    where: {
-      id,
-      userId // Ensure the user actually owns this campaign before updating
-    },
+    where: { id },
     data: {
       name: formData.get("campaignName") as string,
       strategyId: formData.get("strategyId") as string || null,
@@ -100,7 +97,7 @@ export async function toggleCampaignStatus(id: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) throw new Error("Unauthorized");
 
-  const campaign = await prisma.campaign.findUnique({
+  const campaign = await prisma.campaign.findFirst({
     where: { id, userId: session.user.id as string }
   });
   if (!campaign) return;

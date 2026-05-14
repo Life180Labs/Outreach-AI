@@ -114,6 +114,9 @@ importers:
       '@types/react-dom':
         specifier: ^19
         version: 19.2.3(@types/react@19.2.14)
+      '@types/swagger-ui-react':
+        specifier: ^5.18.0
+        version: 5.18.0
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -2333,6 +2336,9 @@ packages:
 
   '@types/swagger-jsdoc@6.0.4':
     resolution: {integrity: sha512-W+Xw5epcOZrF/AooUM/PccNMSAFOKWZA5dasNyMujTwsBkU74njSJBpvCCJhHAJ95XRMzQrrW844Btu0uoetwQ==}
+
+  '@types/swagger-ui-react@5.18.0':
+    resolution: {integrity: sha512-c2M9adVG7t28t1pq19K9Jt20VLQf0P/fwJwnfcmsVVsdkwCWhRmbKDu+tIs0/NGwJ/7GY8lBx+iKZxuDI5gDbw==}
 
   '@types/tedious@4.0.14':
     resolution: {integrity: sha512-KHPsfX/FoVbUGbyYvk1q9MMQHLPeRZhRJZdO45Q4YjvFkv4hMNghCWTvy7rdKessBsmtz4euWCWAB6/tVpI1Iw==}
@@ -8358,6 +8364,10 @@ snapshots:
   '@types/statuses@2.0.6': {}
 
   '@types/swagger-jsdoc@6.0.4': {}
+
+  '@types/swagger-ui-react@5.18.0':
+    dependencies:
+      '@types/react': 19.2.14
 
   '@types/tedious@4.0.14':
     dependencies:
