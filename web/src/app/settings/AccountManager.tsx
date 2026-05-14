@@ -1,197 +1,251 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Trash2, Mail, Zap, Globe, Check, Loader2, X, AlertCircle } from "lucide-react";
-import { addAccount, deleteAccount } from "./actions";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Edit2, Trash2, Plus, Save, X, Mail, Eye, EyeOff } from "lucide-react";
 
-type Account = {
-  id: string;
-  type: string;
-  name: string;
-  provider: string;
-  isActive: boolean;
-};
-
-export function AccountManager({ accounts: initialAccounts }: { accounts: Account[] }) {
-  // Sync state with props when the server revalidates the page
-  const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
-  const [isAdding, setIsAdding] = useState(false);
+export default function AccountManager({ initialAccounts }: { initialAccounts: any[] }) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showPass, setShowPass] = useState(false);
+  const [accounts, setAccounts] = useState(initialAccounts);
 
+  // Sync state with server props
   useEffect(() => {
     setAccounts(initialAccounts);
   }, [initialAccounts]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this account?")) return;
-    const res = await deleteAccount(id);
-    if (res.success) {
-      // Optimistic update
-      setAccounts(prev => prev.filter(a => a.id !== id));
+  const [form, setForm] = useState({
+    name: "",
+    host: "",
+    port: "465",
+    user: "",
+    pass: ""
+  });
+
+  const handleEdit = (acc: any) => {
+    setEditingId(acc.id);
+    setForm({
+      name: acc.name,
+      host: acc.host,
+      port: acc.port.toString(),
+      user: acc.user,
+      pass: "" 
+    });
+    const formElement = document.getElementById("smtp-form");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
-  const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm({ name: "", host: "", port: "465", user: "", pass: "" });
+    setShowPass(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
     
-    // Convert form fields to config JSON
-    const type = formData.get("type") as string;
-    const configObj: any = {};
-    if (type === "AI") {
-      configObj.apiKey = formData.get("host"); // We used generic 'host' field in UI
-    } else {
-      configObj.host = formData.get("host");
-      configObj.port = formData.get("port");
-      configObj.user = formData.get("user");
-      configObj.pass = formData.get("pass");
+    const toastId = toast.loading(editingId ? "Updating SMTP connection..." : "Saving SMTP connection...");
+
+    try {
+      const url = editingId ? `/api/smtp/${editingId}` : "/api/smtp";
+      const method = editingId ? "PATCH" : "POST";
+      
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to save account");
+      }
+
+      toast.success(editingId ? "SMTP Account Updated" : "SMTP Account Added", { id: toastId });
+      router.refresh(); // Trigger server data refresh
+      cancelEdit();
+    } catch (err: any) {
+      toast.error(err.message, { id: toastId });
+    } finally {
+      setLoading(false);
     }
-    
-    formData.append("config", JSON.stringify(configObj));
-    
-    const res = await addAccount(formData);
-    if (res.success && res.account) {
-      setAccounts(prev => [res.account as Account, ...prev]);
-      setIsAdding(false);
-    } else {
-      alert("Error: " + res.error);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this SMTP configuration? This will also remove it from any active campaigns.")) return;
+
+    const toastId = toast.loading("Deleting account...");
+
+    try {
+      const res = await fetch(`/api/smtp/${id}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to delete");
+      
+      toast.success("Account deleted", { id: toastId });
+      
+      // Optimistic UI update
+      setAccounts(prev => prev.filter(a => a.id !== id));
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message, { id: toastId });
     }
-    setLoading(false);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-bold text-black uppercase tracking-wider">Managed Accounts</h3>
-        <button 
-          onClick={() => setIsAdding(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-white rounded-lg text-[10px] font-bold hover:bg-zinc-800 transition-all"
-        >
-          <Plus className="w-3 h-3" />
-          ADD ACCOUNT
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {accounts.map((acc) => (
-          <div key={acc.id} className="p-4 rounded-xl border-2 border-zinc-100 bg-white hover:border-zinc-300 transition-all group animate-in fade-in zoom-in-95 duration-300">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                  acc.type === 'AI' ? 'bg-purple-50 text-purple-600' : 
-                  acc.type === 'SMTP' ? 'bg-blue-50 text-blue-600' : 
-                  'bg-emerald-50 text-emerald-600'
-                }`}>
-                  {acc.type === 'AI' ? <Zap className="w-5 h-5" /> : 
-                   acc.type === 'SMTP' ? <Globe className="w-5 h-5" /> : 
-                   <Mail className="w-5 h-5" />}
+    <div className="space-y-8">
+      {/* List Existing SMTP Accounts */}
+      <div className="space-y-4">
+        {accounts.length > 0 ? (
+          <div className="grid gap-4">
+            {accounts.map((acc) => (
+              <div key={acc.id} className="flex justify-between items-center p-5 bg-zinc-50 rounded-2xl border border-zinc-200 group hover:border-zinc-300 transition-all">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-zinc-600 transition-colors">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-zinc-900">{acc.name}</p>
+                    <p className="text-xs text-zinc-500 font-medium">{acc.user} <span className="mx-1 opacity-30">|</span> {acc.host}:{acc.port}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-black">{acc.name}</p>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{acc.provider}</p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(acc)}
+                    className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-white rounded-lg border border-transparent hover:border-zinc-200 transition-all"
+                    title="Edit Configuration"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(acc.id)}
+                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-white rounded-lg border border-transparent hover:border-red-100 transition-all"
+                    title="Delete Account"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-              <button 
-                onClick={() => handleDelete(acc.id)}
-                className="p-1.5 text-zinc-300 hover:text-red-600 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-            
-            <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <div className={`w-1.5 h-1.5 rounded-full ${acc.isActive ? 'bg-emerald-500' : 'bg-zinc-200'}`} />
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                  {acc.isActive ? 'Active' : 'Inactive'}
-                </span>
-              </div>
-              {acc.isActive ? (
-                <div className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 uppercase">
-                  <Check className="w-3 h-3" />
-                  Primary
-                </div>
-              ) : (
-                <button className="text-[10px] font-bold text-blue-600 hover:underline uppercase tracking-widest">
-                  Make Primary
-                </button>
-              )}
-            </div>
+            ))}
           </div>
-        ))}
-
-        {accounts.length === 0 && !isAdding && (
-          <div className="col-span-full py-8 border-2 border-dashed border-zinc-100 rounded-xl flex flex-col items-center justify-center text-zinc-400 gap-2">
-            <Mail className="w-6 h-6 opacity-20" />
-            <p className="text-xs font-bold uppercase tracking-widest">No accounts added yet</p>
+        ) : (
+          <div className="text-center py-8 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200">
+            <p className="text-sm text-zinc-400">No SMTP accounts configured yet.</p>
           </div>
         )}
       </div>
 
-      {/* Add Modal */}
-      {isAdding && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl border border-zinc-200 w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <form onSubmit={handleAdd}>
-              <div className="p-6 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-black">Add New Account</h3>
-                  <button type="button" onClick={() => setIsAdding(false)} className="text-zinc-400 hover:text-black transition-colors">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+      {/* Add/Edit Account Form */}
+      <div id="smtp-form" className="pt-8 border-t border-zinc-100">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-zinc-100 rounded-lg">
+              {editingId ? <Edit2 className="w-4 h-4 text-zinc-600" /> : <Plus className="w-4 h-4 text-zinc-600" />}
+            </div>
+            <h3 className="text-base font-bold text-zinc-900">
+              {editingId ? "Edit SMTP Connection" : "Add New Connection"}
+            </h3>
+          </div>
+          {editingId && (
+            <button 
+              onClick={cancelEdit}
+              className="text-xs font-semibold text-zinc-400 hover:text-zinc-900 flex items-center gap-1 transition-colors"
+            >
+              <X className="w-3 h-3" />
+              Cancel Edit
+            </button>
+          )}
+        </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Account Type</label>
-                    <select name="type" className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-black transition-all">
-                      <option value="SMTP">SMTP Server</option>
-                      <option value="GMAIL">Gmail Account</option>
-                      <option value="AI">AI Provider</option>
-                    </select>
-                  </div>
-                  
-                  <div className="col-span-2">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Display Name</label>
-                    <input name="name" required placeholder="e.g. Sales SMTP" className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                  </div>
-
-                  <div className="col-span-2">
-                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Provider</label>
-                    <input name="provider" required placeholder="e.g. SendGrid, Gemini" className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                  </div>
-                  
-                  <div className="col-span-2 pt-2">
-                    <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-100 space-y-4">
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                        <AlertCircle className="w-3 h-3" />
-                        Configuration Details
-                      </p>
-                      <input name="host" required placeholder="Host / API Key" className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <input name="user" placeholder="User / Email (Optional)" className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                        <input name="pass" type="password" placeholder="Pass (Optional)" className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 bg-zinc-50 border-t border-zinc-100 flex items-center justify-end gap-3">
-                <button type="button" onClick={() => setIsAdding(false)} className="px-5 py-2.5 text-sm font-bold text-zinc-500 hover:text-black transition-colors">Cancel</button>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Display Name</label>
+              <input 
+                type="text" 
+                required 
+                value={form.name} 
+                onChange={e => setForm({ ...form, name: e.target.value })} 
+                placeholder="e.g. Sales Inbox" 
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Host</label>
+              <input 
+                type="text" 
+                required 
+                value={form.host} 
+                onChange={e => setForm({ ...form, host: e.target.value })} 
+                placeholder="e.g. smtp.gmail.com" 
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Port</label>
+              <input 
+                type="number" 
+                required 
+                value={form.port} 
+                onChange={e => setForm({ ...form, port: e.target.value })} 
+                placeholder="465 or 587" 
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Username / Email</label>
+              <input 
+                type="text" 
+                required 
+                value={form.user} 
+                onChange={e => setForm({ ...form, user: e.target.value })} 
+                placeholder="you@company.com" 
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+              />
+            </div>
+            <div className="md:col-span-2 space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">
+                App Password {editingId && <span className="font-normal lowercase opacity-50">(leave blank to keep current)</span>}
+              </label>
+              <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-900 transition-all">
+                <input 
+                  type={showPass ? "text" : "password"} 
+                  required={!editingId} 
+                  value={form.pass} 
+                  onChange={e => setForm({ ...form, pass: e.target.value })} 
+                  placeholder={editingId ? "••••••••••••••••" : "Enter your secure app password"} 
+                  className="w-full py-2.5 text-sm outline-none bg-transparent" 
+                />
                 <button 
-                  type="submit" 
-                  disabled={loading}
-                  className="px-6 py-2.5 bg-black text-white rounded-lg text-sm font-bold hover:bg-zinc-800 transition-all disabled:opacity-50 flex items-center gap-2"
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
                 >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  CREATE ACCOUNT
+                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+
+          <div className="flex justify-end">
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 text-white text-sm font-bold rounded-xl hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
+            >
+              {loading ? "Saving..." : (editingId ? "Update Connection" : "Save Connection")}
+              <Save className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

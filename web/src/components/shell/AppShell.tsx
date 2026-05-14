@@ -3,8 +3,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, LayoutDashboard, Users, Zap, Menu, X } from "lucide-react";
+import { Settings, LayoutDashboard, Users, Zap, Menu, X, User, LogOut } from "lucide-react";
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 
 type AccountStatus = "connected" | "disconnected";
 
@@ -90,12 +91,31 @@ export function AppShell({
               <StatusPill status={accountStatus} label={accountLabel} />
             </div>
             <div className="h-4 w-px bg-zinc-100 hidden sm:block" />
-            <Link
-              href="/settings"
-              className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link
+                href="/profile"
+                className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors"
+                title="Your Profile"
+              >
+                <User className="w-4 h-4" />
+              </Link>
+              
+              <Link
+                href="/settings"
+                className="p-2 text-zinc-400 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors"
+                title="Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </Link>
+
+              <button
+                onClick={() => signOut({ callbackUrl: "/login" })}
+                className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
 
             {/* Mobile menu toggle */}
             <button

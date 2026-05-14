@@ -1,8 +1,8 @@
 "use server";
 
 import { generateEmailDraft } from "@/lib/ai";
-import { getTransporterFromSettings } from "@/lib/mail";
 import prisma from "@/lib/prisma";
+
 import { revalidatePath } from "next/cache";
 import type { ActionResult, Lead } from "@/types";
 
@@ -138,19 +138,18 @@ export async function sendTestAction(
 
     if (!lead) return { success: false, error: "Lead not found" };
 
-    const { transporter, from } = await getTransporterFromSettings();
-
-    // Use shared branded email template with Life180 Labs signature
+    const { sendEmail } = await import("@/lib/mail");
     const { formatEmailHTML } = await import("@/lib/email-signature");
+    
     const html = formatEmailHTML(lead.emailBody || "");
 
-    await transporter.sendMail({
-      from,
+    await sendEmail({
       to: testEmail,
       subject: `[TEST] ${lead.emailSubject}`,
-      text: lead.emailBody!,
       html,
+      campaignId: lead.campaignId,
     });
+
 
 
 

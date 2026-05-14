@@ -26,10 +26,11 @@ export const generateDraftsBatch = inngest.createFunction(
 
     if (!campaign) return { error: "Campaign not found" };
 
-    // Fetch settings ONCE for the entire batch instead of per-lead
+    // Fetch settings for the user who owns the campaign
     const settings = await step.run("fetch-settings", async () => {
-      return await prisma.settings.findUnique({ where: { id: "global" } });
+      return await prisma.settings.findUnique({ where: { userId: campaign.userId } });
     });
+
 
     const leadsToProcess = campaign.leads.filter((l: any) => !l.emailSubject);
 
@@ -65,22 +66,30 @@ export const sendEmailSequence = inngest.createFunction(
   async ({ event, step }: { event: { data: { campaignId: string } }; step: any }) => {
     const { campaignId } = event.data;
 
-    const { campaign, settings } = await step.run("fetch-data", async () => {
+    const { campaign, settings, smtpAccount } = await step.run("fetch-data", async () => {
       const c = await prisma.campaign.findUnique({
         where: { id: campaignId },
         include: { leads: { where: { sent: false, isApproved: true } } },
       });
-      const s = await prisma.settings.findUnique({ where: { id: "global" } });
-      return { campaign: c, settings: s };
+      if (!c) return { campaign: null, settings: null, smtpAccount: null };
+      
+      const s = await prisma.settings.findUnique({ where: { userId: c.userId } });
+      const acc = c.smtpAccountId 
+        ? await prisma.integrationAccount.findUnique({ where: { id: c.smtpAccountId } })
+        : null;
+
+      return { campaign: c, settings: s, smtpAccount: acc };
     });
 
-    if (!campaign || !settings || (!settings.smtpHost && !settings.gmailEmailAddress)) {
-      return { error: "Missing campaign or sending configuration" };
+    if (!campaign || !smtpAccount) {
+      return { error: "Missing campaign or sending configuration (SMTP Account)" };
     }
 
     // Create a single transporter pool for the entire campaign to reuse connections
-    const transporter = createTransporter(settings as Settings);
-    const from = getSenderAddress(settings as Settings);
+    // We pass the IntegrationAccount now, createTransporter should be updated to handle it
+    const transporter = createTransporter(smtpAccount as any);
+    const from = getSenderAddress(smtpAccount as any);
+
 
     // Verify connection once before starting the loop to catch auth/host errors early
     try {
@@ -173,96 +182,110 @@ export const scheduleFollowUps = inngest.createFunction(
 export const checkInboxForReplies = inngest.createFunction(
   { id: "check-inbox-replies", triggers: [{ cron: "*/15 * * * *" }] },
   async ({ step }) => {
-    const settings = await step.run("fetch-settings", async () => {
-      return await prisma.settings.findUnique({ where: { id: "global" } });
-    });
-
-    if (!settings || (!settings.smtpHost && !settings.gmailEmailAddress)) {
-      return { error: "No settings" };
-    }
-
-    const client = new ImapFlow({
-      host: settings.smtpHost?.replace("smtp.", "imap.") || "imap.gmail.com",
-      port: 993,
-      secure: true,
-      auth: {
-        user: settings.smtpUser || settings.gmailEmailAddress!,
-        pass: settings.smtpPass!,
-      },
-      logger: false,
-    });
-
-    try {
-      await client.connect();
-    } catch (connectError) {
-      console.error("[checkInboxForReplies] IMAP connect failed:", connectError);
-      return { error: "IMAP connection failed" };
-    }
-
-    const lock = await client.getMailboxLock("INBOX");
-
-    const results: string[] = [];
-    try {
-      const activeLeads = await prisma.lead.findMany({
-        where: {
-          sent: true,
-          OR: [
-            { replied: false },
-            { replied: true, messages: { none: { role: "LEAD" } } },
-          ],
-        },
-        select: { email: true, id: true, emailSubject: true, messages: true },
+    // 1. Fetch all active SMTP accounts
+    const smtpAccounts = await step.run("fetch-smtp-accounts", async () => {
+      return await prisma.integrationAccount.findMany({
+        where: { type: "SMTP", isActive: true }
       });
+    });
 
-      for (const lead of activeLeads) {
-        const messageUids = await client.search({ from: lead.email });
-        if (Array.isArray(messageUids) && messageUids.length > 0) {
-          const lastUid = messageUids[messageUids.length - 1];
-          const msg = await client.fetchOne(lastUid, { source: true, envelope: true });
-          
-          if (msg && msg.source && msg.envelope) {
-            // Verify this email is related to our campaign thread
-            const cleanSubject = lead.emailSubject ? lead.emailSubject.replace(/^(re:\s*|fwd:\s*)+/i, '').trim().toLowerCase() : "";
-            const incomingSubject = msg.envelope?.subject ? msg.envelope.subject.toLowerCase() : "";
-            const isRelatedBySubject = cleanSubject && incomingSubject.includes(cleanSubject);
-            const isInReplyToUs = msg.envelope?.inReplyTo && lead.messages.some(m => m.messageId === msg.envelope?.inReplyTo);
+    const summary = { accountsChecked: 0, totalReplies: 0 };
 
-            if (!isRelatedBySubject && !isInReplyToUs) {
-               continue; // Skip unrelated emails
-            }
-
-            const content =
-              msg.source.toString().split("\r\n\r\n")[1] ||
-              "Reply received (Content could not be parsed)";
-
-            // Deterministic step ID
-            await step.run(`mark-replied-${lead.id}`, async () => {
-              await prisma.lead.update({
-                where: { id: lead.id },
-                data: {
-                  replied: true,
-                  status: "Hot",
-                  messages: {
-                    create: {
-                      role: "LEAD",
-                      content:
-                        content.length > 500
-                          ? content.substring(0, 500) + "..."
-                          : content,
-                    },
-                  },
-                },
-              });
-            });
-          }
-          results.push(lead.email);
+    for (const account of smtpAccounts) {
+      await step.run(`check-account-${account.id}`, async () => {
+        const config = JSON.parse(account.config);
+        const { EncryptionUtils } = await import("@/utils/encryption");
+        let decryptedPass = "";
+        try {
+          decryptedPass = EncryptionUtils.decrypt(config.pass);
+        } catch (e) {
+          console.error(`[checkInboxForReplies] Decryption failed for account ${account.id}`);
+          return;
         }
-      }
-    } finally {
-      lock.release();
-      await client.logout().catch(() => {});
+
+        const client = new ImapFlow({
+          host: config.host.replace("smtp.", "imap."),
+          port: 993,
+          secure: true,
+          auth: {
+            user: config.user,
+            pass: decryptedPass,
+          },
+          logger: false,
+        });
+
+        try {
+          await client.connect();
+          const lock = await client.getMailboxLock("INBOX");
+          
+          try {
+            // Find campaigns using this SMTP account
+            const campaigns = await prisma.campaign.findMany({
+              where: { smtpAccountId: account.id },
+              select: { id: true }
+            });
+            const campaignIds = campaigns.map(c => c.id);
+
+            if (campaignIds.length === 0) return;
+
+            // Find leads in these campaigns that might have replies
+            const activeLeads = await prisma.lead.findMany({
+              where: {
+                campaignId: { in: campaignIds },
+                sent: true,
+                OR: [
+                  { replied: false },
+                  { replied: true, messages: { none: { role: "LEAD" } } },
+                ],
+              },
+              select: { email: true, id: true, emailSubject: true, messages: true },
+            });
+
+            for (const lead of activeLeads) {
+              const messageUids = await client.search({ from: lead.email });
+              if (Array.isArray(messageUids) && messageUids.length > 0) {
+                const lastUid = messageUids[messageUids.length - 1];
+                const msg = await client.fetchOne(lastUid, { source: true, envelope: true });
+                
+                if (msg && msg.source && msg.envelope) {
+                  const cleanSubject = lead.emailSubject ? lead.emailSubject.replace(/^(re:\s*|fwd:\s*)+/i, '').trim().toLowerCase() : "";
+                  const incomingSubject = msg.envelope?.subject ? msg.envelope.subject.toLowerCase() : "";
+                  const isRelatedBySubject = cleanSubject && incomingSubject.includes(cleanSubject);
+                  const isInReplyToUs = msg.envelope?.inReplyTo && lead.messages.some(m => m.messageId === msg.envelope?.inReplyTo);
+
+                  if (!isRelatedBySubject && !isInReplyToUs) continue;
+
+                  const content = msg.source.toString().split("\r\n\r\n")[1] || "Reply received";
+
+                  await prisma.lead.update({
+                    where: { id: lead.id },
+                    data: {
+                      replied: true,
+                      status: "Hot",
+                      messages: {
+                        create: {
+                          role: "LEAD",
+                          content: content.length > 500 ? content.substring(0, 500) + "..." : content,
+                        },
+                      },
+                    },
+                  });
+                  summary.totalReplies++;
+                }
+              }
+            }
+          } finally {
+            lock.release();
+            await client.logout();
+          }
+        } catch (err) {
+          console.error(`[checkInboxForReplies] Error checking account ${account.id}:`, err);
+        }
+      });
+      summary.accountsChecked++;
     }
 
-    return { checked: results.length, replies: results };
+    return summary;
   }
 );
+

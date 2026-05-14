@@ -1,217 +1,287 @@
 "use client";
 
 import { useState } from "react";
-import { saveSettings, testSmtpConnection } from "./actions";
-import { Check, Loader2, Zap, AlertCircle, Eye, EyeOff, Globe, Mail } from "lucide-react";
-import { AccountManager } from "./AccountManager";
+import AccountManager from "./AccountManager";
+import { saveSettings } from "./actions";
+import { toast } from "sonner";
+import { Save, Bot, Mail, Sliders, Zap, ChevronDown, ChevronRight, Eye, EyeOff } from "lucide-react";
 
-export function SettingsClient({ settings }: { settings: any }) {
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
-  const [maxEmails, setMaxEmails] = useState((settings?.maxEmailsPerHour as number) || 30);
-  const [activeProvider, setActiveProvider] = useState((settings?.aiProvider as string) || "gemini");
+interface SettingsClientProps {
+  settings: any;
+  accounts: any[];
+}
 
-  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
+export default function SettingsClient({ settings, accounts }: SettingsClientProps) {
+  const [loading, setLoading] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState({
+    ai: true,
+    delivery: true,
+    smtp: true
+  });
+
+  const [showKeys, setShowKeys] = useState({
+    gemini: false,
+    openai: false,
+    groq: false,
+    claude: false
+  });
+
+  const toggleSection = (section: keyof typeof expanded) => {
+    setExpanded(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const toggleKey = (key: keyof typeof showKeys) => {
+    setShowKeys(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>, section: string) => {
     e.preventDefault();
-    setSaving(true);
-    setSaved(false);
+    setLoading(section);
     const formData = new FormData(e.currentTarget);
-    const result = await saveSettings(formData);
-    if (result.success) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
-    } else {
-      alert("Failed to save: " + (result.error || "Unknown error"));
+
+    try {
+      const res = await saveSettings(formData);
+      if (res.success) {
+        toast.success(`${section} settings saved successfully`);
+      } else {
+        toast.error(res.error || `Failed to save ${section} settings`);
+      }
+    } catch (error) {
+      toast.error("An unexpected error occurred");
+    } finally {
+      setLoading(null);
     }
-    setSaving(false);
   };
-
-  const handleTestConnection = async () => {
-    setTesting(true);
-    setTestResult(null);
-    const form = document.querySelector("form") as HTMLFormElement;
-    const formData = new FormData(form);
-    const result = await testSmtpConnection(formData);
-    setTestResult({
-      success: result.success,
-      message: result.success ? "Connection verified!" : (result.error || "Connection failed"),
-    });
-    setTesting(false);
-    setTimeout(() => setTestResult(null), 5000);
-  };
-
-  const val = (key: string) => (settings?.[key] as string) || "";
 
   return (
-    <>
-    <form onSubmit={handleSave} className="space-y-6 pb-24">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* SMTP */}
-        <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-black">SMTP Configuration</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Primary outbound email transport</p>
-            </div>
-            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <FieldInput label="SMTP Host" name="smtpHost" defaultValue={val("smtpHost")} placeholder="smtp.sendgrid.net" />
-            <FieldInput label="SMTP Port" name="smtpPort" type="number" defaultValue={val("smtpPort")} placeholder="587" />
-            <FieldInput label="Username" name="smtpUser" defaultValue={val("smtpUser")} placeholder="apikey" />
-            <FieldInput label="Password" name="smtpPass" type="password" defaultValue={val("smtpPass")} placeholder="SG...." />
-            <div className="col-span-2">
-              <FieldInput label="From Email" name="smtpFromEmail" type="email" defaultValue={val("smtpFromEmail")} placeholder="hello@yourdomain.com" />
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={handleTestConnection}
-            disabled={testing}
-            className="w-full py-2.5 rounded-lg border border-zinc-200 hover:border-zinc-400 text-sm font-medium text-zinc-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+    <div className="max-w-5xl mx-auto py-10 px-6 space-y-8">
+      <div className="flex justify-between items-end mb-4">
+        <div>
+          <h1 className="text-3xl font-bold text-zinc-900 tracking-tight">Configuration</h1>
+          <p className="text-zinc-500 mt-1">Manage your outreach engine, AI models, and email integrations.</p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+
+        {/* 1. AI Integration Section */}
+        <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden transition-all">
+          <div
+            onClick={() => toggleSection('ai')}
+            className="p-6 cursor-pointer border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between group"
           >
-            {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
-            Test Connection
-          </button>
-          {testResult && (
-            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium ${
-              testResult.success ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
-            }`} role="alert">
-              {testResult.success ? <Check className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
-              {testResult.message}
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                <Bot className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-900">AI Intelligence</h2>
+                <p className="text-xs text-zinc-500">Configure your LLM providers and primary engine</p>
+              </div>
+            </div>
+            {expanded.ai ? <ChevronDown className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600" /> : <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600" />}
+          </div>
+
+          {expanded.ai && (
+            <form onSubmit={(e) => handleSave(e, "AI")} className="p-6 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">Primary AI Provider</label>
+                  <select
+                    name="aiProvider"
+                    defaultValue={settings?.aiProvider || "gemini"}
+                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                  >
+                    <option value="gemini">Google Gemini (Recommended)</option>
+                    <option value="openai">OpenAI GPT-4</option>
+                    <option value="groq">Groq (Llama 3)</option>
+                    <option value="claude">Anthropic Claude</option>
+                  </select>
+                </div>
+
+                {/* Gemini */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">Gemini API Key</label>
+                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                    <input
+                      type={showKeys.gemini ? "text" : "password"}
+                      name="geminiApiKey"
+                      defaultValue={settings?.geminiApiKey || ""}
+                      placeholder="AI Studio Key..."
+                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKey('gemini')}
+                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                    >
+                      {showKeys.gemini ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* OpenAI */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">OpenAI API Key</label>
+                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                    <input
+                      type={showKeys.openai ? "text" : "password"}
+                      name="openaiApiKey"
+                      defaultValue={settings?.openaiApiKey || ""}
+                      placeholder="sk-..."
+                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKey('openai')}
+                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                    >
+                      {showKeys.openai ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Groq */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">Groq API Key</label>
+                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                    <input
+                      type={showKeys.groq ? "text" : "password"}
+                      name="groqApiKey"
+                      defaultValue={settings?.groqApiKey || ""}
+                      placeholder="gsk_..."
+                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKey('groq')}
+                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                    >
+                      {showKeys.groq ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Claude */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">Claude API Key</label>
+                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                    <input
+                      type={showKeys.claude ? "text" : "password"}
+                      name="claudeApiKey"
+                      defaultValue={settings?.claudeApiKey || ""}
+                      placeholder="x-api-key..."
+                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => toggleKey('claude')}
+                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                    >
+                      {showKeys.claude ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={loading === "AI"}
+                  className="flex items-center gap-2 px-6 py-2 bg-zinc-900 text-white rounded-xl text-sm font-semibold hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {loading === "AI" ? "Saving..." : "Save AI Settings"}
+                  <Save className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
+
+        {/* 2. Outreach Delivery Section */}
+        <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden transition-all">
+          <div
+            onClick={() => toggleSection('delivery')}
+            className="p-6 cursor-pointer border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg text-orange-600">
+                <Zap className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-900">Delivery Controls</h2>
+                <p className="text-xs text-zinc-500">Manage throughput and safety limits</p>
+              </div>
+            </div>
+            {expanded.delivery ? <ChevronDown className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600" /> : <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600" />}
+          </div>
+
+          {expanded.delivery && (
+            <form onSubmit={(e) => handleSave(e, "Delivery")} className="p-6 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">Max Emails Per Hour (Per Account)</label>
+                  <input
+                    type="number"
+                    name="maxEmailsPerHour"
+                    defaultValue={settings?.maxEmailsPerHour || 30}
+                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                  />
+                  <p className="text-[10px] text-zinc-400 italic">Recommended: 20-40 to avoid spam filters.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-zinc-700">Follow-up Delay Options (Days)</label>
+                  <input
+                    type="text"
+                    name="followupDelayOptions"
+                    defaultValue={settings?.followupDelayOptions || "1,3,5,7,10,14"}
+                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
+                  />
+                  <p className="text-[10px] text-zinc-400 italic">Comma-separated list of days for sequence steps.</p>
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={loading === "Delivery"}
+                  className="flex items-center gap-2 px-6 py-2 bg-zinc-900 text-white rounded-xl text-sm font-semibold hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {loading === "Delivery" ? "Saving..." : "Save Delivery Settings"}
+                  <Save className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
+
+        {/* 3. SMTP Integrations */}
+        <section className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden transition-all">
+          <div
+            onClick={() => toggleSection('smtp')}
+            className="p-6 cursor-pointer border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-purple-100 rounded-lg text-purple-600">
+                <Mail className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-900">Email Sending Accounts</h2>
+                <p className="text-xs text-zinc-500">Add and manage SMTP or Gmail connections</p>
+              </div>
+            </div>
+            {expanded.smtp ? <ChevronDown className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600" /> : <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-zinc-600" />}
+          </div>
+
+          {expanded.smtp && (
+            <div className="p-6 animate-in fade-in slide-in-from-top-2 duration-300">
+              <AccountManager initialAccounts={accounts} />
             </div>
           )}
-        </div>
+        </section>
 
-        {/* Gmail */}
-        <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-black">Gmail Configuration</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Alternative transport via Google App Passwords</p>
-            </div>
-            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
-          </div>
-          <div className="space-y-4">
-            <FieldInput label="Gmail Address" name="gmailEmailAddress" type="email" defaultValue={val("gmailEmailAddress")} placeholder="you@gmail.com" />
-            <FieldInput label="Gmail App Password" name="gmailRefreshToken" type="password" defaultValue={val("gmailRefreshToken")} placeholder="xxxx xxxx xxxx xxxx" />
-          </div>
-        </div>
-
-        {/* Sending Controls */}
-        <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-black">Sending Controls</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Rate limits and follow-up timing</p>
-            </div>
-            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
-          </div>
-          <div>
-            <div className="flex justify-between items-baseline mb-3">
-              <label className="text-xs font-medium text-zinc-500">Max Emails Per Hour</label>
-              <span className="text-sm font-semibold text-black tabular-nums">{maxEmails}/hr</span>
-            </div>
-            <input
-              type="range" name="maxEmailsPerHour" min="10" max="100" value={maxEmails}
-              onChange={(e) => setMaxEmails(parseInt(e.target.value))}
-              className="w-full accent-black h-1.5 rounded-full cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] text-zinc-400 mt-1"><span>10</span><span>50</span><span>100</span></div>
-          </div>
-          <FieldInput label="Follow-up Delays (days)" name="followupDelayOptions" defaultValue={val("followupDelayOptions") || "1,3,5,7,10,14"} placeholder="1,3,5,7,10,14" />
-        </div>
-
-        {/* AI Provider */}
-        <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-5">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-semibold text-black">AI Provider</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Select provider and configure API keys</p>
-            </div>
-            <button type="submit" className="px-3 py-1.5 bg-zinc-100 hover:bg-black hover:text-white rounded-lg text-[10px] font-bold text-black uppercase tracking-widest transition-all">Save Section</button>
-          </div>
-          <div className="grid grid-cols-4 gap-2">
-            {(["gemini", "groq", "openai", "claude"] as const).map(provider => (
-              <label key={provider} className="cursor-pointer">
-                <input type="radio" name="aiProvider" value={provider} className="peer sr-only" defaultChecked={activeProvider === provider} onChange={() => setActiveProvider(provider)} />
-                <div className="text-center py-2.5 rounded-lg border text-xs font-medium transition-colors peer-checked:bg-black peer-checked:text-white peer-checked:border-black border-zinc-200 text-zinc-500 hover:border-zinc-400">
-                  {provider}
-                </div>
-              </label>
-            ))}
-          </div>
-          <div className="space-y-4 pt-2">
-            <FieldInput label="Gemini API Key" name="geminiApiKey" type="password" defaultValue={val("geminiApiKey")} placeholder="AIzaSy..." />
-            <FieldInput label="Groq API Key" name="groqApiKey" type="password" defaultValue={val("groqApiKey")} placeholder="gsk_..." />
-            <FieldInput label="OpenAI API Key" name="openaiApiKey" type="password" defaultValue={val("openaiApiKey")} placeholder="sk-proj-..." />
-            <FieldInput label="Claude API Key" name="claudeApiKey" type="password" defaultValue={val("claudeApiKey")} placeholder="sk-ant-..." />
-          </div>
-        </div>
-      </div>
-
-      {/* Save Bar */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="bg-black/90 backdrop-blur-md border border-white/10 rounded-full px-6 py-3 shadow-2xl flex items-center gap-6">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Settings</span>
-            <span className="text-xs text-white font-medium">Unsaved Changes</span>
-          </div>
-          <div className="h-8 w-px bg-white/10" />
-          <div className="flex items-center gap-3">
-            {saved && <span className="text-emerald-400 text-xs font-bold flex items-center gap-1 animate-in zoom-in-95"><Check className="w-3.5 h-3.5" /> Saved</span>}
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-white text-black px-5 py-2 rounded-full text-xs font-bold hover:bg-zinc-100 transition-all active:scale-95 disabled:opacity-50 flex items-center gap-2"
-            >
-              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
-              {saved ? "SUCCESS" : "SAVE ALL CHANGES"}
-            </button>
-          </div>
-        </div>
-      </div>
-    </form>
-    
-    <div className="pt-8 border-t border-zinc-100">
-      <AccountManager accounts={settings?.accounts || []} />
-    </div>
-    </>
-  );
-}
-
-function FieldInput({ label, name, type = "text", defaultValue = "", placeholder = "" }: {
-  label: string; name: string; type?: string; defaultValue?: string; placeholder?: string;
-}) {
-  const [show, setShow] = useState(false);
-  const isPassword = type === "password";
-  const finalType = isPassword ? (show ? "text" : "password") : type;
-
-  return (
-    <div className="w-full">
-      <label htmlFor={name} className="text-xs font-medium text-zinc-500 mb-1 block">{label}</label>
-      <div className="flex items-center w-full border border-zinc-200 rounded-lg bg-white focus-within:border-zinc-400 transition-colors overflow-hidden">
-        <input 
-          id={name} 
-          type={finalType} 
-          name={name} 
-          defaultValue={defaultValue} 
-          placeholder={placeholder}
-          className="flex-1 bg-transparent border-none px-3 py-2.5 text-sm text-black focus:outline-none placeholder:text-zinc-400 min-w-0" 
-        />
-        {isPassword && (
-          <button
-            type="button"
-            onClick={() => setShow(!show)}
-            className="px-3 py-2.5 text-zinc-400 hover:text-black transition-colors shrink-0"
-          >
-            {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-          </button>
-        )}
       </div>
     </div>
   );
 }
-

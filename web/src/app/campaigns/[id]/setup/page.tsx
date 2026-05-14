@@ -3,15 +3,29 @@ import { updateCampaignSetup } from "../../actions";
 import { Stepper } from "@/components/Stepper";
 import { ArrowRight, Settings2, Sliders, Globe, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 export default async function CampaignSetupPage({ params }: { params: Promise<{ id: string }> }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id as string;
+
   const { id } = await params;
   const campaign = await prisma.campaign.findUnique({
-    where: { id },
+    where: { id, userId },
     include: { _count: { select: { leads: true } } }
   });
-  const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+
+  const settings = await prisma.settings.findUnique({ where: { userId } });
   const strategies = await prisma.strategy.findMany({ orderBy: { name: 'asc' } });
+  const smtpAccounts = await prisma.integrationAccount.findMany({
+    where: { userId, type: "SMTP" },
+    orderBy: { createdAt: 'desc' }
+  });
+
+
 
   if (!campaign) return <div className="p-8 text-center text-zinc-400">Campaign not found</div>;
 
@@ -123,7 +137,27 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
 
               <div className="space-y-6">
                 <div>
+                  <label className="text-xs font-medium text-zinc-500 mb-2 block">Sending Email Account</label>
+                  <select 
+                    name="smtpAccountId"
+                    defaultValue={campaign.smtpAccountId || ""}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors cursor-pointer"
+                  >
+                    <option value="">Select Sending Account...</option>
+                    {smtpAccounts.map(acc => (
+                      <option key={acc.id} value={acc.id}>{acc.name} ({acc.provider})</option>
+                    ))}
+                  </select>
+                  {smtpAccounts.length === 0 && (
+                    <p className="text-[10px] text-red-500 mt-2">
+                      No SMTP accounts found. <Link href="/settings" className="underline font-bold">Add one in settings</Link>
+                    </p>
+                  )}
+                </div>
+
+                <div>
                   <label className="text-xs font-medium text-zinc-500 mb-2 block">AI Outreach Strategy</label>
+
                   <select 
                     name="strategyId"
                     defaultValue={campaign.strategyId || ""}

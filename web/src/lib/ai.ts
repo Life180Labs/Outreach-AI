@@ -44,18 +44,22 @@ class ClaudeProvider implements AIProvider {
 class GeminiProvider implements AIProvider {
   constructor(private apiKey: string, private model: string = "gemini-1.5-flash") { }
   async generate(system: string, user: string, temp: number = 0.7, isJson: boolean = true) {
-    const genAI = new GoogleGenAI(this.apiKey);
-    const model = genAI.getGenerativeModel({
+    const ai = new GoogleGenAI({ apiKey: this.apiKey });
+    const result = await ai.models.generateContent({
       model: this.model,
-      systemInstruction: system
-    });
-    const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: user }] }],
-      generationConfig: { temperature: temp, responseMimeType: isJson ? "application/json" : "text/plain" },
+      config: { 
+        systemInstruction: system,
+        temperature: temp, 
+        responseMimeType: isJson ? "application/json" : "text/plain" 
+      },
     });
-    return result.response.text();
+    return result.text || "";
+
+
   }
 }
+
 
 class GroqProvider implements AIProvider {
   constructor(private apiKey: string, private model: string = "llama-3.3-70b-versatile") { }
@@ -144,7 +148,7 @@ export async function generateEmailDraft(
   userFeedback: string = "",
   cachedSettings?: Settings | null
 ): Promise<EmailDraft> {
-  const settings = cachedSettings ?? await prisma.settings.findUnique({ where: { id: "global" } });
+  const settings = cachedSettings ?? (campaign?.userId ? await prisma.settings.findUnique({ where: { userId: campaign.userId } }) : null);
   if (!settings) throw new Error("AI settings not configured.");
 
   const { systemPrompt, userPrompt } = getPrompts(lead, campaign, userFeedback, settings.basePrompt || undefined);
@@ -215,7 +219,7 @@ export async function testEmailGeneration(
 ): Promise<EmailDraft> {
   const mockLead = { firstName: "Test", lastName: "User", companyName: "Test Co", jobTitle: "CEO", notes: leadNotes } as Lead;
   const mockCampaign = { context: promptOverride, tone: "Professional", cta: "Book a call" } as any;
-  const settings = cachedSettings ?? await prisma.settings.findUnique({ where: { id: "global" } });
+  const settings = cachedSettings ?? (mockCampaign.userId ? await prisma.settings.findUnique({ where: { userId: mockCampaign.userId } }) : null);
   if (!settings) throw new Error("Settings not found");
   return generateEmailDraft(mockLead, mockCampaign, "", settings);
 }

@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { generateEmailDraft } from "@/lib/ai";
-import { getTransporterFromSettings, getSenderAddress } from "@/lib/mail";
+
 import type { ActionResult, LeadWithMessages } from "@/types";
 
 export async function updateLeadStatusAction(
@@ -96,16 +96,16 @@ export async function sendReplyAction(
 
     if (!lead) return { success: false, error: "Lead not found" };
 
-    const { transporter, from } = await getTransporterFromSettings();
+    const { sendEmail } = await import("@/lib/mail");
     const { formatEmailHTML } = await import("@/lib/email-signature");
 
-    await transporter.sendMail({
-      from,
+    await sendEmail({
       to: lead.email,
       subject: `Re: ${lead.emailSubject || "Quick question"}`,
-      text: content,
       html: formatEmailHTML(content),
+      campaignId: lead.campaignId,
     });
+
 
     const updatedLead = await prisma.lead.update({
       where: { id: leadId },
@@ -137,27 +137,39 @@ export async function syncLeadInboxAction(
       where: { id: leadId },
       include: { campaign: true, messages: true },
     });
-    const settings = await prisma.settings.findUnique({
-      where: { id: "global" },
+    if (!lead || !lead.campaign.smtpAccountId)
+      return { success: false, error: "Missing lead or sending account" };
+
+    const smtpAccount = await prisma.integrationAccount.findUnique({
+      where: { id: lead.campaign.smtpAccountId }
     });
 
-    if (!lead || !settings)
-      return { success: false, error: "Missing lead or settings" };
+    if (!smtpAccount) return { success: false, error: "SMTP Account not found" };
+
+    const config = JSON.parse(smtpAccount.config);
+    const { EncryptionUtils } = await import("@/utils/encryption");
+    let decryptedPass = "";
+    try {
+      decryptedPass = EncryptionUtils.decrypt(config.pass);
+    } catch (e) {
+      return { success: false, error: "Failed to decrypt SMTP password" };
+    }
 
     const { ImapFlow } = require("imapflow");
     const client = new ImapFlow({
-      host: settings.smtpHost?.replace("smtp.", "imap.") || "imap.gmail.com",
+      host: config.host.replace("smtp.", "imap."),
       port: 993,
       secure: true,
       auth: {
-        user: settings.smtpUser || settings.gmailEmailAddress || "",
-        pass: settings.smtpPass || "",
+        user: config.user,
+        pass: decryptedPass,
       },
       logger: false,
       emitLogs: false,
       connectionTimeout: 10000,
       greetingTimeout: 5000,
     });
+
 
     let newMessageCount = 0;
 

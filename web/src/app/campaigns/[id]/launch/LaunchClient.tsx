@@ -6,10 +6,24 @@ import { Check, Loader2, Rocket, Clock, ShieldAlert, Send, Users, Activity } fro
 import { StopSequencesButton } from "../../../StopSequencesButton";
 import Link from "next/link";
 
-export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any) {
+export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, readyLeads }: any) {
   const [loading, setLoading] = useState(false);
 
-  const canLaunch = readyLeads > 0 && (settings?.gmailEmailAddress || settings?.smtpHost);
+  // Extract user email from smtpAccount config if available
+  let senderEmail = "Not configured";
+  let isAccountConnected = false;
+
+  if (smtpAccount) {
+    try {
+      const config = JSON.parse(smtpAccount.config);
+      senderEmail = config.user || smtpAccount.name;
+      isAccountConnected = true;
+    } catch (e) {
+      console.error("Failed to parse SMTP config", e);
+    }
+  }
+
+  const canLaunch = readyLeads > 0 && isAccountConnected;
   const pendingLeads = totalLeads - readyLeads;
 
   const handleLaunch = async () => {
@@ -44,7 +58,7 @@ export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <SummaryItem icon={Rocket} label="Campaign" value={campaign.name || "Untitled"} />
               <SummaryItem icon={Users} label="Total Leads" value={totalLeads} />
-              <SummaryItem icon={Send} label="Sender Address" value={settings?.gmailEmailAddress || settings?.smtpUser || "Not connected"} />
+              <SummaryItem icon={Send} label="Sender Address" value={senderEmail} />
               <SummaryItem icon={Activity} label="Send Rate" value={`${settings?.maxEmailsPerHour || 30}/hr`} />
               <SummaryItem icon={Clock} label="Est. Completion" value={`~${Math.max(1, Math.ceil(totalLeads / (settings?.maxEmailsPerHour || 30)))} hours`} />
             </div>
@@ -73,7 +87,7 @@ export function LaunchClient({ campaign, settings, totalLeads, readyLeads }: any
             </div>
             
             <ul className="space-y-4">
-              <CheckItem label="Sender account connected" checked={!!(settings?.gmailEmailAddress || settings?.smtpHost)} />
+              <CheckItem label="Sender account connected" checked={isAccountConnected} />
               <CheckItem label={`${totalLeads} leads validated`} checked={totalLeads > 0} />
               <CheckItem label={`${readyLeads} drafts approved`} checked={readyLeads > 0} />
               <CheckItem label="Rate limits configured" checked={!!settings?.maxEmailsPerHour} />

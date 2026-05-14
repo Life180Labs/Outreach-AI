@@ -1,85 +1,128 @@
+// web/src/lib/mail.ts
 import nodemailer from "nodemailer";
-import type { Transporter } from "nodemailer";
-import prisma from "./prisma";
+import prisma from "@/lib/prisma";
+import { EncryptionUtils } from "@/utils/encryption";
 
-export type MailSettings = {
-  smtpHost: string | null;
-  smtpPort: number | null;
-  smtpUser: string | null;
-  smtpPass: string | null;
-  smtpFromEmail: string | null;
-  gmailEmailAddress: string | null;
-  gmailAppPassword?: string | null;
-  gmailRefreshToken?: string | null;
-};
+interface SendEmailParams {
+  to: string;
+  subject: string;
+  html: string;
+  campaignId?: string;    // Used to automatically find the right SMTP config
+  smtpAccountId?: string; // Can be passed directly if known
+  fromName?: string;      // Usually the campaign senderName
+}
+
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  campaignId,
+  smtpAccountId,
+  fromName
+}: SendEmailParams) {
+
+  let accountIdToUse = smtpAccountId;
+  let senderDisplayName = fromName;
+
+  // 1. If an explicit SMTP ID wasn't provided, look it up via the Campaign
+  if (!accountIdToUse && campaignId) {
+    const campaign = await prisma.campaign.findUnique({
+      where: { id: campaignId },
+      select: { smtpAccountId: true, senderName: true }
+    });
+
+    if (!campaign?.smtpAccountId) {
+      throw new Error(`Campaign ${campaignId} has no sending email configured. Please update it in Campaign Setup.`);
+    }
+
+    accountIdToUse = campaign.smtpAccountId;
+    senderDisplayName = senderDisplayName || campaign.senderName || "The Life180 Team";
+  }
+
+  if (!accountIdToUse) {
+    throw new Error("Cannot send email: No SMTP Account ID provided.");
+  }
+
+  // 2. Fetch the secure SMTP configuration from the database
+  const smtpAccount = await prisma.integrationAccount.findUnique({
+    where: { id: accountIdToUse }
+  });
+
+  if (!smtpAccount || smtpAccount.type !== "SMTP") {
+    throw new Error("Invalid or missing SMTP configuration. Please check your settings.");
+  }
+
+  // 3. Parse the config and securely DECRYPT the password in memory
+  const config = JSON.parse(smtpAccount.config);
+  let decryptedPassword;
+
+  try {
+    decryptedPassword = EncryptionUtils.decrypt(config.pass);
+  } catch (err) {
+    console.error("Failed to decrypt SMTP password for account:", smtpAccount.id);
+    throw new Error("Failed to authenticate with SMTP server. Your credentials may be corrupted.");
+  }
+
+  // 4. Instantiate Nodemailer dynamically using the decrypted credentials
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: Number(config.port),
+    secure: Number(config.port) === 465, // true for 465, false for 587/25
+    auth: {
+      user: config.user,
+      pass: decryptedPassword,
+    },
+  });
+
+  // 5. Build the "From" address formatted nicely: "Sender Name" <email@domain.com>
+  const fromAddress = `"${senderDisplayName || smtpAccount.name}" <${config.user}>`;
+
+  // 6. Dispatch the email
+  try {
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      subject,
+      html,
+    });
+
+    return { success: true, messageId: info.messageId };
+  } catch (error: any) {
+    console.error(`[SMTP Dispatch Error] to ${to}:`, error.message);
+    throw new Error(`Failed to send email: ${error.message}`);
+  }
+}
 
 /**
- * Creates a nodemailer transporter from the global settings.
- * Centralizes SMTP configuration so it's consistent across:
- * - Lead reply sending (leads/[id]/actions.ts)
- * - Campaign batch sending (inngest/functions.ts)
- * - Test email sending (campaigns/[id]/review/actions.ts)
+ * Creates a Nodemailer transporter from an IntegrationAccount.
+ * Used for batch processing and connection reuse in background jobs.
  */
-export function createTransporter(settings: MailSettings): Transporter {
-  const host = settings.smtpHost || "smtp.gmail.com";
-  const port = settings.smtpPort || (settings.smtpHost ? 587 : 465);
-  const isSecure = port === 465;
+export function createTransporter(account: any) {
+  const config = typeof account.config === "string" ? JSON.parse(account.config) : account.config;
+  let decryptedPassword = "";
+
+  try {
+    decryptedPassword = EncryptionUtils.decrypt(config.pass);
+  } catch (err) {
+    throw new Error(`Failed to decrypt password for account ${account.name}`);
+  }
 
   return nodemailer.createTransport({
-    host,
-    port,
-    secure: isSecure,
+    host: config.host,
+    port: Number(config.port),
+    secure: Number(config.port) === 465,
     auth: {
-      user: settings.smtpUser || settings.gmailEmailAddress || "",
-      pass: settings.smtpPass || settings.gmailRefreshToken || "",
-    },
-    // Use a single connection pool for Gmail/SMTP stability
-    pool: true,
-    maxConnections: 1, 
-    maxMessages: 100,
-    connectionTimeout: 30000, // 30s connection timeout
-    greetingTimeout: 30000,   // 30s greeting timeout
-    socketTimeout: 60000,     // 60s socket timeout
-    debug: true,
-    tls: { 
-      rejectUnauthorized: false,
+      user: config.user,
+      pass: decryptedPassword,
     },
   });
 }
 
 /**
- * Returns the "from" address to use for outbound emails.
+ * Returns the formatted sender address for an IntegrationAccount.
  */
-export function getSenderAddress(settings: MailSettings): string {
-  return (
-    settings.smtpFromEmail ||
-    settings.smtpUser ||
-    settings.gmailEmailAddress ||
-    "outreach@life180.com"
-  );
-}
-
-/**
- * Fetches global settings and returns a ready-to-use transporter.
- * Throws a descriptive error if settings are missing.
- */
-export async function getTransporterFromSettings(): Promise<{
-  transporter: Transporter;
-  from: string;
-  settings: MailSettings;
-}> {
-  const settings = await prisma.settings.findUnique({ where: { id: "global" } });
-
-  if (!settings) {
-    throw new Error("Email settings not configured. Go to Settings to configure SMTP.");
-  }
-
-  if (!settings.smtpHost && !settings.gmailEmailAddress) {
-    throw new Error("No SMTP host or Gmail address configured. Go to Settings.");
-  }
-
-  const transporter = createTransporter(settings);
-  const from = getSenderAddress(settings);
-
-  return { transporter, from, settings };
-}
+export function getSenderAddress(account: any, customSenderName?: string) {
+  const config = typeof account.config === "string" ? JSON.parse(account.config) : account.config;
+  const name = customSenderName || account.name || "The Life180 Team";
+  return `"${name}" <${config.user}>`;
+}

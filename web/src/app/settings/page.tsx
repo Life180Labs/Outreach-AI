@@ -1,21 +1,39 @@
-export const dynamic = "force-dynamic";
-
 import prisma from "@/lib/prisma";
-import { SettingsClient } from "./SettingsClient";
+import SettingsClient from "./SettingsClient";
+import { SmtpService } from "@/services/smtp.service";
+
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
-  const settings = await prisma.settings.findUnique({ 
-    where: { id: "global" },
-    include: { accounts: { orderBy: { createdAt: 'desc' } } }
+  const session = await getServerSession(authOptions);
+  
+  if (!session?.user?.id) {
+    redirect("/login");
+  }
+
+  const userId = session.user.id as string;
+
+  // Fetch or create default settings for the user
+  let settings = await prisma.settings.findUnique({ 
+    where: { userId }
   });
+
+  if (!settings) {
+    settings = await prisma.settings.create({
+      data: { userId }
+    });
+  }
+
+  // Use the service to get formatted accounts (with parsed JSON config)
+  const accounts = await SmtpService.getAccountsForUser(userId);
 
   return (
     <div className="w-full space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-black tracking-tight">Settings</h1>
-        <p className="text-zinc-400 text-sm mt-1">Configure your sending accounts and AI models</p>
-      </div>
-      <SettingsClient settings={settings} />
+      <SettingsClient settings={settings} accounts={accounts} />
     </div>
   );
 }
+
+

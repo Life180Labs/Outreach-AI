@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description: "AI-powered outreach engine for Life180 campaigns",
 };
 
+import { ToasterProvider } from "@/components/ToasterProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,7 +27,9 @@ export default function RootLayout({
     <html lang="en" className={cn("h-full", "antialiased", inter.variable, "font-sans", geist.variable)} suppressHydrationWarning>
       <body className="h-full flex flex-col bg-background text-foreground font-sans">
         <AppShell>{children}</AppShell>
+        <ToasterProvider />
       </body>
     </html>
   );
 }
+

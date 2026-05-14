@@ -3,13 +3,19 @@
 import { testEmailGeneration } from "@/lib/ai";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
 
 export async function runEvaluationAction(prompt: string, notes: string) {
   try {
-    const draft = await testEmailGeneration(prompt, notes);
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    const userId = session.user.id as string;
+
+    const settings = await prisma.settings.findUnique({ where: { userId } });
+    const draft = await testEmailGeneration(prompt, notes, settings);
     
-    // In a real evaluation, we might use a second AI call to 'grade' the draft
-    // For now, we'll return the draft and a simulated score based on length and presence of placeholders
     const score = calculateHeuristicScore(draft.body, notes);
     
     return { 
@@ -29,8 +35,12 @@ export async function runEvaluationAction(prompt: string, notes: string) {
 
 export async function saveStructuredPromptAction(data: any) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    const userId = session.user.id as string;
+
     await prisma.settings.upsert({
-      where: { id: "global" },
+      where: { userId },
       update: {
         promptRole: data.role,
         promptProduct: data.product,
@@ -41,7 +51,7 @@ export async function saveStructuredPromptAction(data: any) {
         promptCta: data.cta,
       },
       create: { 
-        id: "global",
+        user: { connect: { id: userId } },
         promptRole: data.role,
         promptProduct: data.product,
         promptPersona: data.persona,
@@ -61,7 +71,11 @@ export async function saveStructuredPromptAction(data: any) {
 
 export async function refineStructuredPromptAction(currentForm: any, feedback: string) {
   try {
-    const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    const userId = session.user.id as string;
+
+    const settings = await prisma.settings.findUnique({ where: { userId } });
     if (!settings) throw new Error("Settings not found");
 
     const provider = settings.aiProvider || "gemini";
@@ -112,6 +126,10 @@ Return ONLY a JSON object with the improved fields:
 
 export async function saveAsNewStrategyAction(name: string, data: any) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) throw new Error("Unauthorized");
+    const userId = session.user.id as string;
+
     const strategy = await prisma.strategy.create({
       data: {
         name,
@@ -132,7 +150,11 @@ export async function saveAsNewStrategyAction(name: string, data: any) {
 }
 
 export async function getInitialDataAction() {
-  const settings = await prisma.settings.findUnique({ where: { id: "global" } });
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) return { basePrompt: "", strategies: [], structured: {} };
+  const userId = session.user.id as string;
+
+  const settings = await prisma.settings.findUnique({ where: { userId } });
   const strategies = await prisma.strategy.findMany({
     orderBy: { createdAt: "desc" }
   });
@@ -151,6 +173,7 @@ export async function getInitialDataAction() {
     }
   };
 }
+
 
 function calculateHeuristicScore(body: string, notes: string): number {
   const bodyLower = body.toLowerCase();
