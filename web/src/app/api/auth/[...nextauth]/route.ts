@@ -8,8 +8,9 @@ import { AuthService } from "@/services/auth.service";
 
 export const authOptions: NextAuthOptions = {
     adapter: PrismaAdapter(prisma) as any,
+    debug: true,
     session: {
-        strategy: "jwt",
+        strategy: "jwt", // Must be JWT for the default Middleware to work
     },
     pages: {
         signIn: "/login",
@@ -23,7 +24,6 @@ export const authOptions: NextAuthOptions = {
 
         CredentialsProvider({
             name: "Credentials",
-
             credentials: {
                 email: { label: "Email", type: "email", placeholder: "you@life180.com" },
                 password: { label: "Password", type: "password" }
@@ -55,18 +55,28 @@ export const authOptions: NextAuthOptions = {
     ],
     callbacks: {
         async jwt({ token, user }) {
+            // CRITICAL: We only store the ID, Email, and Name. 
+            // We explicitly EXCLUDE 'image' and other fields to keep the cookie size under the 4KB limit.
             if (user) {
-                token.id = user.id;
+                return {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                };
             }
             return token;
         },
         async session({ session, token }) {
-            if (session.user) {
+            if (session.user && token) {
                 (session.user as any).id = token.id;
+                session.user.name = token.name;
+                session.user.email = token.email;
+                session.user.image = null; // Ensure no base64 bloat in the session
             }
             return session;
         }
-    }
+    },
+    secret: process.env.NEXTAUTH_SECRET,
 };
 
 const handler = NextAuth(authOptions);

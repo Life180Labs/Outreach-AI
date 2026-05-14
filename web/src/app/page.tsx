@@ -6,8 +6,17 @@ import prisma from "@/lib/prisma";
 import { StopSequencesButton } from "./StopSequencesButton";
 import { CampaignsClient } from "./campaigns/CampaignsClient";
 
+import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+
 export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) redirect("/login");
+  const userId = session.user.id as string;
+
   const campaigns = await prisma.campaign.findMany({
+    where: { userId },
     orderBy: { updatedAt: "desc" },
     take: 8,
     include: {
@@ -15,6 +24,7 @@ export default async function DashboardPage() {
       leads: { select: { sent: true, status: true, replied: true } },
     },
   });
+
 
   const totalLeads = campaigns.reduce((acc, c) => acc + c._count.leads, 0);
   const totalSent = campaigns.reduce((acc, c) => acc + c.leads.filter(l => l.sent).length, 0);
