@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Edit2, Trash2, Plus, Save, X, Mail, Eye, EyeOff } from "lucide-react";
+import { Edit2, Trash2, Plus, Save, X, Mail, Eye, EyeOff, ShieldCheck } from "lucide-react";
 
 export default function AccountManager({ initialAccounts }: { initialAccounts: any[] }) {
   const router = useRouter();
@@ -21,8 +21,11 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
     name: "",
     host: "",
     port: "465",
-    user: "",
-    pass: ""
+    username: "",
+    password: "",
+    encryptionType: "TLS",
+    fromEmail: "",
+    fromName: ""
   });
 
   const handleEdit = (acc: any) => {
@@ -31,8 +34,11 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
       name: acc.name,
       host: acc.host,
       port: acc.port.toString(),
-      user: acc.user,
-      pass: "" 
+      username: acc.username,
+      password: "", 
+      encryptionType: acc.encryptionType || "TLS",
+      fromEmail: acc.fromEmail || "",
+      fromName: acc.fromName || ""
     });
     const formElement = document.getElementById("smtp-form");
     if (formElement) {
@@ -42,7 +48,16 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
   const cancelEdit = () => {
     setEditingId(null);
-    setForm({ name: "", host: "", port: "465", user: "", pass: "" });
+    setForm({ 
+      name: "", 
+      host: "", 
+      port: "465", 
+      username: "", 
+      password: "", 
+      encryptionType: "TLS",
+      fromEmail: "",
+      fromName: ""
+    });
     setShowPass(false);
   };
 
@@ -50,16 +65,22 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
     e.preventDefault();
     setLoading(true);
     
-    const toastId = toast.loading(editingId ? "Updating SMTP connection..." : "Saving SMTP connection...");
+    const toastId = toast.loading(editingId ? "Updating SMTP connection..." : "Verifying & Saving SMTP...");
 
     try {
       const url = editingId ? `/api/smtp/${editingId}` : "/api/smtp";
       const method = editingId ? "PATCH" : "POST";
       
+      // Convert port to number for Zod
+      const payload = {
+        ...form,
+        port: parseInt(form.port, 10)
+      };
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -69,7 +90,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
       }
 
       toast.success(editingId ? "SMTP Account Updated" : "SMTP Account Added", { id: toastId });
-      router.refresh(); // Trigger server data refresh
+      router.refresh(); 
       cancelEdit();
     } catch (err: any) {
       toast.error(err.message, { id: toastId });
@@ -108,12 +129,18 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             {accounts.map((acc) => (
               <div key={acc.id} className="flex justify-between items-center p-5 bg-zinc-50 rounded-2xl border border-zinc-200 group hover:border-zinc-300 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-zinc-600 transition-colors">
+                  <div className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-zinc-600 transition-colors relative">
                     <Mail className="w-5 h-5" />
+                    {acc.isVerified && (
+                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" title="Verified" />
+                    )}
                   </div>
                   <div>
                     <p className="font-semibold text-zinc-900">{acc.name}</p>
-                    <p className="text-xs text-zinc-500 font-medium">{acc.user} <span className="mx-1 opacity-30">|</span> {acc.host}:{acc.port}</p>
+                    <p className="text-xs text-zinc-500 font-medium">
+                      {acc.username} <span className="mx-1 opacity-30">|</span> {acc.host}:{acc.port}
+                      {acc.fromEmail && <span className="block mt-0.5 opacity-60">Sender: {acc.fromName} &lt;{acc.fromEmail}&gt;</span>}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -164,8 +191,9 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
           )}
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Friendly Name */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Display Name</label>
               <input 
@@ -177,6 +205,8 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                 className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
               />
             </div>
+
+            {/* Host */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Host</label>
               <input 
@@ -188,6 +218,8 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                 className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
               />
             </div>
+
+            {/* Port */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Port</label>
               <input 
@@ -199,18 +231,36 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                 className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
               />
             </div>
+
+            {/* Encryption */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Username / Email</label>
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Encryption</label>
+              <select 
+                value={form.encryptionType} 
+                onChange={e => setForm({ ...form, encryptionType: e.target.value })}
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none cursor-pointer"
+              >
+                <option value="TLS">STARTTLS (Port 587)</option>
+                <option value="SSL">SSL/TLS (Port 465)</option>
+                <option value="NONE">None (Not recommended)</option>
+              </select>
+            </div>
+
+            {/* Username */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Username</label>
               <input 
                 type="text" 
                 required 
-                value={form.user} 
-                onChange={e => setForm({ ...form, user: e.target.value })} 
+                value={form.username} 
+                onChange={e => setForm({ ...form, username: e.target.value })} 
                 placeholder="you@company.com" 
                 className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
               />
             </div>
-            <div className="md:col-span-2 space-y-1.5">
+
+            {/* Password */}
+            <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">
                 App Password {editingId && <span className="font-normal lowercase opacity-50">(leave blank to keep current)</span>}
               </label>
@@ -218,8 +268,8 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                 <input 
                   type={showPass ? "text" : "password"} 
                   required={!editingId} 
-                  value={form.pass} 
-                  onChange={e => setForm({ ...form, pass: e.target.value })} 
+                  value={form.password} 
+                  onChange={e => setForm({ ...form, password: e.target.value })} 
                   placeholder={editingId ? "••••••••••••••••" : "Enter your secure app password"} 
                   className="w-full py-2.5 text-sm outline-none bg-transparent" 
                 />
@@ -232,16 +282,42 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                 </button>
               </div>
             </div>
+
+            {/* From Name */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Sender Display Name</label>
+              <input 
+                type="text" 
+                required 
+                value={form.fromName} 
+                onChange={e => setForm({ ...form, fromName: e.target.value })} 
+                placeholder="e.g. Sandeep from Life180" 
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+              />
+            </div>
+
+            {/* From Email */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Sender Email Address</label>
+              <input 
+                type="email" 
+                required 
+                value={form.fromEmail} 
+                onChange={e => setForm({ ...form, fromEmail: e.target.value })} 
+                placeholder="e.g. hello@life180.ai" 
+                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+              />
+            </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-2">
             <button 
               type="submit" 
               disabled={loading} 
-              className="flex items-center gap-2 px-6 py-2.5 bg-zinc-900 text-white text-sm font-bold rounded-xl hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50"
+              className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white text-sm font-bold rounded-xl hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-zinc-200"
             >
-              {loading ? "Saving..." : (editingId ? "Update Connection" : "Save Connection")}
-              <Save className="w-4 h-4" />
+              {loading ? "Verifying Connection..." : (editingId ? "Update Configuration" : "Verify & Save Account")}
+              <ShieldCheck className="w-4 h-4" />
             </button>
           </div>
         </form>
