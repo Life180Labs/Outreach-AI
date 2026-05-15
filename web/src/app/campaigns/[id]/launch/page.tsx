@@ -32,6 +32,7 @@ export default async function CampaignLaunchPage({ params }: { params: Promise<{
         id: true,
         name: true,
         fromEmail: true,
+        userEmail: true,
         host: true,
         isVerified: true,
       },

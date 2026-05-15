@@ -13,14 +13,14 @@ export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, read
   let senderEmail = "Not configured";
   let isAccountConnected = false;
 
-  if (smtpAccount) {
-    try {
-      const config = JSON.parse(smtpAccount.config);
-      senderEmail = config.user || smtpAccount.name;
+  try {
+    if (smtpAccount) {
+      // Use the specific account selected for this campaign
+      senderEmail = smtpAccount.fromEmail || smtpAccount.userEmail || smtpAccount.name;
       isAccountConnected = true;
-    } catch (e) {
-      console.error("Failed to parse SMTP config", e);
     }
+  } catch (error) {
+    console.error("Error resolving selected SMTP account:", error);
   }
 
   const canLaunch = readyLeads > 0 && isAccountConnected;
