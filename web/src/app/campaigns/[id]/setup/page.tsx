@@ -47,7 +47,7 @@ export default async function CampaignSetupPage({ params }: PageProps) {
     }),
 
     prisma.smtpAccount.findMany({
-      where: { userId, isVerified: true },
+      where: { isVerified: true, isActive: true },
       orderBy: { createdAt: "desc" },
       select: {
         id: true,

@@ -80,6 +80,7 @@ model SmtpAccount {
   fromEmail        String
   fromName         String
   isVerified       Boolean    @default(false)
+  isActive         Boolean    @default(true)
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
 

@@ -49,9 +49,10 @@ export const SmtpService = {
   /**
    * Returns all SMTP accounts for a user, with encrypted passwords stripped.
    */
-  async getSmtpAccountsByUser(userId: string): Promise<SmtpAccountSafe[]> {
+  async getSmtpAccountsByUser(userId?: string): Promise<SmtpAccountSafe[]> {
+    const where = userId ? { userId } : {};
     const accounts = await prisma.smtpAccount.findMany({
-      where: { userId },
+      where: { ...where, isVerified: true, isActive: true },
       select: {
         id: true,
         userId: true,
@@ -63,6 +64,7 @@ export const SmtpService = {
         fromEmail: true,
         fromName: true,
         isVerified: true,
+        isActive: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -78,9 +80,8 @@ export const SmtpService = {
    */
   async deleteSmtpAccount(id: string, userId: string): Promise<void> {
     // Verify ownership
-    const account = await prisma.smtpAccount.findFirst({
-      where: { id, userId },
-      select: { id: true },
+    const account = await prisma.smtpAccount.findUnique({
+      where: { id },
     });
 
     if (!account) {
@@ -97,6 +98,27 @@ export const SmtpService = {
     await prisma.smtpAccount.delete({
       where: { id },
     });
+  },
+
+  /**
+   * Toggles the active status of an SMTP account.
+   */
+  async toggleSmtpStatus(id: string, userId: string): Promise<boolean> {
+    const account = await prisma.smtpAccount.findUnique({
+      where: { id },
+      select: { id: true, isActive: true },
+    });
+
+    if (!account) {
+      throw new Error("SMTP account not found");
+    }
+
+    const updated = await prisma.smtpAccount.update({
+      where: { id },
+      data: { isActive: !account.isActive },
+    });
+
+    return updated.isActive;
   },
 
   /**

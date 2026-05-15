@@ -120,6 +120,24 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
     }
   };
 
+  const handleToggleStatus = async (id: string) => {
+    const toastId = toast.loading("Updating status...");
+    try {
+      const res = await fetch(`/api/smtp?id=${id}`, { method: "PATCH" });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Failed to update status");
+
+      toast.success(data.message, { id: toastId });
+      
+      // Optimistic UI update
+      setAccounts(prev => prev.map(a => a.id === id ? { ...a, isActive: data.data.isActive } : a));
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message, { id: toastId });
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* List Existing SMTP Accounts */}
@@ -143,7 +161,16 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleToggleStatus(acc.id)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                      acc.isActive 
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100" 
+                        : "bg-zinc-100 text-zinc-400 border-zinc-200 hover:bg-zinc-200"
+                    }`}
+                  >
+                    {acc.isActive ? "Active" : "Disabled"}
+                  </button>
                   <button
                     onClick={() => handleEdit(acc)}
                     className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-white rounded-lg border border-transparent hover:border-zinc-200 transition-all"

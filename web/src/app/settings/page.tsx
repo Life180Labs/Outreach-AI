@@ -26,7 +26,7 @@ export default async function SettingsPage() {
   }
 
   // Use the service to get formatted accounts (without encrypted passwords)
-  const accounts = await SmtpService.getSmtpAccountsByUser(userId);
+  const accounts = await SmtpService.getSmtpAccountsByUser();
 
   return (
     <div className="w-full space-y-6">

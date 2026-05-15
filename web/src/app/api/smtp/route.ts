@@ -18,7 +18,7 @@ import { NextRequest } from "next/server";
 export async function GET() {
   try {
     const user = await getAuthUser();
-    const accounts = await SmtpService.getSmtpAccountsByUser(user.id);
+    const accounts = await SmtpService.getSmtpAccountsByUser();
     return successResponse(accounts);
   } catch (error) {
     if (error instanceof Error && error.message === "Unauthorized") {
@@ -73,6 +73,30 @@ export async function DELETE(req: NextRequest) {
       return errorResponse(error.message, 400);
     }
     logger.error("Delete SMTP account failed", "SmtpRoute");
+    return errorResponse("Internal server error", 500);
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const user = await getAuthUser();
+    const { searchParams } = new URL(req.url);
+    const accountId = searchParams.get("id");
+
+    if (!accountId) {
+      return errorResponse("Account ID is required", 400);
+    }
+
+    const isActive = await SmtpService.toggleSmtpStatus(accountId, user.id);
+    return successResponse({ isActive }, `SMTP account ${isActive ? 'enabled' : 'disabled'} successfully`);
+  } catch (error) {
+    if (error instanceof Error && error.message === "Unauthorized") {
+      return unauthorizedResponse();
+    }
+    if (error instanceof Error) {
+      return errorResponse(error.message, 400);
+    }
+    logger.error("Toggle SMTP status failed", "SmtpRoute");
     return errorResponse("Internal server error", 500);
   }
 }
