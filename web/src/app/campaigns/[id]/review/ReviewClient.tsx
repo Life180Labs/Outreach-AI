@@ -255,6 +255,8 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                 <div className="flex items-center gap-2">
                   {lead.isApproved ? (
                     <Check className="w-3.5 h-3.5 text-emerald-500" />
+                  ) : lead.emailSubject === "Error" ? (
+                    <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" title="Generation Failed" />
                   ) : lead.emailSubject ? (
                     <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                   ) : (
@@ -284,7 +286,8 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => { setShowTestInput(!showTestInput); setShowRegenInput(false); }}
-                    className="flex items-center gap-2 px-3 py-2 text-zinc-500 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors"
+                    disabled={selectedLead.emailSubject === "Error"}
+                    className="flex items-center gap-2 px-3 py-2 text-zinc-500 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors disabled:opacity-30"
                     title="Send test email"
                   >
                     <Mail className="w-4 h-4" />
@@ -296,16 +299,16 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                     title="Regenerate draft"
                   >
                     <RefreshCcw className="w-4 h-4" />
-                    <span className="text-xs font-medium">Regenerate</span>
+                    <span className="text-xs font-medium">{selectedLead.emailSubject === "Error" ? "Try Again" : "Regenerate"}</span>
                   </button>
                   <div className="w-px h-5 bg-zinc-100" />
                   <button
                     onClick={handleApprove}
-                    disabled={loading === 'approve' || selectedLead.isApproved}
+                    disabled={loading === 'approve' || selectedLead.isApproved || selectedLead.emailSubject === "Error" || !selectedLead.emailSubject}
                     className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 ${
                       selectedLead.isApproved 
                         ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 cursor-default' 
-                        : 'bg-black text-white hover:bg-zinc-800'
+                        : 'bg-black text-white hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400'
                     }`}
                   >
                     {loading === 'approve' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
@@ -323,12 +326,12 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                         type="text"
                         value={regenFeedback}
                         onChange={(e) => setRegenFeedback(e.target.value)}
-                        placeholder="Feedback for AI (e.g. 'Make it shorter')"
+                        placeholder={selectedLead.emailSubject === "Error" ? "Provide context to fix error..." : "Feedback for AI (e.g. 'Make it shorter')"}
                         className="flex-1 bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-zinc-400"
                         onKeyDown={(e) => e.key === 'Enter' && handleRegenerate()}
                       />
                       <button onClick={handleRegenerate} disabled={loading === 'regenerate'} className="px-3 py-1.5 bg-black text-white rounded-lg text-[11px] font-medium transition-colors disabled:opacity-50">
-                        {loading === 'regenerate' ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Regenerate'}
+                        {loading === 'regenerate' ? <Loader2 className="w-3 h-3 animate-spin" /> : (selectedLead.emailSubject === "Error" ? "Retry" : "Regenerate")}
                       </button>
                     </>
                   ) : (
@@ -357,6 +360,23 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                 <div className="flex-1 flex flex-col items-center justify-center text-zinc-300 gap-4">
                   <Loader2 className="w-8 h-8 animate-spin" />
                   <p className="text-sm font-medium">AI Drafting in progress...</p>
+                </div>
+              ) : selectedLead.emailSubject === "Error" ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
+                  <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
+                    <X className="w-8 h-8 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-zinc-900">AI Generation Failed</h3>
+                    <p className="text-sm text-zinc-500 max-w-sm mt-2">
+                      There was an error generating this draft. This usually happens if your AI provider API key is missing or invalid.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link href="/settings" className="text-xs font-bold text-blue-600 hover:underline">Check AI Settings</Link>
+                    <span className="text-zinc-300">|</span>
+                    <button onClick={() => setShowRegenInput(true)} className="text-xs font-bold text-zinc-900 hover:underline">Try Again</button>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSave} className="flex-1 flex flex-col min-h-0">

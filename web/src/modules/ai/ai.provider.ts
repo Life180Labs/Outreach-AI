@@ -89,13 +89,14 @@ class GeminiProvider implements AIProvider {
     const ai = new GoogleGenAI({ apiKey: this.apiKey });
     const result = await ai.models.generateContent({
       model: this.model,
+      systemInstruction: system,
       contents: [{ role: "user", parts: [{ text: user }] }],
       config: {
-        systemInstruction: system,
         temperature: temp,
         responseMimeType: isJson ? "application/json" : "text/plain",
       },
     });
+
     return result.text || "";
   }
 }
