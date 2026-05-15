@@ -1,3 +1,4 @@
+// web/src/inngest/functions.ts
 import { inngest } from "./client";
 import prisma from "@/lib/prisma";
 import { generateEmailDraft } from "@/lib/ai";
@@ -26,22 +27,18 @@ export const generateDraftsBatch = inngest.createFunction(
 
     if (!campaign) return { error: "Campaign not found" };
 
-    // Fetch settings for the user who owns the campaign
     const settings = await step.run("fetch-settings", async () => {
       return await prisma.settings.findUnique({ where: { userId: campaign.userId } });
     });
 
-
     const leadsToProcess = campaign.leads.filter((l: any) => !l.emailSubject);
 
     for (const lead of leadsToProcess) {
-      // Deterministic step ID — safe for Inngest retries/idempotency
       await step.run(`gen-draft-${lead.id}`, async () => {
         try {
           const currentLead = await prisma.lead.findUnique({ where: { id: lead.id } });
           if (!currentLead) return;
 
-          // Pass cached settings to avoid N+1 DB queries
           const draft = await generateEmailDraft(currentLead, campaign, "", settings as Settings | null);
           await prisma.lead.update({
             where: { id: currentLead.id },
@@ -72,10 +69,12 @@ export const sendEmailSequence = inngest.createFunction(
         include: { leads: { where: { sent: false, isApproved: true } } },
       });
       if (!c) return { campaign: null, settings: null, smtpAccount: null };
-      
+
       const s = await prisma.settings.findUnique({ where: { userId: c.userId } });
-      const acc = c.smtpAccountId 
-        ? await prisma.integrationAccount.findUnique({ where: { id: c.smtpAccountId } })
+
+      // Updated to fetch from smtpAccount
+      const acc = c.smtpAccountId
+        ? await prisma.smtpAccount.findUnique({ where: { id: c.smtpAccountId } })
         : null;
 
       return { campaign: c, settings: s, smtpAccount: acc };
@@ -85,13 +84,9 @@ export const sendEmailSequence = inngest.createFunction(
       return { error: "Missing campaign or sending configuration (SMTP Account)" };
     }
 
-    // Create a single transporter pool for the entire campaign to reuse connections
-    // We pass the IntegrationAccount now, createTransporter should be updated to handle it
     const transporter = createTransporter(smtpAccount as any);
     const from = getSenderAddress(smtpAccount as any);
 
-
-    // Verify connection once before starting the loop to catch auth/host errors early
     try {
       await transporter.verify();
     } catch (verifyError) {
@@ -100,9 +95,7 @@ export const sendEmailSequence = inngest.createFunction(
     }
 
     for (const lead of campaign.leads) {
-      // Deterministic step ID
       await step.run(`send-email-${lead.id}`, async () => {
-        // Re-fetch lead status
         const currentLead = await prisma.lead.findUnique({
           where: { id: lead.id },
           select: { sent: true }
@@ -110,7 +103,6 @@ export const sendEmailSequence = inngest.createFunction(
 
         if (currentLead?.sent) return { skipped: true, reason: "Already sent" };
 
-        // Mark as 'Processing' in UI by updating timestamp
         await prisma.lead.update({
           where: { id: lead.id },
           data: { updatedAt: new Date() }
@@ -124,7 +116,6 @@ export const sendEmailSequence = inngest.createFunction(
           `<img src="${trackingUrl}" width="1" height="1" style="display:none !important;" />`;
 
         try {
-          // Send mail relying on the transporter's own timeouts
           const info = await transporter.sendMail({
             from,
             to: lead.email,
@@ -135,7 +126,7 @@ export const sendEmailSequence = inngest.createFunction(
 
           await prisma.lead.update({
             where: { id: lead.id },
-            data: { 
+            data: {
               sent: true,
               messages: {
                 create: {
@@ -148,7 +139,6 @@ export const sendEmailSequence = inngest.createFunction(
           });
         } catch (mailError: any) {
           console.error(`[sendMail Error] Lead: ${lead.email}`, mailError);
-          // If we hit a timeout, throw to retry. Idempotency check above prevents duplicates.
           throw mailError;
         }
       });
@@ -182,10 +172,10 @@ export const scheduleFollowUps = inngest.createFunction(
 export const checkInboxForReplies = inngest.createFunction(
   { id: "check-inbox-replies", triggers: [{ cron: "*/15 * * * *" }] },
   async ({ step }) => {
-    // 1. Fetch all active SMTP accounts
+    // 1. Fetch all active/verified SMTP accounts
     const smtpAccounts = await step.run("fetch-smtp-accounts", async () => {
-      return await prisma.integrationAccount.findMany({
-        where: { type: "SMTP", isActive: true }
+      return await prisma.smtpAccount.findMany({
+        where: { isVerified: true }
       });
     });
 
@@ -193,22 +183,27 @@ export const checkInboxForReplies = inngest.createFunction(
 
     for (const account of smtpAccounts) {
       await step.run(`check-account-${account.id}`, async () => {
-        const config = JSON.parse(account.config);
-        const { EncryptionUtils } = await import("@/utils/encryption");
+        // Use the new EncryptionService
+        const { EncryptionService } = await import("@/core/security/encryption");
         let decryptedPass = "";
         try {
-          decryptedPass = EncryptionUtils.decrypt(config.pass);
+          decryptedPass = EncryptionService.decrypt(account.encryptedPass);
         } catch (e) {
           console.error(`[checkInboxForReplies] Decryption failed for account ${account.id}`);
           return;
         }
 
+        // Basic heuristic: try to replace "smtp." with "imap." for the host
+        const imapHost = account.host.includes("smtp.")
+          ? account.host.replace("smtp.", "imap.")
+          : account.host;
+
         const client = new ImapFlow({
-          host: config.host.replace("smtp.", "imap."),
-          port: 993,
+          host: imapHost,
+          port: 993, // Default secure IMAP port
           secure: true,
           auth: {
-            user: config.user,
+            user: account.username,
             pass: decryptedPass,
           },
           logger: false,
@@ -217,9 +212,8 @@ export const checkInboxForReplies = inngest.createFunction(
         try {
           await client.connect();
           const lock = await client.getMailboxLock("INBOX");
-          
+
           try {
-            // Find campaigns using this SMTP account
             const campaigns = await prisma.campaign.findMany({
               where: { smtpAccountId: account.id },
               select: { id: true }
@@ -228,7 +222,6 @@ export const checkInboxForReplies = inngest.createFunction(
 
             if (campaignIds.length === 0) return;
 
-            // Find leads in these campaigns that might have replies
             const activeLeads = await prisma.lead.findMany({
               where: {
                 campaignId: { in: campaignIds },
@@ -246,7 +239,7 @@ export const checkInboxForReplies = inngest.createFunction(
               if (Array.isArray(messageUids) && messageUids.length > 0) {
                 const lastUid = messageUids[messageUids.length - 1];
                 const msg = await client.fetchOne(lastUid, { source: true, envelope: true });
-                
+
                 if (msg && msg.source && msg.envelope) {
                   const cleanSubject = lead.emailSubject ? lead.emailSubject.replace(/^(re:\s*|fwd:\s*)+/i, '').trim().toLowerCase() : "";
                   const incomingSubject = msg.envelope?.subject ? msg.envelope.subject.toLowerCase() : "";
@@ -288,4 +281,3 @@ export const checkInboxForReplies = inngest.createFunction(
     return summary;
   }
 );
-

@@ -10,25 +10,24 @@ datasource db {
 }
 
 // -----------------------------------------------------------------------------
-// NEXTAUTH MODELS (Authentication)
+// NEXTAUTH & USER MODELS
 // -----------------------------------------------------------------------------
 model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
   emailVerified DateTime?
-  passwordHash  String?   // Added for credentials login
-  image         String?
+  passwordHash  String?   // Used for local credentials login
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts            Account[]
-  sessions            Session[]
+  accounts      Account[]
+  sessions      Session[]
   
   // Relations to Life180 app entities
-  campaigns           Campaign[]
-  settings            Settings?
-  integrationAccounts IntegrationAccount[]
+  campaigns     Campaign[]
+  settings      Settings?
+  smtpAccounts  SmtpAccount[] // Replaces IntegrationAccount
 }
 
 model Account {
@@ -37,12 +36,12 @@ model Account {
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String? @db.Text
   session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -68,9 +67,28 @@ model VerificationToken {
 // CORE DOMAIN MODELS (Life180 App Logic)
 // -----------------------------------------------------------------------------
 
+model SmtpAccount {
+  id               String     @id @default(cuid())
+  userId           String   
+  name             String     // e.g., "Life180 Main Sales"
+  host             String
+  port             Int
+  username         String
+  encryptedPass    String     // AES-256 encrypted at rest
+  encryptionType   String     @default("TLS") // TLS, SSL, NONE
+  fromEmail        String
+  fromName         String
+  isVerified       Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns        Campaign[] 
+}
+
 model Campaign {
   id               String            @id @default(cuid())
-  userId           String            // Link campaign to a specific user
+  userId           String            
   name             String?
   status           String            @default("draft")
   tone             String?
@@ -89,47 +107,48 @@ model Campaign {
   errors           LeadUploadError[]
   
   aiProviderId     String?
-  smtpAccountId    String?           // Will map to IntegrationAccount in code logic
+  
+  // Link to strict Multi-SMTP configuration
+  smtpAccountId    String?
+  smtpAccount      SmtpAccount?      @relation(fields: [smtpAccountId], references: [id])
 
   strategyId       String?
   strategy         Strategy?         @relation(fields: [strategyId], references: [id])
 }
 
 model Lead {
-  // ... (Keep existing fields from your Lead model exactly as they are)
-  id          String   @id @default(cuid())
-  campaignId  String
-  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
-  firstName   String
-  lastName    String
-  jobTitle    String
-  companyName String
-  email       String
-  sector      String?
-  city        String?
-  zipcode     String?
-  country     String?
-  linkedinUrl String?
-  notes       String?
-  status      String   @default("Cold")
+  id           String    @id @default(cuid())
+  campaignId   String
+  campaign     Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  firstName    String
+  lastName     String
+  jobTitle     String
+  companyName  String
+  email        String
+  sector       String?
+  city         String?
+  zipcode      String?
+  country      String?
+  linkedinUrl  String?
+  notes        String?
+  status       String    @default("Cold")
   emailSubject String?
   emailBody    String?
   aiRationale  String?
-  sent        Boolean  @default(false)
-  opened      Boolean  @default(false)
-  replied     Boolean  @default(false)
-  isApproved  Boolean  @default(false)
-  isPaused    Boolean  @default(false)
-  messages    Message[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  sent         Boolean   @default(false)
+  opened       Boolean   @default(false)
+  replied      Boolean   @default(false)
+  isApproved   Boolean   @default(false)
+  isPaused     Boolean   @default(false)
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([campaignId])
   @@unique([campaignId, email])
 }
 
 model Message {
-  // ... (Keep existing fields exactly as they are)
   id        String   @id @default(cuid())
   leadId    String
   lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
@@ -140,7 +159,6 @@ model Message {
 }
 
 model LeadUploadError {
-  // ... (Keep existing fields exactly as they are)
   id         String   @id @default(cuid())
   campaignId String
   campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
@@ -156,19 +174,18 @@ model Settings {
   userId               String @unique
   user                 User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Legacy fields (kept for backward compatibility during migration)
-  gmailEmailAddress    String?
-  gmailRefreshToken    String?
+  // Cleaned up API keys logic
   geminiApiKey         String?
   groqApiKey           String?
   openaiApiKey         String?
   claudeApiKey         String?
-  aiProvider           String  @default("gemini")
+  aiProvider           String  @default("groq")
   
   maxEmailsPerHour     Int     @default(50)
   followupDelayOptions String  @default("1,3,5,7,10,14")
-  basePrompt           String? @default("You are a world-class B2B copywriter. Anchor the hook in lead notes. Use short sentences.")
   
+  // Prompt Configuration
+  basePrompt           String? @default("You are a world-class B2B copywriter. Anchor the hook in lead notes. Use short sentences.")
   promptRole           String? @default("Elite B2B sales copywriter specializing in highly technical GTM cold outreach.")
   promptProduct        String? @default("Life180: Advanced AI-driven outreach automation.")
   promptPersona        String? @default("VP of Sales, Growth Lead, or Founder.")
@@ -179,7 +196,6 @@ model Settings {
 }
 
 model Strategy {
-  // ... (Keep existing fields exactly as they are)
   id           String   @id @default(cuid())
   name         String
   role         String?
@@ -192,21 +208,4 @@ model Strategy {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   campaigns    Campaign[]
-}
-
-// Renamed from Account to IntegrationAccount to prevent NextAuth conflicts
-model IntegrationAccount {
-  id          String   @id @default(cuid())
-  userId      String   
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  type        String   // "SMTP", "GMAIL", "AI"
-  name        String   // Friendly name (e.g., "Main Sales SMTP")
-  provider    String   // "custom", "gemini", etc.
-  
-  config      String   // JSON string of keys, host, port, encrypted passwords, etc.
-  
-  isActive    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }

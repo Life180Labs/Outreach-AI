@@ -1,128 +1,330 @@
-// web/src/lib/mail.ts
-import nodemailer from "nodemailer";
+// src/lib/mail.ts
+
+import nodemailer, {
+  Transporter,
+} from "nodemailer";
+
 import prisma from "@/lib/prisma";
-import { EncryptionUtils } from "@/utils/encryption";
+
+import { EncryptionService } from "@/core/security/encryption";
 
 interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
-  campaignId?: string;    // Used to automatically find the right SMTP config
-  smtpAccountId?: string; // Can be passed directly if known
-  fromName?: string;      // Usually the campaign senderName
+
+  campaignId?: string;
+
+  smtpAccountId?: string;
+
+  fromName?: string;
 }
 
+interface SmtpAccount {
+  id: string;
+  name: string;
+
+  host: string;
+  port: number;
+
+  username: string;
+
+  encryptedPass: string;
+
+  encryptionType: string;
+
+  fromEmail: string;
+
+  fromName: string | null;
+}
+
+/**
+ * Reusable transporter cache
+ * Prevents reconnecting SMTP repeatedly.
+ */
+const transporterCache =
+  new Map<
+    string,
+    Transporter
+  >();
+
+/**
+ * Main email sender
+ */
 export async function sendEmail({
   to,
   subject,
   html,
   campaignId,
   smtpAccountId,
-  fromName
+  fromName,
 }: SendEmailParams) {
 
-  let accountIdToUse = smtpAccountId;
-  let senderDisplayName = fromName;
+  let accountIdToUse =
+    smtpAccountId;
 
-  // 1. If an explicit SMTP ID wasn't provided, look it up via the Campaign
-  if (!accountIdToUse && campaignId) {
-    const campaign = await prisma.campaign.findUnique({
-      where: { id: campaignId },
-      select: { smtpAccountId: true, senderName: true }
-    });
+  let senderDisplayName =
+    fromName;
 
-    if (!campaign?.smtpAccountId) {
-      throw new Error(`Campaign ${campaignId} has no sending email configured. Please update it in Campaign Setup.`);
+  /**
+   * Resolve SMTP from campaign
+   */
+  if (
+    !accountIdToUse &&
+    campaignId
+  ) {
+
+    const campaign =
+      await prisma.campaign.findUnique({
+        where: {
+          id: campaignId,
+        },
+
+        select: {
+          smtpAccountId: true,
+          senderName: true,
+        },
+      });
+
+    if (
+      !campaign?.smtpAccountId
+    ) {
+      throw new Error(
+        `Campaign ${campaignId} has no SMTP account configured`
+      );
     }
 
-    accountIdToUse = campaign.smtpAccountId;
-    senderDisplayName = senderDisplayName || campaign.senderName || "The Life180 Team";
+    accountIdToUse =
+      campaign.smtpAccountId;
+
+    senderDisplayName =
+      senderDisplayName ||
+      campaign.senderName ||
+      "The Life180 Team";
   }
 
+  /**
+   * No SMTP available
+   */
   if (!accountIdToUse) {
-    throw new Error("Cannot send email: No SMTP Account ID provided.");
+    throw new Error(
+      "No SMTP account configured"
+    );
   }
 
-  // 2. Fetch the secure SMTP configuration from the database
-  const smtpAccount = await prisma.integrationAccount.findUnique({
-    where: { id: accountIdToUse }
-  });
+  /**
+   * Fetch SMTP account
+   */
+  const smtpAccount =
+    await prisma.smtpAccount.findUnique({
+      where: {
+        id: accountIdToUse,
+      },
 
-  if (!smtpAccount || smtpAccount.type !== "SMTP") {
-    throw new Error("Invalid or missing SMTP configuration. Please check your settings.");
-  }
+      select: {
+        id: true,
+        name: true,
 
-  // 3. Parse the config and securely DECRYPT the password in memory
-  const config = JSON.parse(smtpAccount.config);
-  let decryptedPassword;
+        host: true,
+        port: true,
 
-  try {
-    decryptedPassword = EncryptionUtils.decrypt(config.pass);
-  } catch (err) {
-    console.error("Failed to decrypt SMTP password for account:", smtpAccount.id);
-    throw new Error("Failed to authenticate with SMTP server. Your credentials may be corrupted.");
-  }
+        username: true,
 
-  // 4. Instantiate Nodemailer dynamically using the decrypted credentials
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: Number(config.port),
-    secure: Number(config.port) === 465, // true for 465, false for 587/25
-    auth: {
-      user: config.user,
-      pass: decryptedPassword,
-    },
-  });
+        encryptedPass: true,
 
-  // 5. Build the "From" address formatted nicely: "Sender Name" <email@domain.com>
-  const fromAddress = `"${senderDisplayName || smtpAccount.name}" <${config.user}>`;
+        encryptionType: true,
 
-  // 6. Dispatch the email
-  try {
-    const info = await transporter.sendMail({
-      from: fromAddress,
-      to,
-      subject,
-      html,
+        fromEmail: true,
+        fromName: true,
+      },
     });
 
-    return { success: true, messageId: info.messageId };
-  } catch (error: any) {
-    console.error(`[SMTP Dispatch Error] to ${to}:`, error.message);
-    throw new Error(`Failed to send email: ${error.message}`);
+  if (!smtpAccount) {
+    throw new Error(
+      "SMTP account not found"
+    );
+  }
+
+  /**
+   * Get reusable transporter
+   */
+  const transporter =
+    getOrCreateTransporter(
+      smtpAccount
+    );
+
+  /**
+   * Build sender address
+   */
+  const fromAddress =
+    getSenderAddress(
+      smtpAccount,
+      senderDisplayName
+    );
+
+  /**
+   * Send email
+   */
+  try {
+
+    const info =
+      await transporter.sendMail({
+        from: fromAddress,
+
+        to,
+
+        subject,
+
+        html,
+      });
+
+    return {
+      success: true,
+
+      messageId:
+        info.messageId,
+    };
+
+  } catch (error) {
+
+    console.error(
+      `[SMTP ERROR] Failed to send email to ${to}`,
+      error
+    );
+
+    if (
+      error instanceof Error
+    ) {
+      throw new Error(
+        `SMTP send failed: ${error.message}`
+      );
+    }
+
+    throw new Error(
+      "SMTP send failed"
+    );
   }
 }
 
 /**
- * Creates a Nodemailer transporter from an IntegrationAccount.
- * Used for batch processing and connection reuse in background jobs.
+ * Returns cached transporter
+ * or creates a new one.
  */
-export function createTransporter(account: any) {
-  const config = typeof account.config === "string" ? JSON.parse(account.config) : account.config;
-  let decryptedPassword = "";
+export function getOrCreateTransporter(
+  account: SmtpAccount
+): Transporter {
+
+  /**
+   * Reuse transporter
+   */
+  if (
+    transporterCache.has(
+      account.id
+    )
+  ) {
+    return transporterCache.get(
+      account.id
+    )!;
+  }
+
+  /**
+   * Decrypt password
+   */
+  let decryptedPassword =
+    "";
 
   try {
-    decryptedPassword = EncryptionUtils.decrypt(config.pass);
-  } catch (err) {
-    throw new Error(`Failed to decrypt password for account ${account.name}`);
+
+    decryptedPassword =
+      EncryptionService.decrypt(
+        account.encryptedPass
+      );
+
+  } catch {
+
+    throw new Error(
+      `Failed to decrypt SMTP password for ${account.name}`
+    );
   }
 
-  return nodemailer.createTransport({
-    host: config.host,
-    port: Number(config.port),
-    secure: Number(config.port) === 465,
-    auth: {
-      user: config.user,
-      pass: decryptedPassword,
-    },
-  });
+  /**
+   * Create transporter
+   */
+  const transporter =
+    nodemailer.createTransport({
+      host: account.host,
+
+      port: account.port,
+
+      secure:
+        account.encryptionType ===
+        "SSL" ||
+        account.port === 465,
+
+      auth: {
+        user: account.username,
+
+        pass: decryptedPassword,
+      },
+    });
+
+  /**
+   * Cache transporter
+   */
+  transporterCache.set(
+    account.id,
+    transporter
+  );
+
+  return transporter;
 }
 
 /**
- * Returns the formatted sender address for an IntegrationAccount.
+ * Verify SMTP connection
+ * Used during setup.
  */
-export function getSenderAddress(account: any, customSenderName?: string) {
-  const config = typeof account.config === "string" ? JSON.parse(account.config) : account.config;
-  const name = customSenderName || account.name || "The Life180 Team";
-  return `"${name}" <${config.user}>`;
-}
+export async function verifyTransporter(
+  account: SmtpAccount
+) {
+
+  const transporter =
+    getOrCreateTransporter(
+      account
+    );
+
+  try {
+
+    await transporter.verify();
+
+    return true;
+
+  } catch (error) {
+
+    console.error(
+      `[SMTP VERIFY ERROR] ${account.name}`,
+      error
+    );
+
+    return false;
+  }
+}
+
+/**
+ * Build formatted sender address
+ */
+export function getSenderAddress(
+  account: Pick<
+    SmtpAccount,
+    "fromEmail" | "fromName"
+  >,
+
+  customSenderName?: string
+) {
+
+  const senderName =
+    customSenderName ||
+    account.fromName ||
+    "The Life180 Team";
+
+  return `"${senderName}" <${account.fromEmail}>`;
+}

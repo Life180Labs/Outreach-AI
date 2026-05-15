@@ -1,133 +1,220 @@
-// web/src/app/(auth)/signup/page.tsx
+// src/app/(auth)/signup/page.tsx
+
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
+import {
+    Mail,
+    Lock,
+    User,
+    ArrowRight,
+} from "lucide-react";
 
-export default function SignupPage() {
+type FormData = {
+    name: string;
+    email: string;
+    password: string;
+};
+
+export default function SignUpPage() {
     const router = useRouter();
-    const [form, setForm] = useState({ name: "", email: "", password: "" });
-    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const [formData, setFormData] =
+        useState<FormData>({
+            name: "",
+            email: "",
+            password: "",
+        });
+
+    const [error, setError] =
+        useState("");
+
+    const [isLoading, setIsLoading] =
+        useState(false);
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (
+        e: React.FormEvent<HTMLFormElement>
+    ) => {
         e.preventDefault();
-        setLoading(true);
-        
-        const toastId = toast.loading("Creating your account...");
+
+        setError("");
+        setIsLoading(true);
 
         try {
-            // 1. Register the user
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(form),
-            });
+            const response = await fetch(
+                "/api/auth/register",
+                {
+                    method: "POST",
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.message || "Something went wrong");
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+
+                    body: JSON.stringify(
+                        formData
+                    ),
+                }
+            );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error ||
+                    "Registration failed"
+                );
             }
 
-            // 2. Automatically log them in after successful registration
-            const signInRes = await signIn("credentials", {
-                redirect: false,
-                email: form.email,
-                password: form.password,
-            });
-
-            if (signInRes?.error) {
-                throw new Error(signInRes.error);
+            router.push(
+                "/login?registered=true"
+            );
+        } catch (error) {
+            if (error instanceof Error) {
+                setError(error.message);
+            } else {
+                setError(
+                    "Something went wrong"
+                );
             }
-
-            toast.success("Account created! Logging you in...", { id: toastId });
-            
-            // 3. Redirect to the main app dashboard
-            router.push("/");
-            router.refresh();
-        } catch (err: any) {
-            toast.error(err.message, { id: toastId });
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-            <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl border border-zinc-100">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+            <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+
+                {/* Header */}
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-zinc-900">Create an account</h2>
-                    <p className="mt-2 text-sm text-zinc-500">Start automating your outreach today.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+                        Join Life180
+                    </h1>
+
+                    <p className="mt-2 text-sm text-gray-600">
+                        Create an account to scale your outreach.
+                    </p>
                 </div>
 
-                <div className="mt-8 space-y-6">
-                    <GoogleSignInButton text="Sign up with Google" />
+                {/* Form */}
+                <form
+                    onSubmit={handleSubmit}
+                    className="mt-8 space-y-5"
+                >
+                    {/* Error */}
+                    {error && (
+                        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                            {error}
+                        </div>
+                    )}
 
+                    {/* Name */}
                     <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t border-zinc-200"></span>
-                        </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-white px-2 text-zinc-400 font-medium">Or continue with</span>
-                        </div>
+                        <User className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+
+                        <input
+                            type="text"
+                            name="name"
+                            required
+                            value={
+                                formData.name
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            placeholder="Full Name"
+                            className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 outline-none transition focus:border-transparent focus:ring-2 focus:ring-blue-600"
+                        />
                     </div>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-tight mb-1">Full Name</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
-                                    value={form.name}
-                                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-tight mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    required
-                                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
-                                    value={form.email}
-                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-tight mb-1">Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
-                                    value={form.password}
-                                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                                />
-                            </div>
-                        </div>
+                    {/* Email */}
+                    <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50 shadow-sm"
-                        >
-                            {loading ? "Creating account..." : "Create Account"}
-                        </button>
-                    </form>
-                </div>
+                        <input
+                            type="email"
+                            name="email"
+                            required
+                            value={
+                                formData.email
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            placeholder="Email Address"
+                            className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 outline-none transition focus:border-transparent focus:ring-2 focus:ring-blue-600"
+                        />
+                    </div>
 
+                    {/* Password */}
+                    <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
 
-                <p className="text-center text-sm text-gray-600">
-                    Already have an account?{" "}
-                    <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-500">
-                        Log in here
+                        <input
+                            type="password"
+                            name="password"
+                            required
+                            minLength={8}
+                            value={
+                                formData.password
+                            }
+                            onChange={
+                                handleChange
+                            }
+                            placeholder="Password (min 8 characters)"
+                            className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 outline-none transition focus:border-transparent focus:ring-2 focus:ring-blue-600"
+                        />
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                        type="submit"
+                        disabled={
+                            isLoading
+                        }
+                        className="flex w-full items-center justify-center rounded-lg bg-blue-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                        {isLoading
+                            ? "Creating account..."
+                            : "Create Account"}
+
+                        {!isLoading && (
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        )}
+                    </button>
+                </form>
+
+                {/* Footer */}
+                <div className="mt-6 text-center text-sm">
+                    <span className="text-gray-600">
+                        Already have an account?
+                    </span>
+
+                    <Link
+                        href="/login"
+                        className="ml-1 font-medium text-blue-600 hover:text-blue-500"
+                    >
+                        Sign in
                     </Link>
-                </p>
+                </div>
             </div>
         </div>
     );
