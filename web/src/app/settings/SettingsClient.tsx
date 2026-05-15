@@ -6,9 +6,11 @@ import { saveSettings } from "./actions";
 import { toast } from "sonner";
 import { Save, Bot, Mail, Sliders, Zap, ChevronDown, ChevronRight, Eye, EyeOff } from "lucide-react";
 
+import type { Settings, SmtpAccountSafe } from "@/types";
+
 interface SettingsClientProps {
-  settings: any;
-  accounts: any[];
+  settings: Settings | null;
+  accounts: SmtpAccountSafe[];
 }
 
 export default function SettingsClient({ settings, accounts }: SettingsClientProps) {

@@ -1,17 +1,16 @@
 "use server";
 
-import { testEmailGeneration } from "@/lib/ai";
+import { testEmailGeneration, refinePromptWithAI } from "@/modules/ai/ai.service";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
+import type { AIProviderName } from "@/types";
 
 
 export async function runEvaluationAction(prompt: string, notes: string) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) throw new Error("Unauthorized");
-    const userId = session.user.id as string;
+    const user = await getAuthUser();
+    const userId = user.id;
 
     const settings = await prisma.settings.findUnique({ where: { userId } });
     const draft = await testEmailGeneration(prompt, notes, settings);
@@ -35,9 +34,8 @@ export async function runEvaluationAction(prompt: string, notes: string) {
 
 export async function saveStructuredPromptAction(data: any) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) throw new Error("Unauthorized");
-    const userId = session.user.id as string;
+    const user = await getAuthUser();
+    const userId = user.id;
 
     await prisma.settings.upsert({
       where: { userId },
@@ -71,9 +69,8 @@ export async function saveStructuredPromptAction(data: any) {
 
 export async function refineStructuredPromptAction(currentForm: any, feedback: string) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) throw new Error("Unauthorized");
-    const userId = session.user.id as string;
+    const user = await getAuthUser();
+    const userId = user.id;
 
     const settings = await prisma.settings.findUnique({ where: { userId } });
     if (!settings) throw new Error("Settings not found");
@@ -115,8 +112,7 @@ Return ONLY a JSON object with the improved fields:
   "cta": "..."
 }`;
 
-    const { refinePromptWithAI } = await import("@/lib/ai");
-    const improved = await refinePromptWithAI(prompt, provider, apiKey);
+    const improved = await refinePromptWithAI(prompt, provider as AIProviderName, apiKey);
 
     return { success: true, data: improved };
   } catch (error: any) {
@@ -126,9 +122,8 @@ Return ONLY a JSON object with the improved fields:
 
 export async function saveAsNewStrategyAction(name: string, data: any) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) throw new Error("Unauthorized");
-    const userId = session.user.id as string;
+    const user = await getAuthUser();
+    const userId = user.id;
 
     const strategy = await prisma.strategy.create({
       data: {
@@ -150,9 +145,13 @@ export async function saveAsNewStrategyAction(name: string, data: any) {
 }
 
 export async function getInitialDataAction() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { basePrompt: "", strategies: [], structured: {} };
-  const userId = session.user.id as string;
+  let userId: string;
+  try {
+    const user = await getAuthUser();
+    userId = user.id;
+  } catch {
+    return { basePrompt: "", strategies: [], structured: {} };
+  }
 
   const settings = await prisma.settings.findUnique({ where: { userId } });
   const strategies = await prisma.strategy.findMany({

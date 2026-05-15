@@ -1,9 +1,9 @@
+// src/modules/lead/leadSchema.ts
+// Lead schema used for ingest validation (CSV upload).
+// Strict validation because downstream AI + email sending should never see malformed data.
+
 import { z } from "zod";
 
-/**
- * Lead schema used for ingest validation (Wireframe Screen 2).
- * We keep this strict because downstream AI + email sending should never see malformed data.
- */
 export const leadInputSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required"),
   lastName: z.string().trim().min(1, "Last name is required"),
@@ -19,4 +19,3 @@ export const leadInputSchema = z.object({
 });
 
 export type LeadInputSchema = z.infer<typeof leadInputSchema>;
-

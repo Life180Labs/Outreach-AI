@@ -1,133 +1,91 @@
-// web/src/app/campaigns/actions.ts
+// src/app/campaigns/actions.ts
+// Campaign server actions — form handlers for campaign management
+
 "use server";
 
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
+import { CampaignService } from "@/modules/campaign/campaign.service";
+import type { LeadInput } from "@/types";
 
 export async function createCampaignFromUpload(formData: FormData) {
-  // 1. Authenticate user
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  const userId = session.user.id as string;
+  const user = await getAuthUser();
 
   const rawData = formData.get("leadsData");
-  if (!rawData) throw new Error("No data provided");
-
-  const leads = JSON.parse(rawData as string);
-
-  // Auto-detect business type and location from leads
-  const sectors = [...new Set(leads.map((l: any) => l.sector).filter(Boolean))].slice(0, 3);
-  const cities = [...new Set(leads.map((l: any) => l.city).filter(Boolean))].slice(0, 2);
-  const countries = [...new Set(leads.map((l: any) => l.country).filter(Boolean))].slice(0, 2);
-
-  const businessType = sectors.join(" / ") || "Unknown";
-  const locationContext = [...cities, ...countries].join(", ") || "Global";
-
-  // 2. Create Campaign WITH the new userId mapping
-  const campaign = await prisma.campaign.create({
-    data: {
-      userId, // <-- Crucial addition for Multi-tenant support
-      name: formData.get("campaignName") as string || "New Campaign",
-      status: "draft",
-      businessType,
-      locationContext,
-    }
-  });
-
-  // Create leads
-  for (const lead of leads) {
-    if (!lead.email) continue;
-    await prisma.lead.create({
-      data: {
-        campaignId: campaign.id,
-        firstName: lead.firstName || "",
-        lastName: lead.lastName || "",
-        email: lead.email,
-        companyName: lead.companyName || "",
-        jobTitle: lead.jobTitle || "",
-        city: lead.city || null,
-        country: lead.country || null,
-        notes: lead.notes || null,
-        sector: lead.sector || lead.type || null,
-        linkedinUrl: lead.linkedinUrl || lead.linkedin || null,
-      }
-    });
+  if (!rawData || typeof rawData !== "string") {
+    throw new Error("No data provided");
   }
 
-  redirect(`/campaigns/${campaign.id}/setup`);
+  const leads: LeadInput[] = JSON.parse(rawData);
+  const campaignName = (formData.get("campaignName") as string) || "New Campaign";
+
+  const campaignId = await CampaignService.createFromUpload(
+    user.id,
+    campaignName,
+    leads
+  );
+
+  redirect(`/campaigns/${campaignId}/setup`);
 }
 
 export async function updateCampaignSetup(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) throw new Error("Unauthorized");
-  const userId = session.user.id as string;
-
+  const user = await getAuthUser();
   const id = formData.get("campaignId") as string;
+
+  // Verify ownership
+  const campaign = await prisma.campaign.findFirst({
+    where: { id, userId: user.id },
+    select: { id: true },
+  });
+
+  if (!campaign) {
+    throw new Error("Campaign not found");
+  }
 
   await prisma.campaign.update({
     where: { id },
     data: {
-      name: formData.get("campaignName") as string,
-      strategyId: formData.get("strategyId") as string || null,
-      smtpAccountId: formData.get("smtpAccountId") as string || null, // <-- Save chosen SMTP
-      tone: formData.get("tone") as string,
-      cta: formData.get("cta") as string,
-      senderName: formData.get("senderName") as string,
-      context: formData.get("context") as string,
-      businessType: formData.get("businessType") as string,
-      locationContext: formData.get("locationContext") as string,
-      followup1Delay: parseInt(formData.get("followup1Delay") as string || "3"),
-      followup2Delay: parseInt(formData.get("followup2Delay") as string || "7"),
-    }
+      name: (formData.get("campaignName") as string) || undefined,
+      strategyId: (formData.get("strategyId") as string) || null,
+      smtpAccountId: (formData.get("smtpAccountId") as string) || null,
+      tone: (formData.get("tone") as string) || undefined,
+      cta: (formData.get("cta") as string) || undefined,
+      senderName: (formData.get("senderName") as string) || undefined,
+      context: (formData.get("context") as string) || undefined,
+      businessType: (formData.get("businessType") as string) || undefined,
+      locationContext: (formData.get("locationContext") as string) || undefined,
+      followup1Delay: parseInt((formData.get("followup1Delay") as string) || "3"),
+      followup2Delay: parseInt((formData.get("followup2Delay") as string) || "7"),
+    },
   });
 
   // Trigger bulk generation in background
   const { inngest } = await import("@/inngest/client");
   await inngest.send({
     name: "campaign/generate.drafts",
-    data: { campaignId: id }
+    data: { campaignId: id },
   });
 
   redirect(`/campaigns/${id}/review`);
 }
 
 export async function toggleCampaignStatus(id: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const user = await getAuthUser();
+  const result = await CampaignService.toggleStatus(id, user.id);
 
-  const campaign = await prisma.campaign.findFirst({
-    where: { id, userId: session.user.id as string }
-  });
-  if (!campaign) return;
+  if (!result.success) {
+    throw new Error(result.error);
+  }
 
-  const newStatus = campaign.status === "active" ? "paused" : "active";
-  const isPaused = newStatus === "paused";
-
-  await prisma.campaign.update({
-    where: { id },
-    data: { status: newStatus }
-  });
-
-  // Also update all leads in this campaign to match
-  await prisma.lead.updateMany({
-    where: { campaignId: id, sent: false, isApproved: true },
-    data: { isPaused }
-  });
-
-  return newStatus;
+  return result.data.newStatus;
 }
 
 export async function stopAllCampaigns() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const user = await getAuthUser();
+  const result = await CampaignService.stopAll(user.id);
 
-  await prisma.campaign.updateMany({
-    where: {
-      status: "active",
-      userId: session.user.id as string // Only stop THEIR campaigns
-    },
-    data: { status: "paused" }
-  });
+  if (!result.success) {
+    throw new Error(result.error);
+  }
 }

@@ -1,19 +1,20 @@
 import prisma from "@/lib/prisma";
 import { LaunchClient } from "./LaunchClient";
 import { Stepper } from "@/components/Stepper";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function CampaignLaunchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
-  
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
 
-  const userId = session.user.id as string;
+  let userId: string;
+  try {
+    const user = await getAuthUser();
+    userId = user.id;
+  } catch {
+    redirect("/login");
+    return;
+  }
 
   const campaign = await prisma.campaign.findUnique({
     where: { id, userId },
@@ -25,8 +26,15 @@ export default async function CampaignLaunchPage({ params }: { params: Promise<{
   // Fetch the specific SMTP account associated with this campaign
   let smtpAccount = null;
   if (campaign.smtpAccountId) {
-    smtpAccount = await prisma.integrationAccount.findUnique({
-      where: { id: campaign.smtpAccountId, userId }
+    smtpAccount = await prisma.smtpAccount.findUnique({
+      where: { id: campaign.smtpAccountId },
+      select: {
+        id: true,
+        name: true,
+        fromEmail: true,
+        host: true,
+        isVerified: true,
+      },
     });
   }
 

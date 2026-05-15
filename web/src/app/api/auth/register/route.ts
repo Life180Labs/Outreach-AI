@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     } catch (error) {
         logger.error(
             "Register Error:",
-            error
+            error instanceof Error ? error : new Error(String(error))
         );
 
         if (error instanceof ZodError) {

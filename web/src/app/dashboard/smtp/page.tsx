@@ -378,7 +378,6 @@ export default function SmtpDashboard() {
                             {account.isVerified && (
                                 <CheckCircle2
                                     className="h-5 w-5 text-green-500"
-                                    title="Verified Connection"
                                 />
                             )}
                         </div>

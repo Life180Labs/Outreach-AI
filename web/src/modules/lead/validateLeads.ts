@@ -1,4 +1,7 @@
-import type { LeadInput, LeadValidationResult } from "@/types/leads";
+// src/modules/lead/validateLeads.ts
+// Lead validation with fuzzy header mapping and email deduplication
+
+import type { LeadInput, LeadValidationResult } from "@/types";
 import { leadInputSchema } from "./leadSchema";
 
 type ParsedRow = Record<string, string | undefined>;
@@ -85,4 +88,3 @@ export function validateLeads(rows: ParsedRow[]): LeadValidationResult {
 
   return result;
 }
-

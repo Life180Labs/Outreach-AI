@@ -1,22 +1,25 @@
-// web/src/app/campaigns/[id]/setup/page.tsx
+// web/src/app/campaigns/[id]/page.tsx
 import prisma from "@/lib/prisma";
 import { updateCampaignSetup } from "../actions";
 
 import { Stepper } from "@/components/Stepper";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function CampaignSetupPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
   // 1. Authenticate user
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect("/login");
-  const userId = session.user.id as string;
-
+  let userId: string;
+  try {
+    const user = await getAuthUser();
+    userId = user.id;
+  } catch {
+    redirect("/login");
+    return;
+  }
 
   // 2. Fetch campaign securely (ensuring it belongs to the logged-in user)
   const campaign = await prisma.campaign.findFirst({
@@ -30,10 +33,15 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
   const settings = await prisma.settings.findUnique({ where: { userId } });
   const strategies = await prisma.strategy.findMany({ orderBy: { name: 'asc' } });
 
-  // 4. Fetch the user's saved SMTP accounts
-  const smtpAccounts = await prisma.integrationAccount.findMany({
-    where: { userId, type: "SMTP" },
-    orderBy: { createdAt: "desc" }
+  // 4. Fetch the user's verified SMTP accounts
+  const smtpAccounts = await prisma.smtpAccount.findMany({
+    where: { userId, isVerified: true },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      fromEmail: true,
+    },
   });
 
   return (
@@ -87,7 +95,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                     />
                   </div>
 
-                  {/* NEW: Dynamic SMTP Account Selector */}
+                  {/* SMTP Account Selector */}
                   <div>
                     <label className="text-xs font-medium text-zinc-500 mb-1 block">Sending Email (SMTP)</label>
                     <div className="relative">
@@ -98,9 +106,9 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                         className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors appearance-none cursor-pointer"
                       >
                         <option value="" disabled>Select an email account...</option>
-                        {smtpAccounts.map((acc: any) => (
+                        {smtpAccounts.map((acc) => (
                           <option key={acc.id} value={acc.id}>
-                            {acc.name} ({JSON.parse(acc.config).user})
+                            {acc.name} ({acc.fromEmail})
                           </option>
                         ))}
                       </select>

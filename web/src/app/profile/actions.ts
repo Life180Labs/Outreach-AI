@@ -1,15 +1,13 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcrypt";
 
 export async function updateProfile(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
-  const userId = session.user.id as string;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const name = formData.get("name") as string;
   const email = formData.get("email") as string;
@@ -40,9 +38,8 @@ export async function updateProfile(formData: FormData) {
 }
 
 export async function updatePassword(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
-  const userId = session.user.id as string;
+  const user = await getAuthUser();
+  const userId = user.id;
 
   const currentPassword = formData.get("currentPassword") as string;
   const newPassword = formData.get("newPassword") as string;
@@ -82,22 +79,7 @@ export async function updatePassword(formData: FormData) {
   }
 }
 
-export async function updateUserImage(image: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
-  const userId = session.user.id as string;
-
-  try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: { image },
-    });
-
-    revalidatePath("/profile");
-    return { success: true };
-  } catch (error: any) {
-    console.error("Image Update Error:", error);
-    return { success: false, error: "Failed to update profile image" };
-  }
-}
+// NOTE: updateUserImage is disabled — the User model does not have an 'image' column.
+// Re-enable after adding 'image String?' to the User model in schema.prisma.
+// export async function updateUserImage(image: string) { ... }
 

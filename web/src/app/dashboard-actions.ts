@@ -1,18 +1,21 @@
+// src/app/dashboard-actions.ts
+// Dashboard server actions — cross-cutting operations
+
 "use server";
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { CampaignService } from "@/modules/campaign/campaign.service";
+import { LeadService } from "@/modules/lead/lead.service";
 import type { ActionResult, Lead } from "@/types";
 
 export async function stopAllSequencesAction(): Promise<ActionResult<{ count: number }>> {
   try {
-    // 1. Pause all active campaigns
     const campaignResult = await prisma.campaign.updateMany({
       where: { status: "active" },
       data: { status: "paused" },
     });
 
-    // 2. Pause all leads that haven't finished their cycle
     await prisma.lead.updateMany({
       where: { sent: false, isApproved: true },
       data: { isPaused: true },
@@ -27,64 +30,33 @@ export async function stopAllSequencesAction(): Promise<ActionResult<{ count: nu
 }
 
 export async function deleteLeadAction(id: string): Promise<ActionResult> {
-  try {
-    await prisma.lead.delete({ where: { id } });
-    revalidatePath("/leads");
-    return { success: true, data: undefined };
-  } catch (error) {
-    console.error("[deleteLead]", error);
-    return { success: false, error: "Failed to delete lead" };
-  }
+  const result = await LeadService.delete(id);
+  if (result.success) revalidatePath("/leads");
+  return result;
 }
 
 export async function bulkDeleteLeadsAction(ids: string[]): Promise<ActionResult> {
-  try {
-    await prisma.lead.deleteMany({ where: { id: { in: ids } } });
-    revalidatePath("/leads");
-    return { success: true, data: undefined };
-  } catch (error) {
-    console.error("[bulkDeleteLeads]", error);
-    return { success: false, error: "Failed to delete leads" };
-  }
+  const result = await LeadService.bulkDelete(ids);
+  if (result.success) revalidatePath("/leads");
+  return result;
 }
 
 export async function updateLeadAction(
   id: string,
-  data: Record<string, unknown>
+  data: Partial<Pick<Lead, "status" | "emailSubject" | "emailBody" | "isApproved" | "isPaused" | "notes">>
 ): Promise<ActionResult<Lead>> {
-  try {
-    const updated = await prisma.lead.update({
-      where: { id },
-      data,
-    });
-    revalidatePath("/leads");
-    return { success: true, data: updated };
-  } catch (error) {
-    console.error("[updateLead]", error);
-    return { success: false, error: "Failed to update lead" };
-  }
+  const result = await LeadService.update(id, data);
+  if (result.success) revalidatePath("/leads");
+  return result;
 }
 
 export async function bulkUpdateLeadsAction(
   ids: string[],
-  data: Record<string, unknown>
+  data: Partial<Pick<Lead, "status" | "isApproved" | "isPaused">>
 ): Promise<ActionResult<Lead[]>> {
-  try {
-    await prisma.lead.updateMany({
-      where: { id: { in: ids } },
-      data,
-    });
-
-    const updated = await prisma.lead.findMany({
-      where: { id: { in: ids } },
-    });
-
-    revalidatePath("/leads");
-    return { success: true, data: updated };
-  } catch (error) {
-    console.error("[bulkUpdateLeads]", error);
-    return { success: false, error: "Failed to update leads" };
-  }
+  const result = await LeadService.bulkUpdate(ids, data);
+  if (result.success) revalidatePath("/leads");
+  return result;
 }
 
 export async function syncCampaignInboxAction(
@@ -93,6 +65,7 @@ export async function syncCampaignInboxAction(
   try {
     const leads = await prisma.lead.findMany({
       where: { campaignId, sent: true },
+      select: { id: true, email: true },
     });
 
     const { syncLeadInboxAction } = await import("./leads/[id]/actions");
@@ -102,8 +75,7 @@ export async function syncCampaignInboxAction(
         try {
           const result = await syncLeadInboxAction(lead.id);
           return result.success && result.data.newMessages > 0;
-        } catch (e) {
-          console.error(`[syncCampaignInbox] Failed for ${lead.email}`, e);
+        } catch {
           return false;
         }
       })
@@ -142,4 +114,3 @@ export async function bulkDeleteCampaignsAction(ids: string[]): Promise<ActionRe
     return { success: false, error: "Failed to delete campaigns" };
   }
 }
-

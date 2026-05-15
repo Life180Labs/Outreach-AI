@@ -2,16 +2,14 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
 
 
 export async function saveSettings(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
-  const userId = session.user.id as string;
+  const user = await getAuthUser();
+  const userId = user.id;
 
-  const data: any = {};
+  const data: Record<string, string | number> = {};
   
   if (formData.has("aiProvider")) data.aiProvider = formData.get("aiProvider") as string;
   if (formData.has("geminiApiKey")) data.geminiApiKey = formData.get("geminiApiKey") as string;
@@ -39,55 +37,59 @@ export async function saveSettings(formData: FormData) {
       }
     });
 
-
     revalidatePath("/settings");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    return { success: false, error: msg };
   }
 }
 
 export async function addAccount(formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
-  const userId = session.user.id as string;
+  const user = await getAuthUser();
+  const userId = user.id;
 
-  const type = formData.get("type") as string;
   const name = formData.get("name") as string;
-  const provider = formData.get("provider") as string;
-  const config = formData.get("config") as string; // JSON string
+  const host = formData.get("host") as string;
+  const port = parseInt(formData.get("port") as string) || 587;
+  const username = formData.get("username") as string;
+  const password = formData.get("password") as string;
+  const encryptionType = formData.get("encryptionType") as string || "TLS";
+  const fromEmail = formData.get("fromEmail") as string;
+  const fromName = formData.get("fromName") as string;
 
   try {
-    const account = await prisma.integrationAccount.create({
-      data: {
-        userId,
-        type,
-        name,
-        provider,
-        config,
-        isActive: true,
-      }
+    const { SmtpService } = await import("@/modules/smtp/smtp.service");
+    const account = await SmtpService.createSmtpAccount(userId, {
+      name,
+      host,
+      port,
+      username,
+      password,
+      encryptionType: encryptionType as "TLS" | "SSL" | "NONE",
+      fromEmail,
+      fromName,
     });
+
     revalidatePath("/settings");
     return { success: true, account };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Failed to add account";
     console.error("[addAccount] Failed:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: msg };
   }
 }
 
 export async function deleteAccount(id: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+  const user = await getAuthUser();
 
   try {
-    await prisma.integrationAccount.delete({ 
-      where: { id, userId: session.user.id as string } 
-    });
+    const { SmtpService } = await import("@/modules/smtp/smtp.service");
+    await SmtpService.deleteSmtpAccount(id, user.id);
     revalidatePath("/settings");
     return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Failed to delete account";
+    return { success: false, error: msg };
   }
 }
-

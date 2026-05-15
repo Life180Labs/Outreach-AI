@@ -1,6 +1,6 @@
 "use client";
 
-import type { LeadValidationError } from "@/types/leads";
+import type { LeadValidationError } from "@/types";
 
 export function ValidationErrorTable({ errors }: { errors: LeadValidationError[] }) {
   return (

@@ -1,7 +1,6 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { sendEmail } from "@/lib/gmail";
 import { inngest } from "@/inngest/client";
 
 export async function startCampaignAction(campaignId: string) {

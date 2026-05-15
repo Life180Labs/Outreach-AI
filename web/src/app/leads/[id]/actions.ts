@@ -2,7 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { generateEmailDraft } from "@/lib/ai";
+import { generateEmailDraft } from "@/modules/ai/ai.service";
 
 import type { ActionResult, LeadWithMessages } from "@/types";
 
@@ -96,7 +96,7 @@ export async function sendReplyAction(
 
     if (!lead) return { success: false, error: "Lead not found" };
 
-    const { sendEmail } = await import("@/lib/mail");
+    const { sendEmailByCampaign: sendEmail } = await import("@/modules/mail/mail.service");
     const { formatEmailHTML } = await import("@/lib/email-signature");
 
     await sendEmail({
@@ -140,28 +140,27 @@ export async function syncLeadInboxAction(
     if (!lead || !lead.campaign.smtpAccountId)
       return { success: false, error: "Missing lead or sending account" };
 
-    const smtpAccount = await prisma.integrationAccount.findUnique({
+    const smtpAccount = await prisma.smtpAccount.findUnique({
       where: { id: lead.campaign.smtpAccountId }
     });
 
     if (!smtpAccount) return { success: false, error: "SMTP Account not found" };
 
-    const config = JSON.parse(smtpAccount.config);
-    const { EncryptionUtils } = await import("@/utils/encryption");
+    const { EncryptionService } = await import("@/modules/encryption/encryption.service");
     let decryptedPass = "";
     try {
-      decryptedPass = EncryptionUtils.decrypt(config.pass);
+      decryptedPass = EncryptionService.decrypt(smtpAccount.encryptedPass);
     } catch (e) {
       return { success: false, error: "Failed to decrypt SMTP password" };
     }
 
     const { ImapFlow } = require("imapflow");
     const client = new ImapFlow({
-      host: config.host.replace("smtp.", "imap."),
+      host: smtpAccount.host.replace("smtp.", "imap."),
       port: 993,
       secure: true,
       auth: {
-        user: config.user,
+        user: smtpAccount.username,
         pass: decryptedPass,
       },
       logger: false,

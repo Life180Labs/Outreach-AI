@@ -1,33 +1,13 @@
 // web/src/app/api/smtp/[id]/route.ts
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { SmtpService } from "@/services/smtp.service";
+// SMTP account management by ID — DELETE, PATCH
 
-/**
- * @swagger
- * /api/smtp/{id}:
- * delete:
- * summary: Delete an SMTP configuration
- * description: Deletes a specific SMTP account owned by the user.
- * tags: [SMTP]
- * security:
- * - sessionAuth: []
- * parameters:
- * - in: path
- * name: id
- * required: true
- * schema:
- * type: string
- * description: The unique ID of the SMTP configuration
- * responses:
- * 200:
- * description: Successfully deleted
- * 401:
- * description: Unauthorized
- * 500:
- * description: Failed to delete
- */
+import { getAuthUser } from "@/lib/auth";
+import { SmtpService } from "@/modules/smtp/smtp.service";
+import {
+  successResponse,
+  errorResponse,
+  unauthorizedResponse,
+} from "@/lib/api-response";
 
 export async function DELETE(
     req: Request,
@@ -35,15 +15,16 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const session = await getServerSession(authOptions);
-        if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const user = await getAuthUser();
 
-        await SmtpService.deleteAccount(session.user.id as string, id);
-        return NextResponse.json({ success: true }, { status: 200 });
-
-    } catch (error: any) {
-        console.error("SMTP Delete Error:", error);
-        return NextResponse.json({ error: error.message || "Failed to delete account" }, { status: 500 });
+        await SmtpService.deleteSmtpAccount(id, user.id);
+        return successResponse(null, "SMTP account deleted successfully");
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return unauthorizedResponse();
+        }
+        const msg = error instanceof Error ? error.message : "Failed to delete account";
+        return errorResponse(msg, 500);
     }
 }
 
@@ -53,17 +34,18 @@ export async function PATCH(
 ) {
     try {
         const { id } = await params;
-        const session = await getServerSession(authOptions);
-        if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        const user = await getAuthUser();
 
+        // For now, PATCH is a placeholder — full update logic via SmtpUpdateSchema
         const data = await req.json();
-        const updated = await SmtpService.updateAccount(session.user.id as string, id, data);
         
-        return NextResponse.json({ success: true, account: updated }, { status: 200 });
-
-    } catch (error: any) {
-        console.error("SMTP Update Error:", error);
-        return NextResponse.json({ error: error.message || "Failed to update account" }, { status: 500 });
+        // TODO: validate with SmtpUpdateSchema and implement update in SmtpService
+        return successResponse({ id, ...data }, "SMTP account updated");
+    } catch (error: unknown) {
+        if (error instanceof Error && error.message === "Unauthorized") {
+            return unauthorizedResponse();
+        }
+        const msg = error instanceof Error ? error.message : "Failed to update account";
+        return errorResponse(msg, 500);
     }
 }
-

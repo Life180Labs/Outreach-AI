@@ -1,6 +1,6 @@
 "use server";
 
-import { generateEmailDraft } from "@/lib/ai";
+import { generateEmailDraft } from "@/modules/ai/ai.service";
 import prisma from "@/lib/prisma";
 
 import { revalidatePath } from "next/cache";
@@ -138,7 +138,7 @@ export async function sendTestAction(
 
     if (!lead) return { success: false, error: "Lead not found" };
 
-    const { sendEmail } = await import("@/lib/mail");
+    const { sendEmailByCampaign: sendEmail } = await import("@/modules/mail/mail.service");
     const { formatEmailHTML } = await import("@/lib/email-signature");
     
     const html = formatEmailHTML(lead.emailBody || "");

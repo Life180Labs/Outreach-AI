@@ -6,14 +6,18 @@ import prisma from "@/lib/prisma";
 import { StopSequencesButton } from "./StopSequencesButton";
 import { CampaignsClient } from "./campaigns/CampaignsClient";
 
-import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect("/login");
-  const userId = session.user.id as string;
+  let userId: string;
+  try {
+    const user = await getAuthUser();
+    userId = user.id;
+  } catch {
+    redirect("/login");
+    return;
+  }
 
   const campaigns = await prisma.campaign.findMany({
     where: { userId },

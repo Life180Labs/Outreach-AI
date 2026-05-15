@@ -1,19 +1,18 @@
 import prisma from "@/lib/prisma";
 import SettingsClient from "./SettingsClient";
-import { SmtpService } from "@/services/smtp.service";
-
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { SmtpService } from "@/modules/smtp/smtp.service";
+import { getAuthUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
-  const session = await getServerSession(authOptions);
-  
-  if (!session?.user?.id) {
+  let userId: string;
+  try {
+    const user = await getAuthUser();
+    userId = user.id;
+  } catch {
     redirect("/login");
+    return;
   }
-
-  const userId = session.user.id as string;
 
   // Fetch or create default settings for the user
   let settings = await prisma.settings.findUnique({ 
@@ -26,8 +25,8 @@ export default async function SettingsPage() {
     });
   }
 
-  // Use the service to get formatted accounts (with parsed JSON config)
-  const accounts = await SmtpService.getAccountsForUser(userId);
+  // Use the service to get formatted accounts (without encrypted passwords)
+  const accounts = await SmtpService.getSmtpAccountsByUser(userId);
 
   return (
     <div className="w-full space-y-6">
@@ -35,5 +34,3 @@ export default async function SettingsPage() {
     </div>
   );
 }
-
-

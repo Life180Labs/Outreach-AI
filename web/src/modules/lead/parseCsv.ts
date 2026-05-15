@@ -100,4 +100,3 @@ export function parseCsv(text: string): { headers: string[]; rows: CsvRow[] } {
 
   return { headers, rows };
 }
-

@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { LeadInput, LeadValidationError } from "@/types/leads";
-import { parseCsv } from "@/features/leads/parseCsv";
-import { validateLeads } from "@/features/leads/validateLeads";
+import type { LeadInput, LeadValidationError } from "@/types";
+import { parseCsv } from "@/modules/lead/parseCsv";
+import { validateLeads } from "@/modules/lead/validateLeads";
 
 import { ValidationErrorTable } from "@/components/leads/ValidationErrorTable";
 
