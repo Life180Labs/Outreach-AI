@@ -19,7 +19,12 @@ export function Stepper({ campaignId }: { campaignId?: string }) {
       <div className="flex items-center w-full px-2">
       {steps.map((step, idx) => {
         const isActive = pathname.includes(`/${step.path}`);
-        const href = `/campaigns/${campaignId || 'new'}/${step.path}`;
+        
+        // Fix: Existing campaigns shouldn't link to a non-existent /[id]/upload page
+        const href = (step.path === 'upload' && campaignId) 
+          ? `/campaigns/${campaignId}/setup` // Redirect back to setup
+          : `/campaigns/${campaignId || 'new'}/${step.path}`;
+          
         const isCompleted = !!campaignId || step.path === 'upload';
 
         return (
