@@ -19,7 +19,8 @@ export const generateDraftsBatch = inngest.createFunction(
   },
   async ({ event, step }: { event: { data: { campaignId: string } }; step: any }) => {
     const { campaignId } = event.data as { campaignId: string };
-
+    console.log(`[Inngest] Starting draft generation for campaign: ${campaignId}`);
+    
     // Step 1: Fetch campaign with leads and strategy
     const campaign = await step.run("fetch-campaign", async () => {
       return prisma.campaign.findUnique({
@@ -33,21 +34,23 @@ export const generateDraftsBatch = inngest.createFunction(
       return { error: "Campaign not found" };
     }
 
-    // Step 2: Fetch user settings (cached for all leads)
+    // Step 2: Fetch or create default settings
     const settings = await step.run("fetch-settings", async () => {
-      return prisma.settings.findUnique({
+      let s = await prisma.settings.findUnique({
         where: { userId: campaign.userId },
       });
+      
+      if (!s) {
+        s = await prisma.settings.create({
+          data: { userId: campaign.userId }
+        });
+      }
+      return s;
     });
-
-    if (!settings) {
-      logger.error("Settings not found for draft generation", "GenerateDrafts", { userId: campaign.userId });
-      return { error: "AI settings not configured" };
-    }
 
     // Step 3: Filter leads needing drafts
     const leadsToProcess = campaign.leads.filter(
-      (l: Lead) => !l.emailSubject
+      (l: Lead) => !l.emailSubject || l.emailSubject === "Error"
     );
 
     if (leadsToProcess.length === 0) {
@@ -73,23 +76,32 @@ export const generateDraftsBatch = inngest.createFunction(
             // Skip if already generated (idempotency)
             if (!currentLead || currentLead.emailSubject) return "skipped";
 
-            const draft = await generateEmailDraft(
-              lead,
-              campaign as CampaignWithStrategy,
-              "",
-              settings as Settings
-            );
+            console.log(`[Inngest] Drafting for lead: ${lead.firstName} (${lead.id})`);
+            try {
+              const draft = await generateEmailDraft(
+                lead,
+                campaign as CampaignWithStrategy,
+                "",
+                settings as Settings
+              );
 
-            await prisma.lead.update({
-              where: { id: lead.id },
-              data: {
-                emailSubject: draft.subject,
-                emailBody: draft.body,
-                aiRationale: draft.rationale,
-              },
-            });
+              console.log(`[Inngest] Draft generated for ${lead.id}: ${draft.subject.substring(0, 20)}...`);
 
-            return "success";
+              await prisma.lead.update({
+                where: { id: lead.id },
+                data: {
+                  emailSubject: draft.subject,
+                  emailBody: draft.body,
+                  aiRationale: draft.rationale,
+                },
+              });
+              
+              console.log(`[Inngest] Lead ${lead.id} updated in DB.`);
+              return "success";
+            } catch (err) {
+              console.error(`[Inngest] Error processing lead ${lead.id}:`, err);
+              throw err;
+            }
           })
         );
 

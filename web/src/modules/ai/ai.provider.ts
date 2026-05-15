@@ -87,6 +87,7 @@ class GeminiProvider implements AIProvider {
     isJson = true
   ): Promise<string> {
     const ai = new GoogleGenAI({ apiKey: this.apiKey });
+    
     const result = await ai.models.generateContent({
       model: this.model,
       systemInstruction: system,
@@ -97,7 +98,14 @@ class GeminiProvider implements AIProvider {
       },
     });
 
-    return result.text || "";
+    // Return the text directly as per SDK docs
+    const text = result.text || "";
+    
+    if (!text) {
+      console.warn("[GeminiProvider] Received empty text response", result);
+    }
+    
+    return text;
   }
 }
 
