@@ -16,7 +16,7 @@ export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, read
   try {
     if (smtpAccount) {
       // Use the specific account selected for this campaign
-      senderEmail = smtpAccount.fromEmail || smtpAccount.userEmail || smtpAccount.name;
+      senderEmail = smtpAccount.fromEmail || smtpAccount.username || smtpAccount.name;
       isAccountConnected = true;
     }
   } catch (error) {
