@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { updateProfile, updatePassword } from "./actions";
+import { updateProfile, updatePassword, updateUserImage } from "./actions";
 import { toast } from "sonner";
 import { Save, User, Lock, Eye, EyeOff, ShieldCheck, Mail, Camera, ChevronDown, ChevronRight, Clock, Calendar, Loader2 } from "lucide-react";
 
@@ -44,8 +44,26 @@ export default function ProfileClient({ user }: ProfileClientProps) {
       return;
     }
 
-    // NOTE: Image upload is disabled until the User model has an 'image' field
-    toast.info("Profile image upload coming soon.");
+    setImageLoading(true);
+    const reader = new FileReader();
+    
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      try {
+        const res = await updateUserImage(base64String);
+        if (res.success) {
+          toast.success("Profile image updated");
+        } else {
+          toast.error(res.error || "Failed to upload image");
+        }
+      } catch (error) {
+        toast.error("An unexpected error occurred during upload");
+      } finally {
+        setImageLoading(false);
+      }
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {

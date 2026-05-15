@@ -79,7 +79,21 @@ export async function updatePassword(formData: FormData) {
   }
 }
 
-// NOTE: updateUserImage is disabled — the User model does not have an 'image' column.
-// Re-enable after adding 'image String?' to the User model in schema.prisma.
-// export async function updateUserImage(image: string) { ... }
+export async function updateUserImage(image: string) {
+  const user = await getAuthUser();
+  const userId = user.id;
+
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { image },
+    });
+
+    revalidatePath("/profile");
+    return { success: true };
+  } catch (error: any) {
+    console.error("Image Update Error:", error);
+    return { success: false, error: "Failed to update profile image" };
+  }
+}
 

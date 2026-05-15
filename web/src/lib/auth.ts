@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        // Minimal payload — no image, no unnecessary fields
+        // Minimal payload
         return {
           id: user.id,
           email: user.email,
@@ -81,10 +81,10 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        // Explicitly remove image to reduce JWT/session size
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        // Image is optionally stored in DB but we keep JWT slim
         session.user.image = null;
       }
       return session;
