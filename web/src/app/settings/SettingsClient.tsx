@@ -60,7 +60,7 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
       <div className="flex justify-between items-end mb-4">
         <div>
           <h1 className="text-3xl font-bold text-gradient tracking-tight">Configuration</h1>
-          <p className="mt-1" style={{ color: '#64748B' }}>Manage your outreach engine, AI models, and email integrations.</p>
+          <p className="mt-1" style={{ color: 'var(--text-muted)' }}>Manage your outreach engine, AI models, and email integrations.</p>
         </div>
       </div>
 
@@ -78,11 +78,11 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
                 <Bot className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">AI Intelligence</h2>
-                <p className="text-xs" style={{ color: '#64748B' }}>Configure your LLM providers and primary engine</p>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">AI Intelligence</h2>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Configure your LLM providers and primary engine</p>
               </div>
             </div>
-            {expanded.ai ? <ChevronDown className="w-5 h-5 text-[#475569] group-hover:text-white" /> : <ChevronRight className="w-5 h-5 text-[#475569] group-hover:text-white" />}
+            {expanded.ai ? <ChevronDown className="w-5 h-5 text-[var(--text-faint)] group-hover:text-[var(--text-primary)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-faint)] group-hover:text-[var(--text-primary)]" />}
           </div>
 
           {expanded.ai && (
@@ -111,7 +111,7 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
                       name="geminiApiKey"
                       defaultValue={settings?.geminiApiKey || ""}
                       placeholder="AI Studio Key..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: 'var(--text-primary)' }}
                     />
                     <button
                       type="button"
@@ -137,7 +137,7 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
                     <button
                       type="button"
                       onClick={() => toggleKey('openai')}
-                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
+                      className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors ml-2"
                     >
                       {showKeys.openai ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -213,11 +213,11 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
                 <Zap className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Delivery Controls</h2>
-                <p className="text-xs" style={{ color: '#64748B' }}>Manage throughput and safety limits</p>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">Delivery Controls</h2>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Manage throughput and safety limits</p>
               </div>
             </div>
-            {expanded.delivery ? <ChevronDown className="w-5 h-5 text-[#475569] group-hover:text-white" /> : <ChevronRight className="w-5 h-5 text-[#475569] group-hover:text-white" />}
+            {expanded.delivery ? <ChevronDown className="w-5 h-5 text-[var(--text-faint)] group-hover:text-[var(--text-primary)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-faint)] group-hover:text-[var(--text-primary)]" />}
           </div>
 
           {expanded.delivery && (
@@ -272,11 +272,11 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
                 <Mail className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Email Sending Accounts</h2>
-                <p className="text-xs" style={{ color: '#64748B' }}>Add and manage SMTP or Gmail connections</p>
+                <h2 className="text-lg font-bold text-[var(--text-primary)]">Email Sending Accounts</h2>
+                <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Add and manage SMTP or Gmail connections</p>
               </div>
             </div>
-            {expanded.smtp ? <ChevronDown className="w-5 h-5 text-[#475569] group-hover:text-white" /> : <ChevronRight className="w-5 h-5 text-[#475569] group-hover:text-white" />}
+            {expanded.smtp ? <ChevronDown className="w-5 h-5 text-[var(--text-faint)] group-hover:text-[var(--text-primary)]" /> : <ChevronRight className="w-5 h-5 text-[var(--text-faint)] group-hover:text-[var(--text-primary)]" />}
           </div>
 
           {expanded.smtp && (

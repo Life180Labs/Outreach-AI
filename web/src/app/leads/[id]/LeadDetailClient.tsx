@@ -76,15 +76,15 @@ function formatMessageContent(text: string) {
       return (
         <p
           key={idx}
-          className="mb-1 leading-relaxed text-zinc-200"
+          className="mb-1 leading-relaxed text-[var(--text-secondary)]"
           dangerouslySetInnerHTML={{
-            __html: lineText.replace(boldRegex, '<strong class="text-[#FFD54F] font-semibold">$1</strong>'),
+            __html: lineText.replace(boldRegex, '<strong class="text-[var(--brand-primary)] font-semibold">$1</strong>'),
           }}
         />
       );
     }
 
-    return <p key={idx} className="mb-1 leading-relaxed text-zinc-200">{lineText}</p>;
+    return <p key={idx} className="mb-1 leading-relaxed text-[var(--text-secondary)]">{lineText}</p>;
   });
 }
 
@@ -163,12 +163,12 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
   return (
     // Global container wrapper updated to fit the tactical dark theme
-    <div className="space-y-6 text-orange-50 select-none overflow-x-hidden w-full max-w-full">
+    <div className="space-y-6 text-[var(--text-primary)] select-none overflow-x-hidden w-full max-w-full">
       {/* Status toast updated to neon styling */}
       {statusMessage && (
         <div className={`fixed top-20 right-6 z-[100] px-4 py-2.5 rounded-none border shadow-2xl text-xs font-mono tracking-widest uppercase ${statusMessage.type === "success"
-            ? "bg-[#030303] border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-            : "bg-[#030303] border-red-500 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+            ? "bg-[var(--bg-elevated)] border-emerald-500 text-emerald-500 shadow-[var(--shadow-glow-primary)]"
+            : "bg-[var(--bg-elevated)] border-red-500 text-red-500 shadow-[var(--shadow-lg)]"
           }`} role="alert">
           {statusMessage.text}
         </div>
@@ -181,14 +181,14 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
         <div className="flex-1 lg:w-[33.33%] space-y-4 min-w-0">
 
           {/* Lead Profile Card: Dark cyberpunk style, orange left border indicator */}
-          <div className="p-6 rounded-none border border-[#FFAB00]/20 border-l-[4px] border-l-[#FFAB00] bg-[#030303] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)]">
+          <div className="p-6 rounded-none border border-[var(--border-muted)] border-l-[4px] border-l-[#FFAB00] bg-[var(--bg-surface)] shadow-[var(--shadow-layered)]">
             <div className="flex items-center gap-4 mb-5">
-              <div className="w-12 h-12 rounded-none bg-[#1A2A3A]/40 border border-[#FFAB00]/30 flex items-center justify-center text-md font-mono font-bold text-[#FFAB00]">
+              <div className="w-12 h-12 rounded-none bg-[var(--bg-elevated)] border border-[var(--border-muted)] flex items-center justify-center text-md font-mono font-bold text-[#FFAB00]">
                 {lead.firstName[0]}{lead.lastName?.[0] || ""}
               </div>
               <div className="min-w-0">
-                <h1 className="text-md font-medium tracking-tight uppercase text-white truncate font-sans">{lead.firstName} {lead.lastName}</h1>
-                <p className="text-[10px] font-mono tracking-widest text-[#FF6D00] uppercase truncate">{lead.jobTitle || "LEAD TARGET"}</p>
+                <h1 className="text-md font-bold tracking-tight uppercase text-[var(--text-primary)] truncate font-sans">{lead.firstName} {lead.lastName}</h1>
+                <p className="text-[10px] font-mono tracking-widest text-[#FF6D00] uppercase truncate font-bold">{lead.jobTitle || "LEAD TARGET"}</p>
               </div>
             </div>
 
@@ -212,13 +212,13 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
           </div>
 
           {/* Actions Card: Integrated interactive group tooltips for hover function identification */}
-          <div className="p-5 rounded-none border border-[#FFAB00]/20 border-l-[4px] border-l-[#FF6D00] bg-[#030303] space-y-3">
-            <p className="text-[10px] font-mono font-medium tracking-widest text-zinc-500 uppercase">System Controls</p>
+          <div className="p-5 rounded-none border border-[var(--border-muted)] border-l-[4px] border-l-[#FF6D00] bg-[var(--bg-surface)] space-y-3">
+            <p className="text-[10px] font-mono font-bold tracking-widest text-[var(--text-faint)] uppercase">System Controls</p>
             <div className="grid grid-cols-2 gap-2">
 
               {/* Mark Hot Button */}
               <div className="relative group">
-                <button onClick={() => handleStatusChange("Hot")} className={`w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-medium border transition-all duration-200 ${lead.status === "Hot" ? "bg-[#FFAB00] text-black border-[#FFAB00]" : "border-zinc-800 bg-[#1A2A3A]/20 text-zinc-300 hover:border-[#FFAB00]/50 hover:text-white"}`}>
+                <button onClick={() => handleStatusChange("Hot")} className={`w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-bold border transition-all duration-200 ${lead.status === "Hot" ? "bg-[#FFAB00] text-black border-[#FFAB00]" : "border-[var(--border-muted)] bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:border-[#FFAB00]/50 hover:text-[var(--text-primary)]"}`}>
                   Mark Hot
                 </button>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
@@ -249,7 +249,7 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
               {/* Sync Inbox Button */}
               <div className="relative group">
-                <button onClick={handleSync} disabled={loading} className="w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-medium border border-zinc-800 bg-[#1A2A3A]/20 text-zinc-300 hover:border-[#FFAB00]/50 hover:text-white transition-all duration-200 flex items-center justify-center gap-1.5 disabled:opacity-30">
+                <button onClick={handleSync} disabled={loading} className="w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-bold border border-[var(--border-muted)] bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:border-[#FFAB00]/50 hover:text-[var(--text-primary)] transition-all duration-200 flex items-center justify-center gap-1.5 disabled:opacity-30">
                   <Clock className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
                   Sync Inbox
                 </button>
@@ -263,12 +263,12 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
           {/* AI Rationale / Strategy Box */}
           {aiRationale && (
-            <div className="p-5 rounded-none border border-blue-500/30 bg-blue-950/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
+            <div className="p-5 rounded-none border border-blue-500/30 bg-blue-500/5 shadow-[var(--shadow-lg)]">
               <div className="flex items-center gap-1.5 mb-2">
-                <Zap className="w-3.5 h-3.5 text-blue-400" />
-                <p className="text-[10px] font-mono tracking-widest uppercase text-blue-400">AI Tactical Strategy</p>
+                <Zap className="w-3.5 h-3.5 text-blue-500" />
+                <p className="text-[10px] font-mono tracking-widest uppercase text-blue-500 font-bold">AI Tactical Strategy</p>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed font-sans">{aiRationale}</p>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed font-sans">{aiRationale}</p>
             </div>
           )}
         </div>
@@ -277,10 +277,10 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
         <div className="flex-1 lg:w-[66.66%] flex flex-col min-h-0 min-w-0 overflow-x-hidden">
 
           {/* Message Thread Container - Sharp border configuration with subtle gradient background layout */}
-          <div className="flex-1 rounded-none border border-[#FFAB00]/20 bg-[#030303] overflow-hidden flex flex-col shadow-[0_0_30px_rgba(255,171,0,0.05)] w-full max-w-full" style={{ minHeight: "530px" }}>
-            <div className="px-6 py-4 border-b border-[#FFAB00]/10 flex items-center justify-between bg-zinc-950">
-              <h2 className="text-xs font-mono uppercase tracking-widest text-white">Communications Log</h2>
-              <span className="text-[10px] font-mono uppercase tracking-widest text-[#FFAB00] bg-[#5C3A0B]/30 px-2 py-0.5 border border-[#FFAB00]/20">
+          <div className="flex-1 rounded-none border border-[var(--border-muted)] bg-[var(--bg-surface)] overflow-hidden flex flex-col shadow-[var(--shadow-layered)] w-full max-w-full" style={{ minHeight: "530px" }}>
+            <div className="px-6 py-4 border-b border-[var(--border-muted)] flex items-center justify-between bg-[var(--bg-elevated)]">
+              <h2 className="text-xs font-bold font-mono uppercase tracking-widest text-[var(--text-primary)]">Communications Log</h2>
+              <span className="text-[10px] font-bold font-mono uppercase tracking-widest text-[#FFAB00] bg-[#5C3A0B]/10 px-2 py-0.5 border border-[#FFAB00]/20">
                 {relevantMessages.length + (lead.sent ? 1 : 0)} entries
               </span>
             </div>
@@ -291,15 +291,15 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
               {/* Initial Outreach message mapping */}
               {lead.sent && lead.emailBody && (
                 <div className="flex justify-end w-full max-w-full">
-                  <div className="bg-[#1A2A3A]/30 rounded-none p-5 max-w-[85%] border border-[#FFAB00]/10 break-words w-full">
-                    <div className="flex items-center gap-2 mb-2 border-b border-[#FFAB00]/10 pb-1.5">
+                  <div className="bg-[var(--bg-elevated)] rounded-none p-5 max-w-[85%] border border-[var(--border-muted)] break-words w-full">
+                    <div className="flex items-center gap-2 mb-2 border-b border-[var(--border-muted)] pb-1.5">
                       <Zap className="w-3 h-3 text-[#FFAB00]" />
-                      <span className="text-[10px] font-mono uppercase tracking-widest text-[#FFAB00]">Outbound Lead Inception</span>
+                      <span className="text-[10px] font-bold font-mono uppercase tracking-widest text-[#FFAB00]">Outbound Lead Inception</span>
                     </div>
                     {lead.emailSubject && (
-                      <p className="text-xs font-mono font-semibold text-zinc-300 mb-2 uppercase tracking-wider"><span className="text-zinc-500">SUBJ:</span> {lead.emailSubject}</p>
+                      <p className="text-xs font-mono font-bold text-[var(--text-secondary)] mb-2 uppercase tracking-wider"><span className="text-[var(--text-faint)]">SUBJ:</span> {lead.emailSubject}</p>
                     )}
-                    <div className="text-sm text-zinc-200 leading-relaxed font-sans break-words whitespace-pre-wrap">
+                    <div className="text-sm text-[var(--text-primary)] leading-relaxed font-sans break-words whitespace-pre-wrap">
                       {formatMessageContent(lead.emailBody)}
                     </div>
                   </div>
@@ -310,19 +310,19 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
               {relevantMessages.map(msg => (
                 <div key={msg.id} className={`flex w-full max-w-full ${msg.role === "LEAD" ? "justify-start" : "justify-end"}`}>
                   <div className={`rounded-none p-5 max-w-[85%] border break-words w-full ${msg.role === "LEAD"
-                      ? "bg-zinc-950 border-zinc-800 border-l-[3px] border-l-[#FFAB00]"
-                      : "bg-[#1A2A3A]/20 border-[#FFAB00]/10"
+                      ? "bg-[var(--bg-surface)] border-[var(--border-muted)] border-l-[3px] border-l-[#FFAB00]"
+                      : "bg-[var(--bg-elevated)] border-[var(--border-muted)]"
                     }`}>
-                    <div className="flex items-center justify-between mb-2 border-b border-zinc-900 pb-1.5 font-mono text-[10px] tracking-wider">
-                      <span className={msg.role === "LEAD" ? "text-[#FFAB00] font-medium" : "text-zinc-400"}>
+                    <div className="flex items-center justify-between mb-2 border-b border-[var(--border-muted)] pb-1.5 font-mono text-[10px] tracking-wider">
+                      <span className={msg.role === "LEAD" ? "text-[#FFAB00] font-bold" : "text-[var(--text-faint)]"}>
                         {msg.role === "LEAD" ? `${lead.firstName} ${lead.lastName} (INBOUND)` : "YOU (OUTBOUND)"}
                       </span>
-                      <span className="text-zinc-500">
+                      <span className="text-[var(--text-muted)]">
                         {new Date(msg.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                       </span>
                     </div>
                     {/* Integrated parsing layer cleans any raw text markup markers safely */}
-                    <div className="text-sm text-zinc-200 leading-relaxed font-sans break-words whitespace-pre-wrap">
+                    <div className="text-sm text-[var(--text-primary)] leading-relaxed font-sans break-words whitespace-pre-wrap">
                       {formatMessageContent(msg.content)}
                     </div>
                   </div>
@@ -338,14 +338,14 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
             </div>
 
             {/* Composer Input Area */}
-            <div className="border-t border-[#FFAB00]/10 p-5 space-y-4 bg-zinc-950">
+            <div className="border-t border-[var(--border-muted)] p-5 space-y-4 bg-[var(--bg-elevated)]">
               <div className="relative">
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
                   placeholder="Draft system outbox reply packet..."
                   rows={4}
-                  className="w-full bg-[#030303] border border-zinc-800 rounded-none px-4 py-3 text-sm text-white font-sans resize-none focus:outline-none focus:border-[#FFAB00]/60 transition-colors placeholder:text-zinc-600"
+                  className="w-full bg-[var(--bg-surface)] border border-[var(--border-muted)] rounded-none px-4 py-3 text-sm text-[var(--text-primary)] font-sans resize-none focus:outline-none focus:border-[#FFAB00]/60 transition-colors placeholder:text-[var(--text-muted)]"
                   aria-label="Reply content"
                 />
                 {generating && (
@@ -444,7 +444,7 @@ function InfoRow({ icon: Icon, label }: { icon: React.ComponentType<{ className?
   return (
     <div className="flex items-center gap-2.5 max-w-full overflow-hidden">
       <Icon className="w-3.5 h-3.5 text-[#FF6D00] shrink-0" />
-      <span className="text-zinc-300 font-mono text-[11px] uppercase tracking-wide truncate max-w-full">{label || "UNKNOWN TELEMETRY"}</span>
+      <span className="text-[var(--text-secondary)] font-bold font-mono text-[11px] uppercase tracking-wide truncate max-w-full">{label || "UNKNOWN TELEMETRY"}</span>
     </div>
   );
 }

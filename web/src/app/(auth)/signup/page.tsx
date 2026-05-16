@@ -77,7 +77,7 @@ export default function SignUpPage() {
             <div className="w-full max-w-md space-y-8 p-8 relative z-10 card-surface animate-in fade-in zoom-in-95 duration-500">
                 {/* Header */}
                 <div className="text-center">
-                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-white/5 border border-white/5 mb-6">
+                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-[var(--bg-elevated)] border border-[var(--border-muted)] mb-6">
                         <Sparkles className="w-6 h-6 text-[#6366F1]" />
                     </div>
                     <h1 className="text-3xl font-bold tracking-tight text-gradient">
@@ -143,7 +143,7 @@ export default function SignUpPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#475569] hover:text-white transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>

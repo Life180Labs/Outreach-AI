@@ -50,9 +50,9 @@ function NavLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+      className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
         isActive
-          ? "text-white"
+          ? "text-[var(--text-primary)]"
           : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       }`}
       style={{

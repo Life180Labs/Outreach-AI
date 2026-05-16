@@ -53,7 +53,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
       case "active": return { border: 'rgba(16,185,129,0.2)', dot: '#10B981', text: '#10B981', bg: 'rgba(16,185,129,0.05)' };
       case "draft": return { border: 'rgba(245,158,11,0.2)', dot: '#F59E0B', text: '#F59E0B', bg: 'rgba(245,158,11,0.05)' };
       case "completed": return { border: 'rgba(99,102,241,0.2)', dot: '#6366F1', text: '#6366F1', bg: 'rgba(99,102,241,0.05)' };
-      default: return { border: 'rgba(255,255,255,0.06)', dot: '#475569', text: '#64748B', bg: 'rgba(255,255,255,0.02)' };
+      default: return { border: 'var(--border-muted)', dot: 'var(--text-faint)', text: 'var(--text-muted)', bg: 'var(--bg-elevated)' };
     }
   };
 
@@ -69,12 +69,12 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                   <AlertTriangle className="w-6 h-6 text-[#EF4444]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">
                     {modalState.type === "bulk"
                       ? `Delete ${selectedIds.length} Campaigns?`
                       : "Delete Campaign?"}
                   </h3>
-                  <p className="text-sm text-[#94A3B8] mt-1">
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
                     This action cannot be undone. This will permanently delete the
                     campaign and all associated data.
                   </p>
@@ -198,7 +198,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                   <div className="flex items-start justify-between mb-4 pr-16">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-sm font-semibold text-[#F1F5F9] truncate group-hover:text-white">
+                        <h3 className="text-sm font-bold text-[var(--text-primary)] truncate group-hover:text-[var(--brand-primary)]">
                           {c.name || "Untitled Campaign"}
                         </h3>
                         <div
@@ -206,7 +206,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                           style={{ background: accent.dot }}
                         />
                       </div>
-                      <p className="text-xs font-medium mt-0.5" style={{ color: '#64748B' }}>
+                      <p className="text-xs font-bold mt-0.5" style={{ color: 'var(--text-muted)' }}>
                         {totalLeads} leads · <span style={{ color: accent.text }}>{c.status}</span>
                       </p>
                     </div>
@@ -234,9 +234,9 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                   </div>
 
                   <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div className="flex items-center gap-3 text-xs font-medium" style={{ fontFamily: 'var(--font-mono)' }}>
-                      <span className="text-[#94A3B8]">
-                        <span className="font-bold text-white">{sentCount}</span>{" "}Sent
+                    <div className="flex items-center gap-3 text-xs font-bold" style={{ fontFamily: 'var(--font-mono)' }}>
+                      <span className="text-[var(--text-muted)]">
+                        <span className="text-[var(--text-primary)]">{sentCount}</span>{" "}Sent
                       </span>
                       <span className="text-[#94A3B8]">
                         <span className="font-bold text-[#10B981]">{hotCount}</span>{" "}Hot

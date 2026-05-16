@@ -43,7 +43,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="relative z-10">
         <h1 className="text-3xl font-bold text-gradient tracking-tight">Dashboard</h1>
-        <p className="text-[#64748B] text-sm mt-1.5">Overview of your outreach performance</p>
+        <p className="text-[var(--text-muted)] text-sm mt-1.5">Overview of your outreach performance</p>
       </div>
 
       {/* Bento Grid — Row 1: Stats */}
@@ -65,8 +65,8 @@ export default async function DashboardPage() {
             <Plus className="w-4 h-4 text-[#6366F1] group-hover:text-white transition-colors" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">New Campaign</p>
-            <p className="text-xs text-[#64748B] mt-0.5">Upload leads, configure AI, and launch</p>
+            <p className="text-sm font-bold text-[var(--text-primary)]">New Campaign</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5">Upload leads, configure AI, and launch</p>
           </div>
         </Link>
 
@@ -79,8 +79,8 @@ export default async function DashboardPage() {
             <RotateCcw className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-colors" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white">Resume Campaign</p>
-            <p className="text-xs text-[#64748B] mt-0.5 truncate">
+            <p className="text-sm font-bold text-[var(--text-primary)]">Resume Campaign</p>
+            <p className="text-xs text-[var(--text-muted)] mt-0.5 truncate">
               {lastCampaign?.name || "No recent campaigns"}
             </p>
           </div>
@@ -93,8 +93,8 @@ export default async function DashboardPage() {
       {/* Bento Grid — Row 3: Recent Campaigns */}
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-white">Recent Campaigns</h2>
-          <Link href="/campaigns" className="text-xs text-[#64748B] hover:text-[#6366F1] transition-colors">
+          <h2 className="text-sm font-bold text-[var(--text-primary)]">Recent Campaigns</h2>
+          <Link href="/campaigns" className="text-xs text-[var(--text-muted)] hover:text-[var(--brand-primary)] transition-colors">
             View all →
           </Link>
         </div>
@@ -115,7 +115,7 @@ export default async function DashboardPage() {
 
 function StatCard({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; color: "default" | "blue" | "green" }) {
   const accents = {
-    default: { icon: '#64748B', value: '#F1F5F9', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.06)' },
+    default: { icon: 'var(--text-secondary)', value: 'var(--text-primary)', bg: 'var(--bg-elevated)', border: 'var(--border-muted)' },
     blue: { icon: '#3B82F6', value: '#3B82F6', bg: 'rgba(59,130,246,0.05)', border: 'rgba(59,130,246,0.15)' },
     green: { icon: '#10B981', value: '#10B981', bg: 'rgba(16,185,129,0.05)', border: 'rgba(16,185,129,0.15)' },
   };

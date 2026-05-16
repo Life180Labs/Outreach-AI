@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { TrackingService } from "@/modules/tracking/tracking.service";
+import { logger } from "@/lib/logger";
+
+/**
+ * Dynamic Open Tracking API
+ * Handles signals from /api/track/open/[leadId]
+ */
+
+const PIXEL = Buffer.from(
+  "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+  "base64"
+);
 
 export async function GET(
   req: NextRequest,
@@ -7,29 +18,23 @@ export async function GET(
 ) {
   const { leadId } = await params;
 
-  try {
-    // Mark as opened in background
-    await prisma.lead.update({
-      where: { id: leadId },
-      data: { opened: true, status: "Opened" }
+  if (leadId) {
+    // Record open in background
+    TrackingService.recordOpen(leadId).then(success => {
+      if (success) {
+        console.log(`[Tracking] Lead ${leadId} opened the email`);
+      }
+    }).catch(err => {
+      logger.error("Dynamic tracking failure", "TrackOpenDynamic", { leadId, error: err.message });
     });
-    console.log(`[Tracking] Lead ${leadId} opened the email`);
-  } catch (error) {
-    console.error(`[Tracking] Error updating lead ${leadId}:`, error);
   }
 
-  // Return a 1x1 transparent GIF
-  const pixel = Buffer.from(
-    "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-    "base64"
-  );
-
-  return new NextResponse(pixel, {
+  return new NextResponse(PIXEL, {
     headers: {
       "Content-Type": "image/gif",
       "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      "Pragma": "no-cache",
-      "Expires": "0",
+      Pragma: "no-cache",
+      Expires: "0",
     },
   });
 }

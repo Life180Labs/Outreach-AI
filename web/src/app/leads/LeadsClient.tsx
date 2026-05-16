@@ -59,7 +59,7 @@ const LeadRow = memo(function LeadRow({
       <td className="px-4 py-4">
         <button
           onClick={() => onSelect(lead.id)}
-          className="text-[#475569] hover:text-white transition-colors"
+          className="text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors"
           aria-label={`Select ${lead.firstName} ${lead.lastName}`}
         >
           {selected ? <CheckSquare className="w-4 h-4 text-[#6366F1]" /> : <Square className="w-4 h-4" />}
@@ -71,14 +71,14 @@ const LeadRow = memo(function LeadRow({
             {lead.firstName[0]}{lead.lastName?.[0] || ""}
           </div>
           <div>
-            <p className="text-sm font-medium text-[#F1F5F9]">{lead.firstName} {lead.lastName}</p>
-            <p className="text-xs text-[#64748B]">{lead.email}</p>
+            <p className="text-sm font-bold text-[var(--text-primary)]">{lead.firstName} {lead.lastName}</p>
+            <p className="text-xs text-[var(--text-muted)]">{lead.email}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-4">
-        <p className="text-sm text-[#F1F5F9]">{lead.companyName}</p>
-        <p className="text-xs text-[#64748B]">{lead.jobTitle || "—"}</p>
+        <p className="text-sm font-bold text-[var(--text-primary)]">{lead.companyName}</p>
+        <p className="text-xs text-[var(--text-muted)]">{lead.jobTitle || "—"}</p>
       </td>
       <td className="px-4 py-4">
         <span className={statusBadge()}>
@@ -90,7 +90,7 @@ const LeadRow = memo(function LeadRow({
         <p className="text-xs text-[#94A3B8]" style={{ fontFamily: 'var(--font-mono)' }}>
           {activityLabel}
         </p>
-        <p className="text-[11px] mt-0.5" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
+        <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
           {new Date(lead.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </p>
       </td>
@@ -99,7 +99,7 @@ const LeadRow = memo(function LeadRow({
           <div className="relative group/tooltip">
             <button
               onClick={() => onEdit(lead)}
-              className="p-1.5 text-[#475569] hover:text-white hover:bg-white/5 rounded-md transition-all"
+              className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-md transition-all"
               aria-label={`Edit ${lead.firstName}`}
             >
               <Edit className="w-3.5 h-3.5" />
@@ -125,7 +125,7 @@ const LeadRow = memo(function LeadRow({
           <div className="relative group/tooltip">
             <Link
               href={`/leads/${lead.id}`}
-              className="p-1.5 text-[#475569] hover:text-white hover:bg-white/5 rounded-md transition-all"
+              className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-md transition-all"
               aria-label={`View ${lead.firstName}`}
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -171,9 +171,9 @@ function EditLeadModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} role="dialog" aria-modal="true">
       <div className="w-full max-w-lg overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-container)', boxShadow: 'var(--shadow-2xl)' }}>
         <form onSubmit={onSave}>
-            <div className="flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '1.5rem' }}>
-              <h3 className="text-lg font-semibold text-white">Edit Lead</h3>
-              <button type="button" onClick={onClose} className="p-1 text-[#64748B] hover:text-white rounded transition-colors" aria-label="Close">
+            <div className="flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-muted)', padding: '1.5rem' }}>
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">Edit Lead</h3>
+              <button type="button" onClick={onClose} className="p-1 text-[var(--text-faint)] hover:text-[var(--text-primary)] rounded transition-colors" aria-label="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -198,8 +198,8 @@ function EditLeadModal({
               </div>
             </div>
           </div>
-          <div className="p-6 flex gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-medium text-[#94A3B8] hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)' }}>
+          <div className="p-6 flex gap-3" style={{ borderTop: '1px solid var(--border-muted)' }}>
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-button)' }}>
               Cancel
             </button>
             <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
@@ -216,7 +216,7 @@ function EditLeadModal({
 function Field({ label, name, defaultValue }: { label: string; name: string; defaultValue: string }) {
   return (
     <div>
-      <label htmlFor={`edit-${name}`} className="text-xs font-medium mb-1 block" style={{ color: '#64748B' }}>{label}</label>
+      <label htmlFor={`edit-${name}`} className="text-xs font-bold mb-1 block uppercase tracking-tight" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{label}</label>
       <input id={`edit-${name}`} name={name} defaultValue={defaultValue} className="input-dark w-full" />
     </div>
   );
@@ -330,10 +330,10 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
                   <AlertTriangle className="w-6 h-6 text-[#EF4444]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">
                     {modalState.type === 'bulk' ? `Delete ${selectedIds.length} Leads?` : "Delete Lead?"}
                   </h3>
-                  <p className="text-sm text-[#94A3B8] mt-1">
+                  <p className="text-sm text-[var(--text-secondary)] mt-1">
                     This action cannot be undone. This will permanently delete the lead and all associated messages.
                   </p>
                 </div>
@@ -343,8 +343,8 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
               <button
                 onClick={() => setModalState({ isOpen: false, type: 'single' })}
                 disabled={!!loading}
-                className="px-4 py-2 text-sm font-medium text-[#94A3B8] hover:text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)' }}
+                className="px-4 py-2 text-sm font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-button)' }}
               >
                 Cancel
               </button>
@@ -365,9 +365,9 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
       <div className="space-y-4">
       {/* Bulk toolbar */}
       {selectedIds.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 text-white" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 'var(--radius-card)' }}>
-          <span className="text-xs font-medium" style={{ fontFamily: 'var(--font-mono)' }}>{selectedIds.length} selected</span>
-          <div className="h-4 w-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+        <div className="flex items-center gap-3 px-4 py-3 text-[var(--text-primary)]" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-card)' }}>
+          <span className="text-xs font-bold uppercase tracking-wider" style={{ fontFamily: 'var(--font-mono)' }}>{selectedIds.length} selected</span>
+          <div className="h-4 w-px bg-[var(--border-muted)]" />
           <div className="relative">
             <button onClick={() => setShowBulkMenu(!showBulkMenu)} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors">
               Actions <ChevronDown className="w-3 h-3" />
@@ -413,7 +413,7 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
                     {selectedIds.length === leads.length && leads.length > 0 ? <CheckSquare className="w-4 h-4 text-[#6366F1]" /> : <Square className="w-4 h-4" />}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Contact</th>
+                <th className="px-4 py-3 text-xs font-bold" style={{ background: 'var(--bg-elevated)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Contact</th>
                 <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Company</th>
                 <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Status</th>
                 <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Activity</th>

@@ -25,7 +25,10 @@ export const TrackingService = {
       if (!lead.opened) {
         await prisma.lead.update({
           where: { id: leadId },
-          data: { opened: true },
+          data: { 
+            opened: true,
+            status: "Opened" 
+          },
         });
       }
 

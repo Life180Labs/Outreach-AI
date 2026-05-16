@@ -56,10 +56,10 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
           <div className="flex items-center gap-2 mb-1">
             <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
             <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F1F5F9', fontFamily: 'var(--font-mono)' }}>Configuration</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>Configuration</span>
           </div>
           <h1 className="text-3xl font-bold text-gradient tracking-tight">{campaign.name || 'Campaign Setup'}</h1>
-          <p className="text-sm mt-1" style={{ color: '#64748B' }}>Define your outreach strategy and AI context</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Define your outreach strategy and AI context</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -68,8 +68,8 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
           <div className="flex-1 lg:w-[58.33%] space-y-6">
             <div className="p-6 card-surface space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">Campaign Identity</h3>
-                <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Define your internal name and outreach context</p>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">Campaign Identity</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Define your internal name and outreach context</p>
               </div>
 
               <div className="space-y-4">
@@ -137,8 +137,8 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
 
             <div className="p-6 card-surface space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">Sequence Logic</h3>
-                <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Configure follow-up timing and sequence steps</p>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">Sequence Logic</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Configure follow-up timing and sequence steps</p>
               </div>
 
               <div className="grid grid-cols-2 gap-6">
@@ -174,13 +174,13 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
           <div className="flex-1 lg:w-[41.66%] space-y-6">
             <div className="p-6 card-surface space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">Tone & Strategy</h3>
-                <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Refine how the AI communicates</p>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">Tone & Strategy</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Refine how the AI communicates</p>
               </div>
 
               <div className="space-y-6">
                 <div>
-                  <label className="text-xs font-medium mb-3 block" style={{ color: '#64748B' }}>AI Outreach Strategy</label>
+                  <label className="text-xs font-bold mb-3 block" style={{ color: 'var(--text-muted)' }}>AI Outreach Strategy</label>
                   <select
                     name="strategyId"
                     defaultValue={campaign.strategyId || ""}
@@ -199,7 +199,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                     {['Professional', 'Friendly', 'Direct'].map(t => (
                       <label key={t} className="cursor-pointer">
                         <input type="radio" name="tone" value={t} className="peer sr-only" defaultChecked={(!campaign.tone && t === 'Professional') || campaign.tone?.includes(t)} />
-                        <div className="px-4 py-2 rounded-lg border border-white/10 text-xs font-medium transition-all peer-checked:bg-white peer-checked:text-black text-[#64748B] hover:border-white/20">
+                        <div className="px-4 py-2 rounded-lg border border-[var(--border-muted)] text-xs font-bold transition-all peer-checked:bg-[var(--text-primary)] peer-checked:text-[var(--bg-surface)] text-[var(--text-muted)] hover:border-[var(--text-faint)]">
                           {t}
                         </div>
                       </label>
@@ -213,7 +213,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                     {['Book a call', 'Reply back', 'Custom'].map(c => (
                       <label key={c} className="cursor-pointer">
                         <input type="radio" name="cta" value={c} className="peer sr-only" defaultChecked={(!campaign.cta && c === 'Book a call') || campaign.cta?.includes(c)} />
-                        <div className="px-4 py-2 rounded-lg border border-white/10 text-xs font-medium transition-all peer-checked:bg-white peer-checked:text-black text-[#64748B] hover:border-white/20">
+                        <div className="px-4 py-2 rounded-lg border border-[var(--border-muted)] text-xs font-bold transition-all peer-checked:bg-[var(--text-primary)] peer-checked:text-[var(--bg-surface)] text-[var(--text-muted)] hover:border-[var(--text-faint)]">
                           {c}
                         </div>
                       </label>
@@ -225,12 +225,12 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
 
             <div className="p-6 card-surface space-y-5">
               <div>
-                <h3 className="text-sm font-semibold text-white">Auto-Detected Context</h3>
-                <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Refined by AI during lead ingestion</p>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">Auto-Detected Context</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Refined by AI during lead ingestion</p>
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="text-[10px] font-semibold uppercase tracking-tight mb-1 block" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Business Type</label>
+                  <label className="text-[10px] font-bold uppercase tracking-tight mb-1 block" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>Business Type</label>
                   <input
                     type="text"
                     name="businessType"
@@ -240,7 +240,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-semibold uppercase tracking-tight mb-1 block" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Geographic Focus</label>
+                  <label className="text-[10px] font-bold uppercase tracking-tight mb-1 block" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>Geographic Focus</label>
                   <input
                     type="text"
                     name="locationContext"

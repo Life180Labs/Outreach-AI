@@ -135,7 +135,7 @@ Output Format:
             <ShieldCheck className="w-8 h-8 text-[#10B981]" />
             AI Strategy Studio
           </h1>
-          <p className="text-sm mt-1" style={{ color: '#64748B' }}>Engineer and audit your outreach prompts with high-fidelity simulations.</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Engineer and audit your outreach prompts with high-fidelity simulations.</p>
         </div>
         <button
           onClick={handleSave}
@@ -176,11 +176,11 @@ Output Format:
                   }
                 }
               }}
-              className="bg-transparent border-none text-sm font-semibold text-white focus:outline-none p-0 w-full cursor-pointer appearance-none"
+              className="bg-transparent border-none text-sm font-bold text-[var(--text-primary)] focus:outline-none p-0 w-full cursor-pointer appearance-none"
             >
-              <option value="" className="bg-[#0D0E12]">Default (Global Settings)</option>
+              <option value="" className="bg-[var(--bg-surface)]">Default (Global Settings)</option>
               {strategies.map(s => (
-                <option key={s.id} value={s.id} className="bg-[#0D0E12]">{s.name}</option>
+                <option key={s.id} value={s.id} className="bg-[var(--bg-surface)]">{s.name}</option>
               ))}
             </select>
           </div>
@@ -204,7 +204,7 @@ Output Format:
             <div className="flex" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               <button 
                 onClick={() => setActiveTab('structured')}
-                className={`flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'structured' ? 'bg-white/5 text-white border-b-2 border-[#6366F1]' : 'text-[#475569] hover:text-[#94A3B8]'}`}
+                className={`flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'structured' ? 'bg-white/5 text-[var(--text-primary)] border-b-2 border-[#6366F1]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`}
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 <Layers className="w-3.5 h-3.5" />
@@ -212,7 +212,7 @@ Output Format:
               </button>
               <button 
                 onClick={() => setActiveTab('preview')}
-                className={`flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'preview' ? 'bg-white/5 text-white border-b-2 border-[#6366F1]' : 'text-[#475569] hover:text-[#94A3B8]'}`}
+                className={`flex-1 px-4 py-4 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${activeTab === 'preview' ? 'bg-white/5 text-[var(--text-primary)] border-b-2 border-[#6366F1]' : 'text-[var(--text-faint)] hover:text-[var(--text-muted)]'}`}
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 <FileText className="w-3.5 h-3.5" />
@@ -308,7 +308,7 @@ Output Format:
               ) : (
                 <div className="space-y-4">
                   <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>System Prompt</p>
-                  <div className="bg-black text-[#10B981] p-6 rounded-xl text-xs font-mono whitespace-pre-wrap leading-relaxed border border-white/5 shadow-inner overflow-y-auto max-h-[500px]">
+                  <div className="bg-[var(--bg-sink)] text-[#10B981] p-6 rounded-xl text-xs font-mono whitespace-pre-wrap leading-relaxed border border-[var(--border-muted)] shadow-inner overflow-y-auto max-h-[500px]">
                     {builtPrompt}
                   </div>
                 </div>
@@ -387,10 +387,10 @@ Output Format:
                   <div className="p-8">
                     <div className="bg-[#0D0E12] border border-white/10 rounded-2xl shadow-2xl overflow-hidden max-w-[600px] mx-auto antialiased">
                       <div className="bg-white/5 px-8 py-4 border-b border-white/5">
-                         <p className="text-[11px] text-[#475569] font-medium">Subject: <span className="text-white font-bold ml-1">{result.subject || 're: inquiry'}</span></p>
+                         <p className="text-[11px] text-[var(--text-muted)] font-bold uppercase">Subject: <span className="text-[var(--text-primary)] font-bold ml-1">{result.subject || 're: inquiry'}</span></p>
                       </div>
                       <div className="p-10">
-                        <div className="text-[15px] text-[#F1F5F9] leading-[1.6] whitespace-pre-wrap">
+                        <div className="text-[15px] text-[var(--text-secondary)] leading-[1.6] whitespace-pre-wrap">
                           {result.draft}
                         </div>
                         
@@ -399,8 +399,8 @@ Output Format:
                            <div className="flex gap-3">
                               <div className="w-[3px] h-10 bg-[#6366F1] rounded-sm" />
                               <div>
-                                <p className="text-[15px] font-bold text-white leading-tight">GTM Team</p>
-                                <p className="text-[13px] font-medium text-[#475569]">Outreach Intelligence</p>
+                                <p className="text-[15px] font-bold text-[var(--text-primary)] leading-tight">GTM Team</p>
+                                <p className="text-[13px] font-bold text-[var(--text-faint)]">Outreach Intelligence</p>
                               </div>
                            </div>
                         </div>
@@ -436,12 +436,12 @@ Output Format:
       {showSaveNameModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="card-surface shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <div className="p-6" style={{ borderBottom: '1px solid var(--border-muted)' }}>
+              <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-[#6366F1]" />
                 Strategy Library
               </h3>
-              <p className="text-xs mt-1" style={{ color: '#64748B' }}>Give this strategy a unique identifier.</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--text-muted)' }}>Give this strategy a unique identifier.</p>
             </div>
             <div className="p-6 space-y-4">
               <div>
