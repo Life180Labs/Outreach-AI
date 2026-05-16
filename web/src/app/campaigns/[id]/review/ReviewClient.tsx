@@ -200,25 +200,25 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-black transition-colors">Campaign</Link>
-            <span className="text-zinc-300">/</span>
-            <span className="text-[10px] font-bold text-black uppercase tracking-widest">Review Workspace</span>
+            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
+            <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F1F5F9', fontFamily: 'var(--font-mono)' }}>Review Workspace</span>
           </div>
-          <h1 className="text-2xl font-semibold text-black tracking-tight">{campaign.name || 'Review Drafts'}</h1>
-          <p className="text-zinc-400 text-sm">{leads.length} leads · {approvedCount} approved · {draftedLeadsCount} drafted</p>
+          <h1 className="text-3xl font-bold text-gradient tracking-tight">{campaign.name || 'Review Drafts'}</h1>
+          <p className="text-sm" style={{ color: '#64748B' }}>{leads.length} leads · {approvedCount} approved · {draftedLeadsCount} drafted</p>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={handleApproveAll}
             disabled={loading === 'approveAll' || approvedCount === draftedLeadsCount}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg font-medium transition-colors text-sm flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:bg-zinc-200 disabled:text-zinc-400"
+            className="btn-success px-4 py-2.5 flex items-center gap-2"
           >
             {loading === 'approveAll' ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCheck className="w-4 h-4" />}
             Approve All ({draftedLeadsCount - approvedCount})
           </button>
           <Link 
             href={`/campaigns/${campaign.id}/launch`} 
-            className="bg-black hover:bg-zinc-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors text-sm flex items-center gap-2 shadow-sm"
+            className="btn-primary px-5 py-2.5 flex items-center gap-2"
           >
             Continue to Launch
             <ArrowRight className="w-4 h-4" />
@@ -229,10 +229,10 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
       <div className="flex flex-col lg:flex-row gap-6" style={{ height: 'calc(100vh - 220px)', minHeight: '650px' }}>
         
         {/* Left: Queue (4/12) */}
-        <div className="flex-1 lg:w-[33.33%] lg:max-w-[33.33%] flex flex-col rounded-2xl border border-zinc-200 bg-white overflow-hidden">
-          <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between shrink-0">
-            <h2 className="text-sm font-semibold text-black">Sequence Queue</h2>
-            <span className="text-[11px] font-medium text-blue-600 uppercase tracking-wide">
+        <div className="flex-1 lg:w-[33.33%] lg:max-w-[33.33%] flex flex-col card-surface overflow-hidden">
+          <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+            <h2 className="text-sm font-semibold text-white">Sequence Queue</h2>
+            <span className="text-[11px] font-bold uppercase tracking-wide text-[#6366F1]" style={{ fontFamily: 'var(--font-mono)' }}>
               {approvedCount}/{leads.length} Approved
             </span>
           </div>
@@ -241,16 +241,17 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
               <button
                 key={lead.id}
                 onClick={() => setSelectedLeadId(lead.id)}
-                className={`w-full text-left p-4 border-b border-zinc-50 flex items-center gap-4 transition-colors ${
-                  selectedLeadId === lead.id ? 'bg-zinc-50' : 'hover:bg-zinc-50/50'
+                className={`w-full text-left p-4 flex items-center gap-4 transition-all duration-200 ${
+                  selectedLeadId === lead.id ? 'bg-white/5 border-l-2 border-[#6366F1]' : 'hover:bg-white/[0.02] border-l-2 border-transparent'
                 }`}
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}
               >
-                <div className="text-[10px] font-medium text-zinc-300 w-4">{idx + 1}</div>
+                <div className="text-[10px] font-bold text-[#475569] w-4" style={{ fontFamily: 'var(--font-mono)' }}>{idx + 1}</div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${selectedLeadId === lead.id ? 'text-black' : 'text-zinc-600'}`}>
+                  <p className={`text-sm font-medium truncate ${selectedLeadId === lead.id ? 'text-white' : 'text-[#94A3B8]'}`}>
                     {lead.firstName} {lead.lastName}
                   </p>
-                  <p className="text-xs text-zinc-400 truncate">{lead.companyName}</p>
+                  <p className="text-xs truncate" style={{ color: '#475569' }}>{lead.companyName}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {lead.isApproved ? (
@@ -269,25 +270,25 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
         </div>
 
         {/* Right: Workspace (8/12) */}
-        <div className="flex-1 lg:w-[66.66%] flex flex-col rounded-2xl border border-zinc-200 bg-white overflow-hidden">
+        <div className="flex-1 lg:w-[66.66%] flex flex-col card-surface overflow-hidden">
           {selectedLead ? (
             <>
               {/* Workspace Header */}
-              <div className="px-6 py-5 border-b border-zinc-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+              <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-semibold text-zinc-500">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', color: '#94A3B8' }}>
                     {selectedLead.firstName[0]}{selectedLead.lastName?.[0] || ''}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-black">{selectedLead.firstName} {selectedLead.lastName}</h3>
-                    <p className="text-xs text-zinc-400">{selectedLead.jobTitle} at {selectedLead.companyName}</p>
+                    <h3 className="text-sm font-semibold text-white">{selectedLead.firstName} {selectedLead.lastName}</h3>
+                    <p className="text-xs" style={{ color: '#64748B' }}>{selectedLead.jobTitle} at {selectedLead.companyName}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => { setShowTestInput(!showTestInput); setShowRegenInput(false); }}
                     disabled={selectedLead.emailSubject === "Error"}
-                    className="flex items-center gap-2 px-3 py-2 text-zinc-500 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors disabled:opacity-30"
+                    className="flex items-center gap-2 px-3 py-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-30"
                     title="Send test email"
                   >
                     <Mail className="w-4 h-4" />
@@ -295,20 +296,20 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                   </button>
                   <button 
                     onClick={() => { setShowRegenInput(!showRegenInput); setShowTestInput(false); }}
-                    className="flex items-center gap-2 px-3 py-2 text-zinc-500 hover:text-black hover:bg-zinc-50 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                     title="Regenerate draft"
                   >
                     <RefreshCcw className="w-4 h-4" />
                     <span className="text-xs font-medium">{selectedLead.emailSubject === "Error" ? "Try Again" : "Regenerate"}</span>
                   </button>
-                  <div className="w-px h-5 bg-zinc-100" />
+                  <div className="w-px h-5" style={{ background: 'rgba(255,255,255,0.06)' }} />
                   <button
                     onClick={handleApprove}
                     disabled={loading === 'approve' || selectedLead.isApproved || selectedLead.emailSubject === "Error" || !selectedLead.emailSubject}
-                    className={`px-4 py-2 rounded-lg text-xs font-medium transition-colors flex items-center gap-2 ${
+                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
                       selectedLead.isApproved 
-                        ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 cursor-default' 
-                        : 'bg-black text-white hover:bg-zinc-800 disabled:bg-zinc-100 disabled:text-zinc-400'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 cursor-default' 
+                        : 'btn-primary'
                     }`}
                   >
                     {loading === 'approve' ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
@@ -319,7 +320,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
 
               {/* Inline Inputs */}
               {(showRegenInput || showTestInput) && (
-                <div className="px-6 py-3 bg-zinc-50 border-b border-zinc-100 flex items-center gap-3 shrink-0">
+                <div className="px-6 py-3 border-b flex items-center gap-3 shrink-0" style={{ background: 'rgba(255,255,255,0.03)', borderBottomColor: 'rgba(255,255,255,0.06)' }}>
                   {showRegenInput ? (
                     <>
                       <input 
@@ -327,10 +328,10 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                         value={regenFeedback}
                         onChange={(e) => setRegenFeedback(e.target.value)}
                         placeholder={selectedLead.emailSubject === "Error" ? "Provide context to fix error..." : "Feedback for AI (e.g. 'Make it shorter')"}
-                        className="flex-1 bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-zinc-400"
+                        className="input-dark flex-1 py-1.5 text-xs"
                         onKeyDown={(e) => e.key === 'Enter' && handleRegenerate()}
                       />
-                      <button onClick={handleRegenerate} disabled={loading === 'regenerate'} className="px-3 py-1.5 bg-black text-white rounded-lg text-[11px] font-medium transition-colors disabled:opacity-50">
+                      <button onClick={handleRegenerate} disabled={loading === 'regenerate'} className="btn-primary px-3 py-1.5 text-[11px] font-bold">
                         {loading === 'regenerate' ? <Loader2 className="w-3 h-3 animate-spin" /> : (selectedLead.emailSubject === "Error" ? "Retry" : "Regenerate")}
                       </button>
                     </>
@@ -341,15 +342,15 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                         value={testEmail}
                         onChange={(e) => setTestEmail(e.target.value)}
                         placeholder="Send test email to..."
-                        className="flex-1 bg-white border border-zinc-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-zinc-400"
+                        className="input-dark flex-1 py-1.5 text-xs"
                         onKeyDown={(e) => e.key === 'Enter' && handleSendTest()}
                       />
-                      <button onClick={handleSendTest} disabled={loading === 'test'} className="px-3 py-1.5 bg-black text-white rounded-lg text-[11px] font-medium transition-colors disabled:opacity-50">
+                      <button onClick={handleSendTest} disabled={loading === 'test'} className="btn-primary px-3 py-1.5 text-[11px] font-bold">
                         Send Test
                       </button>
                     </>
                   )}
-                  <button onClick={() => { setShowRegenInput(false); setShowTestInput(false); }} className="text-zinc-400 hover:text-black p-1">
+                  <button onClick={() => { setShowRegenInput(false); setShowTestInput(false); }} className="text-[#475569] hover:text-white p-1">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -363,19 +364,19 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                 </div>
               ) : selectedLead.emailSubject === "Error" ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-8 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center">
-                    <X className="w-8 h-8 text-red-500" />
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    <X className="w-8 h-8 text-[#EF4444]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-zinc-900">AI Generation Failed</h3>
-                    <p className="text-sm text-zinc-500 max-w-sm mt-2">
+                    <h3 className="text-lg font-semibold text-white">AI Generation Failed</h3>
+                    <p className="text-sm max-w-sm mt-2" style={{ color: '#64748B' }}>
                       There was an error generating this draft. This usually happens if your AI provider API key is missing or invalid.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Link href="/settings" className="text-xs font-bold text-blue-600 hover:underline">Check AI Settings</Link>
-                    <span className="text-zinc-300">|</span>
-                    <button onClick={() => setShowRegenInput(true)} className="text-xs font-bold text-zinc-900 hover:underline">Try Again</button>
+                    <Link href="/settings" className="text-xs font-bold text-[#6366F1] hover:underline">Check AI Settings</Link>
+                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
+                    <button onClick={() => setShowRegenInput(true)} className="text-xs font-bold text-white hover:underline">Try Again</button>
                   </div>
                 </div>
               ) : (
@@ -383,13 +384,13 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                   {/* Scrollable area: subject + body only */}
                   <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6" style={{ scrollbarWidth: 'thin' }}>
                     <div>
-                      <label className="text-[10px] font-medium text-zinc-400 uppercase tracking-widest mb-1.5 block">Subject</label>
+                      <label className="text-[10px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Subject</label>
                       <input 
                         type="text" 
                         name="subject" 
                         value={editSubject}
                         onChange={(e) => setEditSubject(e.target.value)}
-                        className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-3 text-sm text-black font-medium focus:outline-none focus:border-zinc-400 transition-colors"
+                        className="input-dark w-full py-3 font-medium"
                       />
                     </div>
                     <div className="flex-1 flex flex-col min-h-0">
@@ -398,8 +399,8 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                           <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Message Content</label>
                         </div>
 
-                        <div className="flex-1 bg-white border border-zinc-200 rounded-xl overflow-hidden transition-colors focus-within:border-zinc-400 flex flex-col">
-                          <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-zinc-200 [&_.ql-toolbar]:bg-zinc-50/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-zinc-700 [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
+                        <div className="flex-1 card-surface overflow-hidden flex flex-col" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+                          <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-white/5 [&_.ql-toolbar]:bg-white/5 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-[#F1F5F9] [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
                             <ReactQuill 
                               theme="snow" 
                               value={editBody} 
@@ -420,20 +421,20 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                   </div>
 
                   {/* Fixed footer: rationale + save button — always visible */}
-                  <div className="px-6 py-4 border-t border-zinc-100 flex items-center justify-between shrink-0 bg-zinc-50/50">
+                  <div className="px-6 py-4 border-t flex items-center justify-between shrink-0" style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
                     <div className="flex items-center gap-3 min-w-0 flex-1 mr-4">
-                      <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded-md shrink-0">
-                        <Zap className="w-3 h-3 text-blue-600" />
-                        <span className="text-[10px] font-bold text-blue-700 uppercase tracking-tight">AI Strategy</span>
+                      <div className="flex items-center gap-1.5 px-2 py-1 border rounded-md shrink-0" style={{ background: 'rgba(99,102,241,0.08)', borderColor: 'rgba(99,102,241,0.2)' }}>
+                        <Zap className="w-3 h-3 text-[#6366F1]" />
+                        <span className="text-[10px] font-bold uppercase tracking-tight" style={{ color: '#818CF8', fontFamily: 'var(--font-mono)' }}>AI Strategy</span>
                       </div>
-                      <p className="text-[11px] font-medium text-zinc-500 italic line-clamp-2">
+                      <p className="text-[11px] font-medium italic line-clamp-2" style={{ color: '#64748B' }}>
                         "{selectedLead.aiRationale || 'Highly personalized based on lead notes'}"
                       </p>
                     </div>
                     <button 
                       type="submit" 
                       disabled={loading === 'save'} 
-                      className="px-5 py-2.5 bg-black hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-2 shrink-0 shadow-sm hover:shadow-md active:scale-[0.98]"
+                      className="btn-primary px-5 py-2.5 text-xs font-bold flex items-center gap-2 shrink-0"
                     >
                       {loading === 'save' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                       Save Changes

@@ -18,7 +18,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="w-full space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/leads" className="flex items-center gap-1.5 text-zinc-400 hover:text-black text-sm font-medium transition-colors">
+        <Link href="/leads" className="flex items-center gap-1.5 text-[#64748B] hover:text-white text-sm font-medium transition-all duration-200">
           <ChevronLeft className="w-4 h-4" /> Back to leads
         </Link>
       </div>

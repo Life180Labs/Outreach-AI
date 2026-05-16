@@ -23,12 +23,12 @@ export default async function CampaignsListPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-black tracking-tight">Campaigns</h1>
-          <p className="text-zinc-400 text-sm mt-1">Manage and track your outreach performance</p>
+          <h1 className="text-3xl font-bold text-gradient tracking-tight">Campaigns</h1>
+          <p className="text-[#64748B] text-sm mt-1">Manage and track your outreach performance</p>
         </div>
         <Link
           href="/campaigns/new/upload"
-          className="bg-black hover:bg-zinc-800 text-white px-4 py-2.5 rounded-lg font-medium transition-colors text-sm flex items-center gap-2"
+          className="btn-primary flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           New Campaign
@@ -85,17 +85,17 @@ function Section({
   children: React.ReactNode;
 }) {
   const badgeColors: Record<string, string> = {
-    emerald: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    zinc: "bg-zinc-50 text-zinc-600 border-zinc-200",
-    amber: "bg-amber-50 text-amber-700 border-amber-200",
+    emerald: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    zinc: "bg-white/5 text-zinc-400 border-white/10",
+    amber: "bg-amber-500/10 text-amber-400 border-amber-500/20",
   };
 
   return (
     <section className="space-y-4">
       <div className="flex items-center gap-2.5">
-        <Icon className="w-4 h-4 text-zinc-400" />
-        <h2 className="text-sm font-semibold text-black">{title}</h2>
-        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${badgeColors[color] || badgeColors.zinc}`}>
+        <Icon className="w-4 h-4 text-[#475569]" />
+        <h2 className="text-sm font-semibold text-white">{title}</h2>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColors[color] || badgeColors.zinc}`} style={{ fontFamily: 'var(--font-mono)' }}>
           {count}
         </span>
       </div>
@@ -108,8 +108,8 @@ function Section({
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="py-10 border border-dashed border-zinc-200 rounded-2xl flex items-center justify-center">
-      <p className="text-sm text-zinc-400">{text}</p>
+    <div className="py-12 border border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center gap-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
+      <p className="text-sm text-[#475569]">{text}</p>
     </div>
   );
 }

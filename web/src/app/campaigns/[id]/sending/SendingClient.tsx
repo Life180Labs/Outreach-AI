@@ -36,16 +36,16 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest hover:text-black transition-colors">Campaign</Link>
-            <span className="text-zinc-300">/</span>
-            <span className="text-[10px] font-bold text-black uppercase tracking-widest">Real-time Monitor</span>
+            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
+            <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F1F5F9', fontFamily: 'var(--font-mono)' }}>Real-time Monitor</span>
           </div>
-          <h1 className="text-2xl font-semibold text-black tracking-tight">{campaign.name || 'Monitoring Outreach'}</h1>
-          <p className="text-zinc-400 text-sm">Tracking live sequence progression and responses</p>
+          <h1 className="text-3xl font-bold text-gradient tracking-tight">{campaign.name || 'Monitoring Outreach'}</h1>
+          <p className="text-sm mt-1" style={{ color: '#64748B' }}>Tracking live sequence progression and responses</p>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 border border-emerald-100 rounded-full">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Active</span>
+        <div className="flex items-center gap-2 px-3 py-1 border rounded-full" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.2)' }}>
+          <div className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" />
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#10B981]" style={{ fontFamily: 'var(--font-mono)' }}>Active</span>
         </div>
       </div>
 
@@ -55,37 +55,37 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
         <div className="flex-1 lg:w-[58.33%] space-y-6">
           {/* Stats Row */}
           <div className="grid grid-cols-3 gap-4">
-            <StatCard label="Sent" value={stats.sent} icon={MailCheck} color="text-emerald-600" bg="bg-emerald-50/50" border="border-emerald-100" />
-            <StatCard label="Pending" value={stats.pending} icon={MailQuestion} color="text-amber-600" bg="bg-amber-50/50" border="border-amber-100" />
-            <StatCard label="Failed" value={stats.failed} icon={MailX} color="text-red-600" bg="bg-red-50/50" border="border-red-100" />
+            <StatCard label="Sent" value={stats.sent} icon={MailCheck} color="text-[#10B981]" bg="bg-[#10B981]/10" border="border-[#10B981]/20" />
+            <StatCard label="Pending" value={stats.pending} icon={MailQuestion} color="text-[#F59E0B]" bg="bg-[#F59E0B]/10" border="border-[#F59E0B]/20" />
+            <StatCard label="Failed" value={stats.failed} icon={MailX} color="text-[#EF4444]" bg="bg-[#EF4444]/10" border="border-[#EF4444]/20" />
           </div>
 
           {/* Progress */}
-          <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-4">
+          <div className="p-6 card-surface space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-black">Overall Progress</h3>
-              <span className="text-sm font-semibold text-black tabular-nums">{progressPercent}%</span>
+              <h3 className="text-sm font-semibold text-white">Overall Progress</h3>
+              <span className="text-sm font-bold text-white tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>{progressPercent}%</span>
             </div>
-            <div className="w-full bg-zinc-100 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
               <div 
-                className="h-full bg-black rounded-full transition-all duration-1000 ease-out" 
+                className="h-full bg-[#6366F1] rounded-full transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(99,102,241,0.4)]" 
                 style={{ width: `${progressPercent}%` }} 
               />
             </div>
-            <div className="flex items-center justify-between text-xs text-zinc-400 font-medium">
+            <div className="flex items-center justify-between text-xs font-medium" style={{ color: '#475569' }}>
               <div className="flex items-center gap-2">
-                <Activity className="w-3.5 h-3.5" />
-                <span>30 emails/hr</span>
+                <Activity className="w-3.5 h-3.5 text-[#6366F1]" />
+                <span style={{ fontFamily: 'var(--font-mono)' }}>30 emails/hr</span>
               </div>
-              <span>{stats.total > 0 ? `${Math.ceil(stats.pending / 30 * 60)} min remaining` : 'No leads'}</span>
+              <span style={{ fontFamily: 'var(--font-mono)' }}>{stats.total > 0 ? `${Math.ceil(stats.pending / 30 * 60)} min remaining` : 'No leads'}</span>
             </div>
           </div>
 
           {/* Timeline */}
-          <div className="p-6 rounded-2xl border border-zinc-200 bg-white space-y-6">
+          <div className="p-6 card-surface space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-black">Sequence Lifecycle</h3>
-              <p className="text-xs text-zinc-400 mt-0.5">Automated outreach progression</p>
+              <h3 className="text-sm font-semibold text-white">Sequence Lifecycle</h3>
+              <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Automated outreach progression</p>
             </div>
             <div className="space-y-6 pl-2">
               <TimelineStep label="Day 0" title="Initial Outreach" description="Currently being dispatched to approved leads." status="active" />
@@ -95,12 +95,12 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
           </div>
 
           {/* Controls */}
-          <div className="p-6 rounded-2xl border border-red-100 bg-red-50/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-6 border flex flex-col sm:flex-row items-center justify-between gap-4" style={{ background: 'rgba(239,68,68,0.04)', borderColor: 'rgba(239,68,68,0.15)', borderRadius: 'var(--radius-card)' }}>
             <div className="flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 text-red-500" />
+              <AlertCircle className="w-5 h-5 text-[#EF4444]" />
               <div>
-                <p className="text-xs font-semibold text-red-900">Emergency Controls</p>
-                <p className="text-[11px] text-red-800/60 mt-0.5">Stop all active outreach cycles immediately.</p>
+                <p className="text-xs font-bold text-[#F87171]" style={{ fontFamily: 'var(--font-mono)' }}>Emergency Controls</p>
+                <p className="text-[11px] mt-0.5" style={{ color: '#FCA5A5' }}>Stop all active outreach cycles immediately.</p>
               </div>
             </div>
             <StopSequencesButton variant="button" />
@@ -108,10 +108,10 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
         </div>
 
         {/* Right Column: Live Feed (5/12) */}
-        <div className="flex-1 lg:w-[41.66%] flex flex-col h-[700px] rounded-2xl border border-zinc-200 bg-white overflow-hidden">
-          <div className="px-5 py-4 border-b border-zinc-100 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-black">Live Feed</h2>
-            <span className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 uppercase tracking-tight">
+        <div className="flex-1 lg:w-[41.66%] flex flex-col h-[700px] card-surface overflow-hidden">
+          <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+            <h2 className="text-sm font-semibold text-white">Live Feed</h2>
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#10B981] uppercase tracking-tight" style={{ fontFamily: 'var(--font-mono)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
               Real-time
             </span>
@@ -125,19 +125,19 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
               </div>
             ) : (
               recentLeads.map((lead: any) => (
-                <div key={lead.id} className="p-4 border-b border-zinc-50 flex items-center gap-4 hover:bg-zinc-50/50 transition-colors">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
-                    lead.sent ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                <div key={lead.id} className="p-4 flex items-center gap-4 hover:bg-white/[0.02] transition-all duration-200" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border transition-colors ${
+                    lead.sent ? 'bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20' : 'bg-[#F59E0B]/10 text-[#F59E0B] border-[#F59E0B]/20'
                   }`}>
                     {lead.sent ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4 animate-spin" />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-black truncate">{lead.email}</p>
-                    <p className="text-[11px] text-zinc-400 mt-0.5" suppressHydrationWarning>
+                    <p className="text-sm font-medium text-white truncate">{lead.email}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }} suppressHydrationWarning>
                       {lead.sent ? 'Dispatched' : 'Processing'} · {new Date(lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
-                  <Link href={`/leads/${lead.id}`} className="p-1.5 text-zinc-300 hover:text-black transition-colors">
+                  <Link href={`/leads/${lead.id}`} className="p-1.5 text-[#475569] hover:text-white transition-colors">
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -145,8 +145,8 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
             )}
           </div>
 
-          <div className="p-4 border-t border-zinc-100 bg-zinc-50/50 text-center">
-            <Link href={`/campaigns/${campaign.id}`} className="text-xs font-semibold text-zinc-500 hover:text-black transition-colors flex items-center justify-center gap-1.5">
+          <div className="p-4 bg-white/5 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <Link href={`/campaigns/${campaign.id}`} className="text-xs font-bold text-[#64748B] hover:text-white transition-all flex items-center justify-center gap-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
               View Campaign Insights
               <ArrowRight className="w-3 h-3" />
             </Link>
@@ -159,26 +159,26 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
 
 function StatCard({ label, value, icon: Icon, color, bg, border }: any) {
   return (
-    <div className={`p-5 rounded-2xl border ${border} ${bg}`}>
+    <div className={`p-5 card-surface border ${border} ${bg} flex flex-col items-center justify-center text-center`}>
       <Icon className={`w-4 h-4 ${color} mb-3`} />
-      <p className={`text-2xl font-semibold tabular-nums ${color}`}>{value}</p>
-      <p className="text-[11px] font-medium text-zinc-400 uppercase tracking-wide mt-1">{label}</p>
+      <p className={`text-3xl font-bold tabular-nums ${color}`} style={{ fontFamily: 'var(--font-mono)' }}>{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>{label}</p>
     </div>
   );
 }
 
 function TimelineStep({ label, title, description, status }: any) {
   return (
-    <div className="relative pl-6 border-l border-zinc-100 last:border-0 pb-6 last:pb-0">
-      <div className={`absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full border-2 border-white ${
-        status === 'active' ? 'bg-black ring-4 ring-zinc-50' : 'bg-zinc-200'
+    <div className="relative pl-6 last:border-0 pb-6 last:pb-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className={`absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full border-2 border-[#0D0E12] ${
+        status === 'active' ? 'bg-[#6366F1] ring-4 ring-[#6366F1]/10' : 'bg-[#16171D]'
       }`} />
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{label}</span>
-        <span className="text-zinc-200">·</span>
-        <h4 className="text-sm font-semibold text-black">{title}</h4>
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>{label}</span>
+        <span style={{ color: 'rgba(255,255,255,0.06)' }}>·</span>
+        <h4 className="text-sm font-semibold text-white">{title}</h4>
       </div>
-      <p className="text-xs text-zinc-500">{description}</p>
+      <p className="text-xs" style={{ color: '#64748B' }}>{description}</p>
     </div>
   );
 }

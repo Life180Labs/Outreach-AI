@@ -104,7 +104,7 @@ const LeadRow = memo(function LeadRow({
             >
               <Edit className="w-3.5 h-3.5" />
             </button>
-            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#6366F1] text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
               Edit lead details
             </div>
           </div>
@@ -117,7 +117,7 @@ const LeadRow = memo(function LeadRow({
             >
               {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
             </button>
-            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#6366F1] text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
               {lead.isPaused ? "Resume automated sequence" : "Pause automated sequence"}
             </div>
           </div>
@@ -130,7 +130,7 @@ const LeadRow = memo(function LeadRow({
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
-            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#6366F1] text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
               Open conversation log
             </div>
           </div>
@@ -144,7 +144,7 @@ const LeadRow = memo(function LeadRow({
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
             </button>
-            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-red-500 text-red-500 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#EF4444] text-[#EF4444] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-in fade-in zoom-in-95 duration-200">
               Permanently delete lead
             </div>
           </div>
@@ -373,12 +373,12 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
               Actions <ChevronDown className="w-3 h-3" />
             </button>
             {showBulkMenu && (
-              <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 py-1 text-black">
-                <button onClick={() => handleBulkUpdate({ status: "Hot" })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50">Mark as Hot</button>
-                <button onClick={() => handleBulkUpdate({ status: "NotInterested" })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50">Mark Not Interested</button>
-                <div className="border-t border-zinc-100 my-1" />
-                <button onClick={() => handleBulkUpdate({ isPaused: true })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 flex items-center gap-2"><Pause className="w-3.5 h-3.5" /> Pause</button>
-                <button onClick={() => handleBulkUpdate({ isPaused: false })} className="w-full text-left px-4 py-2 text-sm hover:bg-zinc-50 flex items-center gap-2"><Play className="w-3.5 h-3.5" /> Resume</button>
+              <div className="absolute top-full left-0 mt-2 w-48 bg-[#0D0E12]/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl z-50 py-1 overflow-hidden">
+                <button onClick={() => handleBulkUpdate({ status: "Hot" })} className="w-full text-left px-4 py-2 text-sm text-[#94A3B8] hover:text-white hover:bg-white/5 transition-colors">Mark as Hot</button>
+                <button onClick={() => handleBulkUpdate({ status: "NotInterested" })} className="w-full text-left px-4 py-2 text-sm text-[#94A3B8] hover:text-white hover:bg-white/5 transition-colors">Mark Not Interested</button>
+                <div className="border-t border-white/5 my-1" />
+                <button onClick={() => handleBulkUpdate({ isPaused: true })} className="w-full text-left px-4 py-2 text-sm text-[#94A3B8] hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"><Pause className="w-3.5 h-3.5" /> Pause</button>
+                <button onClick={() => handleBulkUpdate({ isPaused: false })} className="w-full text-left px-4 py-2 text-sm text-[#94A3B8] hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"><Play className="w-3.5 h-3.5" /> Resume</button>
               </div>
             )}
           </div>
