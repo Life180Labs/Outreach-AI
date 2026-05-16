@@ -24,33 +24,67 @@ import {
 } from "./actions";
 import type { LeadWithMessages } from "@/types";
 
-// Simple custom helper function to format inline markdown/markup bolding or block strings safely
+// Enhanced helper function to format message content for professional readability
 function formatMessageContent(text: string) {
   if (!text) return "";
 
-  // Clean markdown block wrappers if present (handles code snippet overflows)
-  let cleanText = text.replace(/```[a-z]*/g, "").replace(/```/g, "");
+  let cleanText = text;
 
-  // Split lines to look for markdown styling safely
-  return cleanText.split("\n").map((line, idx) => {
-    // Basic conversion for markdown bullet formatting to clean readability
-    if (line.trim().startsWith("* ")) {
-      line = "• " + line.trim().substring(2);
+  // 1. Handle potential JSON artifacts if the AI returned a raw object string
+  if (cleanText.trim().startsWith('{') && cleanText.trim().endsWith('}')) {
+    try {
+      const parsed = JSON.parse(cleanText.trim());
+      cleanText = parsed.message || parsed.content || parsed.body || parsed.emailBody || cleanText;
+    } catch (e) {
+      // Fallback to raw text if not valid JSON
     }
-    // Bold replacement (**text** to HTML strong tags)
+  }
+
+  // 2. Strip AI internal tags and reasoning blocks
+  cleanText = cleanText.replace(/<thought>[\s\S]*?<\/thought>/gi, "");
+  cleanText = cleanText.replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, "");
+  
+  // 3. Remove markdown code block wrappers
+  cleanText = cleanText.replace(/```[a-z]*\n?/gi, "").replace(/```/g, "");
+
+  // 4. Strip specific wrapping tags occasionally produced by LLMs
+  const artifacts = ['message', 'email', 'response', 'draft', 'subject', 'body'];
+  artifacts.forEach(tag => {
+    const start = new RegExp(`<${tag}>`, 'gi');
+    const end = new RegExp(`<\\/${tag}>`, 'gi');
+    cleanText = cleanText.replace(start, "").replace(end, "");
+  });
+
+  // 5. Clean up redundant "Subject:" lines if they appear in the body
+  cleanText = cleanText.replace(/^Subject:\s?.*\n/i, "");
+
+  // 6. Split and format lines
+  return cleanText.trim().split("\n").map((line, idx) => {
+    let lineText = line.trim();
+    
+    // Skip empty lines with a spacer
+    if (!lineText) return <div key={idx} className="h-3" />;
+
+    // Convert markdown bullets to clean glyphs
+    if (lineText.startsWith("* ") || lineText.startsWith("- ")) {
+      lineText = "• " + lineText.substring(2);
+    }
+
+    // Process bolding (**text**) using safe replacement
     const boldRegex = /\*\*(.*?)\*\*/g;
-    if (boldRegex.test(line)) {
+    if (boldRegex.test(lineText)) {
       return (
-        <span
+        <p
           key={idx}
-          className="block min-h-[1.5rem]"
+          className="mb-1 leading-relaxed text-zinc-200"
           dangerouslySetInnerHTML={{
-            __html: line.replace(boldRegex, '<strong class="text-[#FFD54F] font-semibold">$1</strong>'),
+            __html: lineText.replace(boldRegex, '<strong class="text-[#FFD54F] font-semibold">$1</strong>'),
           }}
         />
       );
     }
-    return <span key={idx} className="block min-h-[1.5rem]">{line}</span>;
+
+    return <p key={idx} className="mb-1 leading-relaxed text-zinc-200">{lineText}</p>;
   });
 }
 
