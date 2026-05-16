@@ -5,57 +5,54 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Canvas Layers ── */
-  --bg-sink: #070709;
-  --bg-surface: #0D0E12;
-  --bg-elevated: #16171D;
+  /* ═══════════════════════════════════════════════════════════════════════
+     PREMIUM LIGHT-MODE PALETTE (Default)
+     ═══════════════════════════════════════════════════════════════════════ */
+  --bg-sink: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F1F5F9;
 
-  /* ── Borders ── */
-  --border-active: rgba(255, 255, 255, 0.15);
-  --border-muted: rgba(255, 255, 255, 0.06);
+  --border-active: rgba(0, 0, 0, 0.1);
+  --border-muted: rgba(0, 0, 0, 0.05);
 
-  /* ── Semantic Accent Emitters ── */
   --brand-primary: #6366F1;
   --brand-glow: #3B82F6;
   --brand-success: #10B981;
   --brand-warning: #F59E0B;
   --brand-danger: #EF4444;
 
-  /* ── Text ── */
-  --text-primary: #F1F5F9;
-  --text-secondary: #94A3B8;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
   --text-muted: #64748B;
-  --text-faint: #475569;
+  --text-faint: #94A3B8;
 
-  /* ── Tailwind v4 theme wiring ── */
-  --background: #070709;
-  --foreground: #F1F5F9;
-  --card: #0D0E12;
-  --card-foreground: #F1F5F9;
-  --popover: #16171D;
-  --popover-foreground: #F1F5F9;
+  --background: var(--bg-sink);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-elevated);
+  --popover-foreground: var(--text-primary);
   --primary: #6366F1;
   --primary-foreground: #FFFFFF;
-  --secondary: #16171D;
-  --secondary-foreground: #94A3B8;
-  --muted: #0D0E12;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #475569;
+  --muted: #F8FAFC;
   --muted-foreground: #64748B;
   --accent: #6366F1;
   --accent-foreground: #FFFFFF;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(255, 255, 255, 0.06);
-  --input: rgba(255, 255, 255, 0.06);
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.08);
   --ring: #6366F1;
 
-  /* ── Sidebar (for shadcn compat) ── */
-  --sidebar: #0D0E12;
-  --sidebar-foreground: #F1F5F9;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #475569;
   --sidebar-primary: #6366F1;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #16171D;
-  --sidebar-accent-foreground: #94A3B8;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #0F172A;
+  --sidebar-border: rgba(0, 0, 0, 0.08);
   --sidebar-ring: #6366F1;
 
   /* ── Font Stacks ── */
@@ -69,14 +66,63 @@
   --radius-input: 8px;
   --radius-card: 12px;
   --radius-container: 16px;
-
   --radius: 0.5rem;
 
-  /* ── Shadow System ── */
+  /* ── Shadow System (Light) ── */
+  --shadow-layered: 0 1px 2px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.05), 0 12px 32px rgba(0, 0, 0, 0.1);
+  --shadow-glow-primary: 0 0 0 1px rgba(99, 102, 241, 0.1), 0 0 20px rgba(99, 102, 241, 0.05);
+  --shadow-focus: 0 0 0 4px rgba(99, 102, 241, 0.1);
+
+  --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.08);
+  --shadow: var(--shadow-layered);
+  --shadow-md: var(--shadow-layered);
+  --shadow-lg: 0 1px 2px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.1);
+  --shadow-xl: 0 1px 2px rgba(0,0,0,0.05), 0 12px 40px rgba(0,0,0,0.12);
+  --shadow-2xl: 0 1px 2px rgba(0,0,0,0.05), 0 20px 50px rgba(0,0,0,0.15);
+
+  --spacing: 0.25rem;
+}
+
+.dark {
+  /* ═══════════════════════════════════════════════════════════════════════
+     PREMIUM DARK-MODE PALETTE
+     ═══════════════════════════════════════════════════════════════════════ */
+  --bg-sink: #070709;
+  --bg-surface: #0D0E12;
+  --bg-elevated: #16171D;
+
+  --border-active: rgba(255, 255, 255, 0.15);
+  --border-muted: rgba(255, 255, 255, 0.06);
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-faint: #475569;
+
+  --background: #070709;
+  --foreground: #F1F5F9;
+  --card: #0D0E12;
+  --card-foreground: #F1F5F9;
+  --popover: #16171D;
+  --popover-foreground: #F1F5F9;
+  --secondary: #16171D;
+  --secondary-foreground: #94A3B8;
+  --muted: #0D0E12;
+  --muted-foreground: #64748B;
+  --border: rgba(255, 255, 255, 0.06);
+  --input: rgba(255, 255, 255, 0.06);
+
+  --sidebar: #0D0E12;
+  --sidebar-foreground: #F1F5F9;
+  --sidebar-accent: #16171D;
+  --sidebar-accent-foreground: #94A3B8;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+
+  /* ── Shadow System (Dark) ── */
   --shadow-layered: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.5);
   --shadow-glow-primary: 0 0 0 1px rgba(99, 102, 241, 0.2), 0 0 20px rgba(99, 102, 241, 0.1);
-  --shadow-glow-success: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.1);
-  --shadow-glow-danger: 0 0 0 1px rgba(239, 68, 68, 0.2), 0 0 20px rgba(239, 68, 68, 0.1);
   --shadow-focus: 0 0 0 4px rgba(99, 102, 241, 0.15);
 
   --shadow-2xs: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -87,9 +133,6 @@
   --shadow-lg: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.5);
   --shadow-xl: 0 1px 2px rgba(0,0,0,0.3), 0 12px 40px rgba(0,0,0,0.6);
   --shadow-2xl: 0 1px 2px rgba(0,0,0,0.3), 0 20px 50px rgba(0,0,0,0.7);
-
-  --tracking-normal: 0em;
-  --spacing: 0.25rem;
 }
 
 /* ── Tailwind v4 @theme inline ── */

@@ -3,9 +3,10 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, LayoutDashboard, Users, Zap, Menu, X, User, LogOut } from "lucide-react";
-import { useState } from "react";
+import { Settings, LayoutDashboard, Users, Zap, Menu, X, User, LogOut, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 
 type AccountStatus = "connected" | "disconnected";
 
@@ -14,17 +15,17 @@ function StatusPill({ status, label }: { status: AccountStatus; label: string })
     <div
       className="flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all"
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        borderColor: status === "connected" ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)',
+        background: 'var(--bg-elevated)',
+        borderColor: status === "connected" ? 'rgba(16,185,129,0.2)' : 'var(--border-muted)',
       }}
       role="status"
     >
       <div
         className={`h-1.5 w-1.5 rounded-full ${
-          status === "connected" ? "bg-emerald-400 animate-pulse-dot" : "bg-zinc-600"
+          status === "connected" ? "bg-[#10B981] animate-pulse-dot" : "bg-[#64748B]"
         }`}
       />
-      <span className="text-[10px] font-semibold uppercase tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: status === "connected" ? '#10B981' : '#64748B' }}>
+      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ fontFamily: 'var(--font-mono)', color: status === "connected" ? '#10B981' : 'var(--text-muted)' }}>
         {label}
       </span>
     </div>
@@ -52,15 +53,14 @@ function NavLink({
       className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
         isActive
           ? "text-white"
-          : "text-[#64748B] hover:text-[#94A3B8]"
+          : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
       }`}
       style={{
         background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
-        ...(isActive ? {} : {}),
       }}
       onMouseEnter={(e) => {
         if (!isActive) {
-          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
+          (e.currentTarget as HTMLElement).style.background = 'var(--border-muted)';
         }
       }}
       onMouseLeave={(e) => {
@@ -85,6 +85,11 @@ export function AppShell({
   accountLabel?: string;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Avoid hydration mismatch
+  useEffect(() => setMounted(true), []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-sink)' }}>
@@ -93,11 +98,12 @@ export function AppShell({
         <div
           className="w-full max-w-[1200px] flex items-center justify-between px-5 py-2.5 rounded-full"
           style={{
-            background: 'rgba(13, 14, 18, 0.7)',
+            background: 'var(--bg-surface)',
+            opacity: 0.95,
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
-            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.4)',
+            border: '1px solid var(--border-muted)',
+            boxShadow: 'var(--shadow-xl)',
           }}
         >
           {/* Left: Logo + Nav */}
@@ -106,7 +112,7 @@ export function AppShell({
               <div className="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:shadow-[0_0_12px_rgba(99,102,241,0.3)]" style={{ background: 'linear-gradient(135deg, #6366F1, #4F46E5)' }}>
                 <Zap className="w-3.5 h-3.5 text-white fill-white" />
               </div>
-              <span className="text-sm font-semibold tracking-tight text-white">
+              <span className="text-sm font-bold tracking-tight text-[var(--text-primary)]">
                 Outreach AI
               </span>
             </Link>
@@ -124,25 +130,32 @@ export function AppShell({
             <div className="hidden sm:block">
               <StatusPill status={accountStatus} label={accountLabel} />
             </div>
-            <div className="h-4 w-px hidden sm:block" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <div className="h-4 w-px hidden sm:block" style={{ background: 'var(--border-muted)' }} />
             <div className="flex items-center gap-0.5">
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all duration-200"
+                title="Toggle Theme"
+              >
+                {mounted && (theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />)}
+              </button>
               <Link
                 href="/profile"
-                className="p-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-full transition-all duration-200"
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all duration-200"
                 title="Your Profile"
               >
                 <User className="w-4 h-4" />
               </Link>
               <Link
                 href="/settings"
-                className="p-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-full transition-all duration-200"
+                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all duration-200"
                 title="Settings"
               >
                 <Settings className="w-4 h-4" />
               </Link>
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="p-2 text-[#64748B] hover:text-[#EF4444] hover:bg-red-500/5 rounded-full transition-all duration-200"
+                className="p-2 text-[var(--text-muted)] hover:text-[#EF4444] hover:bg-red-500/5 rounded-full transition-all duration-200"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
@@ -151,7 +164,7 @@ export function AppShell({
 
             {/* Mobile menu toggle */}
             <button
-              className="md:hidden p-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-full transition-all"
+              className="md:hidden p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -165,9 +178,11 @@ export function AppShell({
         <div
           className="md:hidden mx-4 mt-2 rounded-2xl p-3 space-y-1"
           style={{
-            background: 'rgba(13, 14, 18, 0.9)',
+            background: 'var(--bg-surface)',
+            opacity: 0.98,
             backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255, 255, 255, 0.06)',
+            border: '1px solid var(--border-muted)',
+            boxShadow: 'var(--shadow-lg)',
           }}
         >
           <NavLink href="/campaigns" icon={LayoutDashboard} onClick={() => setMobileMenuOpen(false)}>
@@ -185,12 +200,12 @@ export function AppShell({
       {/* Main Content */}
       <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
         {children}
-        <footer className="mt-16 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-medium" style={{ borderTop: '1px solid rgba(255,255,255,0.06)', color: '#475569' }}>
-          <p>© life180labs 2026</p>
+        <footer className="mt-16 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-bold" style={{ borderTop: '1px solid var(--border-muted)', color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>
+          <p className="uppercase tracking-widest">© life180labs 2026</p>
           <div className="flex items-center gap-6">
-            <span className="hover:text-[#94A3B8] cursor-pointer transition-colors">Privacy Policy</span>
-            <span className="hover:text-[#94A3B8] cursor-pointer transition-colors">Terms of Service</span>
-            <span className="hover:text-[#94A3B8] cursor-pointer transition-colors">Support</span>
+            <span className="hover:text-[var(--text-primary)] cursor-pointer transition-colors">Privacy Policy</span>
+            <span className="hover:text-[var(--text-primary)] cursor-pointer transition-colors">Terms of Service</span>
+            <span className="hover:text-[var(--text-primary)] cursor-pointer transition-colors">Support</span>
           </div>
         </footer>
       </main>

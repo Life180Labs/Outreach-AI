@@ -31,6 +31,7 @@ export const metadata: Metadata = {
 };
 
 import { ToasterProvider } from "@/components/ToasterProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export default function RootLayout({
   children,
@@ -49,9 +50,16 @@ export default function RootLayout({
       )}
       suppressHydrationWarning
     >
-      <body className="h-full flex flex-col bg-[#070709] text-[#F1F5F9]">
-        <AppShell>{children}</AppShell>
-        <ToasterProvider />
+      <body className="h-full flex flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AppShell>{children}</AppShell>
+          <ToasterProvider />
+        </ThemeProvider>
       </body>
     </html>
   );
