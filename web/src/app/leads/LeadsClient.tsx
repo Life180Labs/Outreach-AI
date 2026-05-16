@@ -95,7 +95,7 @@ const LeadRow = memo(function LeadRow({
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-1">
-          <div className="relative group">
+          <div className="relative group/tooltip">
             <button
               onClick={() => onEdit(lead)}
               className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
@@ -103,12 +103,12 @@ const LeadRow = memo(function LeadRow({
             >
               <Edit className="w-3.5 h-3.5" />
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
               Edit lead details
             </div>
           </div>
 
-          <div className="relative group">
+          <div className="relative group/tooltip">
             <button
               onClick={() => onPause(lead.id, !lead.isPaused)}
               className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" : "text-zinc-500 hover:text-black hover:bg-zinc-100"}`}
@@ -116,12 +116,12 @@ const LeadRow = memo(function LeadRow({
             >
               {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
               {lead.isPaused ? "Resume automated sequence" : "Pause automated sequence"}
             </div>
           </div>
 
-          <div className="relative group">
+          <div className="relative group/tooltip">
             <Link
               href={`/leads/${lead.id}`}
               className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
@@ -129,12 +129,12 @@ const LeadRow = memo(function LeadRow({
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
               Open conversation log
             </div>
           </div>
 
-          <div className="relative group">
+          <div className="relative group/tooltip">
             <button
               onClick={() => onDelete(lead.id)}
               disabled={loading}
@@ -143,7 +143,7 @@ const LeadRow = memo(function LeadRow({
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-red-500 text-red-500 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+            <div className="absolute right-full top-1/2 -translate-y-1/2 mr-2 hidden group-hover/tooltip:block z-50 bg-black border border-red-500 text-red-500 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in slide-in-from-right-1 duration-200">
               Permanently delete lead
             </div>
           </div>
@@ -382,20 +382,20 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
               </div>
             )}
           </div>
-          <div className="relative group">
+          <div className="relative group/tooltip">
             <button onClick={handleExport} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors">
               <Download className="w-3.5 h-3.5" /> Export
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in zoom-in-95 duration-200">
               Download selection as CSV
             </div>
           </div>
 
-          <div className="relative group ml-auto">
+          <div className="relative group/tooltip ml-auto">
             <button onClick={handleBulkDeleteClick} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors text-red-300 hover:text-red-200">
               <Trash2 className="w-3.5 h-3.5" /> Delete
             </button>
-            <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50 bg-black border border-red-500 text-red-400 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+            <div className="absolute bottom-full right-0 mb-2 hidden group-hover/tooltip:block z-50 bg-black border border-red-500 text-red-400 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg animate-in fade-in zoom-in-95 duration-200">
               Remove all selected leads
             </div>
           </div>
