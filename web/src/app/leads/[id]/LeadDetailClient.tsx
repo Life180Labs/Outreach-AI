@@ -228,7 +228,7 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
               {/* Mark Won Button */}
               <div className="relative group">
-                <button onClick={() => handleStatusChange("Closed")} className="w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-medium border border-zinc-800 bg-[#1A2A3A]/20 text-zinc-300 hover:border-emerald-500/50 hover:text-emerald-400 transition-all duration-200">
+                <button onClick={() => handleStatusChange("Closed")} className="w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-bold border border-[var(--border-muted)] bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:border-emerald-500/50 hover:text-emerald-400 transition-all duration-200">
                   Mark Won
                 </button>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-emerald-500 text-emerald-400 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
@@ -238,7 +238,7 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
               {/* Pause/Resume Button */}
               <div className="relative group">
-                <button onClick={() => handleStatusChange(lead.isPaused ? "resume" : "pause")} className="w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-medium border border-zinc-800 bg-[#1A2A3A]/20 text-zinc-300 hover:border-amber-500/50 hover:text-amber-400 transition-all duration-200 flex items-center justify-center gap-1.5">
+                <button onClick={() => handleStatusChange(lead.isPaused ? "resume" : "pause")} className="w-full py-2.5 rounded-none text-[11px] font-mono uppercase font-bold border border-[var(--border-muted)] bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:border-amber-500/50 hover:text-amber-400 transition-all duration-200 flex items-center justify-center gap-1.5">
                   {lead.isPaused ? <Play className="w-3 h-3 text-[#FFAB00]" /> : <Pause className="w-3 h-3 text-[#FF6D00]" />}
                   {lead.isPaused ? "Resume" : "Pause"}
                 </button>
@@ -331,8 +331,8 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
               {relevantMessages.length === 0 && !lead.sent && (
                 <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-                  <MessageCircle className="w-8 h-8 text-zinc-800 mb-3" />
-                  <p className="text-xs font-mono uppercase tracking-widest text-zinc-600">No telemetry log lines generated yet</p>
+                  <MessageCircle className="w-8 h-8 text-[var(--text-faint)] mb-3" />
+                  <p className="text-xs font-mono uppercase tracking-widest text-[var(--text-muted)]">No telemetry log lines generated yet</p>
                 </div>
               )}
             </div>

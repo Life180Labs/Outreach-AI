@@ -175,14 +175,20 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                   </button>
                   <button
                     onClick={() => handleEdit(acc)}
-                    className="p-2 text-[#475569] hover:text-white hover:bg-white/5 rounded-lg transition-all"
+                    className="p-2 transition-all rounded-lg"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
                     title="Edit Configuration"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(acc.id)}
-                    className="p-2 text-[#475569] hover:text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg transition-all"
+                    className="p-2 transition-all rounded-lg"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#EF4444')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
                     title="Delete Account"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -199,7 +205,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
       </div>
 
       {/* Add/Edit Account Form */}
-      <div id="smtp-form" className="pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div id="smtp-form" className="pt-8" style={{ borderTop: '1px solid var(--border-muted)' }}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366F1' }}>
@@ -294,7 +300,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
               <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 App Password {editingId && <span className="font-normal lowercase opacity-40">(leave blank to keep current)</span>}
               </label>
-              <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
+              <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-input)' }}>
                 <input 
                   type={showPass ? "text" : "password"} 
                   required={!editingId} 

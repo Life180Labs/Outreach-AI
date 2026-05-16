@@ -134,24 +134,50 @@ export function AppShell({
             <div className="flex items-center gap-0.5">
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all duration-200"
+                className="p-2 transition-all duration-200 rounded-full"
+                style={{ 
+                  color: 'var(--text-muted)',
+                  background: 'transparent'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--border-muted)')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 title="Toggle Theme"
               >
                 {mounted && (theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />)}
               </button>
               <Link
                 href="/profile"
-                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all duration-200"
+                className="p-2 transition-all duration-200 rounded-full"
+                style={{ 
+                  color: pathname === '/profile' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  background: pathname === '/profile' ? 'rgba(99,102,241,0.15)' : 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (pathname !== '/profile') e.currentTarget.style.background = 'var(--border-muted)';
+                }}
+                onMouseLeave={(e) => {
+                  if (pathname !== '/profile') e.currentTarget.style.background = 'transparent';
+                }}
                 title="Your Profile"
               >
-                <User className="w-4 h-4" />
+                <User className={`w-4 h-4 ${pathname === '/profile' ? 'text-[#6366F1]' : ''}`} />
               </Link>
               <Link
                 href="/settings"
-                className="p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-white/5 rounded-full transition-all duration-200"
+                className="p-2 transition-all duration-200 rounded-full"
+                style={{ 
+                  color: pathname === '/settings' ? 'var(--text-primary)' : 'var(--text-muted)',
+                  background: pathname === '/settings' ? 'rgba(99,102,241,0.15)' : 'transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (pathname !== '/settings') e.currentTarget.style.background = 'var(--border-muted)';
+                }}
+                onMouseLeave={(e) => {
+                  if (pathname !== '/settings') e.currentTarget.style.background = 'transparent';
+                }}
                 title="Settings"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className={`w-4 h-4 ${pathname === '/settings' ? 'text-[#6366F1]' : ''}`} />
               </Link>
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}

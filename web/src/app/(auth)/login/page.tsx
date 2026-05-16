@@ -67,7 +67,7 @@ export default function LoginPage() {
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Email</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-faint)' }} />
                                     <input
                                         type="email"
                                         required
@@ -81,7 +81,7 @@ export default function LoginPage() {
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Password</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'var(--text-faint)' }} />
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         required

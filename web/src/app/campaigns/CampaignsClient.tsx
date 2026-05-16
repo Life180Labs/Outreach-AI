@@ -81,7 +81,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                 </div>
               </div>
             </div>
-            <div className="px-6 py-4 flex items-center justify-end gap-3" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="px-6 py-4 flex items-center justify-end gap-3" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid var(--border-muted)' }}>
               <button
                 onClick={() => setModalState({ isOpen: false, type: "single" })}
                 disabled={isDeleting}
@@ -111,7 +111,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
       <div className="space-y-4">
         {/* Bulk Actions Header */}
         {campaigns.length > 0 && (
-          <div className="flex items-center justify-between p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-card)' }}>
+          <div className="flex items-center justify-between p-3" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-card)' }}>
             <button
               onClick={toggleSelectAll}
               className="flex items-center gap-2 text-sm transition-colors"
@@ -165,18 +165,23 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                   <button
                     onClick={() => setModalState({ isOpen: true, type: "single", id: c.id })}
                     disabled={isDeleting}
-                    className="p-1.5 text-[#475569] hover:text-[#EF4444] transition-all duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                    style={{ borderRadius: 'var(--radius-badge)' }}
+                    className="p-1.5 transition-all duration-200 opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                    style={{ borderRadius: 'var(--radius-badge)', color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#EF4444')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
                     title="Delete Campaign"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => toggleSelect(c.id)}
-                    className="text-[#475569] hover:text-[#6366F1]"
+                    className="transition-colors"
+                    style={{ color: 'var(--text-secondary)' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--brand-primary)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
                   >
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 text-[#6366F1]" />
+                      <CheckSquare className="w-5 h-5" style={{ color: 'var(--brand-primary)' }} />
                     ) : (
                       <Square className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
@@ -217,7 +222,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                       <span className="text-[var(--text-faint)]">Progress</span>
                       <span className="text-[var(--text-muted)]">{progress}%</span>
                     </div>
-                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-muted)' }}>
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{
@@ -233,7 +238,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid var(--border-muted)' }}>
                     <div className="flex items-center gap-3 text-xs font-bold" style={{ fontFamily: 'var(--font-mono)' }}>
                       <span className="text-[var(--text-muted)]">
                         <span className="text-[var(--text-primary)]">{sentCount}</span>{" "}Sent
@@ -242,7 +247,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                         <span className="font-bold text-[#10B981]">{hotCount}</span>{" "}Hot
                       </span>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-[#475569] group-hover:text-[#6366F1] transition-colors" />
+                    <ArrowRight className="w-4 h-4 transition-colors" style={{ color: 'var(--text-muted)' }} />
                   </div>
                 </div>
               </div>

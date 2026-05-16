@@ -100,9 +100,9 @@ export default async function DashboardPage() {
         </div>
         <div>
           {campaigns.length === 0 ? (
-            <div className="col-span-full py-16 rounded-xl flex flex-col items-center justify-center gap-2" style={{ border: '1px dashed rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
-              <BarChart3 className="w-6 h-6 text-[#475569]" />
-              <p className="text-sm text-[#64748B]">No campaigns yet</p>
+            <div className="col-span-full py-16 rounded-xl flex flex-col items-center justify-center gap-2" style={{ border: '1px dashed var(--border-muted)', background: 'var(--bg-elevated)' }}>
+              <BarChart3 className="w-6 h-6" style={{ color: 'var(--text-faint)' }} />
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No campaigns yet</p>
             </div>
           ) : (
             <CampaignsClient campaigns={campaigns} />
@@ -135,7 +135,7 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: n
         <Icon className="w-5 h-5" style={{ color: a.icon }} />
       </div>
       <p className="text-3xl font-bold tabular-nums" style={{ color: a.value, fontFamily: 'var(--font-mono)' }}>{value}</p>
-      <p className="text-[10px] font-bold uppercase tracking-wider mt-1" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>{label}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider mt-1" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{label}</p>
     </div>
   );
 }
