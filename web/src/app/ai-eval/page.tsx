@@ -347,8 +347,6 @@ Output Format:
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                {/* Score Dashboard */}
                <div className="grid grid-cols-3 gap-4">
-               {/* Score Dashboard */}
-               <div className="grid grid-cols-3 gap-4">
                   <div className="card-surface p-4 shadow-sm">
                     <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Quality</p>
                     <div className="flex items-end gap-1">
@@ -372,7 +370,6 @@ Output Format:
                   </div>
                </div>
 
-               {/* Inbox Simulation */}
                {/* Inbox Simulation */}
                <div className="card-surface overflow-hidden shadow-sm">
                   <div className="px-6 py-4 bg-white/5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
