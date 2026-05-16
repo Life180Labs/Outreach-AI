@@ -95,7 +95,7 @@ export default function SignUpPage() {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Full Name</label>
                             <div className="relative">
-                                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
                                 <input
                                     type="text"
                                     name="name"
@@ -103,7 +103,7 @@ export default function SignUpPage() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     placeholder="John Doe"
-                                    className="input-dark w-full pl-11"
+                                    className="input-dark w-full !pl-12"
                                 />
                             </div>
                         </div>
@@ -112,7 +112,7 @@ export default function SignUpPage() {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Email Address</label>
                             <div className="relative">
-                                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
                                 <input
                                     type="email"
                                     name="email"
@@ -120,7 +120,7 @@ export default function SignUpPage() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="john@example.com"
-                                    className="input-dark w-full pl-11"
+                                    className="input-dark w-full !pl-12"
                                 />
                             </div>
                         </div>
@@ -129,7 +129,7 @@ export default function SignUpPage() {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Password</label>
                             <div className="relative">
-                                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     name="password"
@@ -138,7 +138,7 @@ export default function SignUpPage() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
-                                    className="input-dark w-full pl-11 pr-11"
+                                    className="input-dark w-full !pl-12 !pr-12"
                                 />
                                 <button
                                     type="button"

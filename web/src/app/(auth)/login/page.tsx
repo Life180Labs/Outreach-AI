@@ -67,11 +67,11 @@ export default function LoginPage() {
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Email</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
                                     <input
                                         type="email"
                                         required
-                                        className="input-dark w-full pl-11"
+                                        className="input-dark w-full !pl-12"
                                         value={form.email}
                                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                                         placeholder="john@example.com"
@@ -81,11 +81,11 @@ export default function LoginPage() {
                             <div>
                                 <label className="block text-xs font-bold uppercase tracking-tight mb-2" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Password</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-[#475569]" />
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         required
-                                        className="input-dark w-full pl-11 pr-11"
+                                        className="input-dark w-full !pl-12 !pr-12"
                                         value={form.password}
                                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                                         placeholder="••••••••"
