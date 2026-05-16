@@ -71,7 +71,7 @@ export default function LoginPage() {
                                     <input
                                         type="email"
                                         required
-                                        className="input-dark w-full pl-10"
+                                        className="input-dark w-full pl-11"
                                         value={form.email}
                                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                                         placeholder="john@example.com"
@@ -85,7 +85,7 @@ export default function LoginPage() {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         required
-                                        className="input-dark w-full pl-10 pr-10"
+                                        className="input-dark w-full pl-11 pr-11"
                                         value={form.password}
                                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                                         placeholder="••••••••"

@@ -103,7 +103,7 @@ export default function SignUpPage() {
                                     value={formData.name}
                                     onChange={handleChange}
                                     placeholder="John Doe"
-                                    className="input-dark w-full pl-10"
+                                    className="input-dark w-full pl-11"
                                 />
                             </div>
                         </div>
@@ -120,7 +120,7 @@ export default function SignUpPage() {
                                     value={formData.email}
                                     onChange={handleChange}
                                     placeholder="john@example.com"
-                                    className="input-dark w-full pl-10"
+                                    className="input-dark w-full pl-11"
                                 />
                             </div>
                         </div>
@@ -138,7 +138,7 @@ export default function SignUpPage() {
                                     value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
-                                    className="input-dark w-full pl-10 pr-10"
+                                    className="input-dark w-full pl-11 pr-11"
                                 />
                                 <button
                                     type="button"
