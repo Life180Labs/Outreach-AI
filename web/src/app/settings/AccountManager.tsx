@@ -161,6 +161,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                     </p>
                   </div>
                 </div>
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleToggleStatus(acc.id)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
