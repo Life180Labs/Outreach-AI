@@ -45,60 +45,61 @@ const LeadRow = memo(function LeadRow({
   onDelete: (id: string) => void;
   onPause: (id: string, isPaused: boolean) => void;
 }) {
+  const statusBadge = () => {
+    if (lead.replied || lead.status === "Hot") return "badge-success";
+    if (lead.opened || lead.status === "Opened") return "badge-warning";
+    if (lead.sent) return "badge-info";
+    return "badge-neutral";
+  };
+  const statusLabel = lead.replied ? "Replied" : (lead.opened || lead.status === "Opened") ? "Opened" : lead.status;
+  const activityLabel = lead.replied ? "Replied" : (lead.opened || lead.status === "Opened") ? "Opened" : lead.sent ? "Sent" : "Pending";
+
   return (
-    <tr className={`group hover:bg-zinc-50/80 transition-colors ${selected ? "bg-zinc-50" : ""}`}>
+    <tr className={`group transition-all duration-200 ${selected ? "" : ""}`} style={{ background: selected ? 'rgba(99,102,241,0.06)' : 'transparent' }} onMouseEnter={e => { if(!selected) e.currentTarget.style.background='var(--bg-elevated)'; e.currentTarget.style.borderRadius='8px'; }} onMouseLeave={e => { if(!selected) e.currentTarget.style.background='transparent'; }}>
       <td className="px-4 py-4">
         <button
           onClick={() => onSelect(lead.id)}
-          className="text-zinc-400 hover:text-black transition-colors"
+          className="text-[#475569] hover:text-white transition-colors"
           aria-label={`Select ${lead.firstName} ${lead.lastName}`}
         >
-          {selected ? <CheckSquare className="w-4 h-4 text-black" /> : <Square className="w-4 h-4" />}
+          {selected ? <CheckSquare className="w-4 h-4 text-[#6366F1]" /> : <Square className="w-4 h-4" />}
         </button>
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-zinc-200 flex items-center justify-center text-[11px] font-semibold text-zinc-700">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-semibold" style={{ background: 'rgba(99,102,241,0.1)', color: '#818CF8' }}>
             {lead.firstName[0]}{lead.lastName?.[0] || ""}
           </div>
           <div>
-            <p className="text-sm font-medium text-black">{lead.firstName} {lead.lastName}</p>
-            <p className="text-xs text-zinc-600">{lead.email}</p>
+            <p className="text-sm font-medium text-[#F1F5F9]">{lead.firstName} {lead.lastName}</p>
+            <p className="text-xs text-[#64748B]">{lead.email}</p>
           </div>
         </div>
       </td>
       <td className="px-4 py-4">
-        <p className="text-sm text-black">{lead.companyName}</p>
-        <p className="text-xs text-zinc-600">{lead.jobTitle || "—"}</p>
+        <p className="text-sm text-[#F1F5F9]">{lead.companyName}</p>
+        <p className="text-xs text-[#64748B]">{lead.jobTitle || "—"}</p>
       </td>
       <td className="px-4 py-4">
-        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium ${
-          lead.replied || lead.status === "Hot"
-            ? "bg-emerald-50 text-emerald-700"
-            : (lead.opened || lead.status === "Opened")
-            ? "bg-amber-50 text-amber-700"
-            : "bg-zinc-100 text-zinc-600"
-        }`}>
-          <div className={`w-1.5 h-1.5 rounded-full ${
-            lead.replied ? "bg-emerald-500" : (lead.opened || lead.status === "Opened") ? "bg-amber-500" : "bg-zinc-500"
-          }`} />
-          {lead.replied ? "Replied" : (lead.opened || lead.status === "Opened") ? "Opened" : lead.status}
+        <span className={statusBadge()}>
+          <div className={`w-1.5 h-1.5 rounded-full ${lead.replied ? 'bg-[#10B981]' : (lead.opened || lead.status === 'Opened') ? 'bg-[#F59E0B] animate-pulse-dot' : lead.sent ? 'bg-[#3B82F6]' : 'bg-[#475569]'}`} />
+          {statusLabel}
         </span>
       </td>
       <td className="px-4 py-4">
-        <p className="text-xs text-zinc-600">
-          {lead.replied ? "Replied" : (lead.opened || lead.status === "Opened") ? "Opened" : lead.sent ? "Sent" : "Pending"}
+        <p className="text-xs text-[#94A3B8]" style={{ fontFamily: 'var(--font-mono)' }}>
+          {activityLabel}
         </p>
-        <p className="text-[11px] text-zinc-500 mt-0.5">
+        <p className="text-[11px] mt-0.5" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
           {new Date(lead.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
         </p>
       </td>
       <td className="px-4 py-4">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" style={{ overflow: 'visible' }}>
           <div className="relative group/tooltip">
             <button
               onClick={() => onEdit(lead)}
-              className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
+              className="p-1.5 text-[#475569] hover:text-white hover:bg-white/5 rounded-md transition-all"
               aria-label={`Edit ${lead.firstName}`}
             >
               <Edit className="w-3.5 h-3.5" />
@@ -111,7 +112,7 @@ const LeadRow = memo(function LeadRow({
           <div className="relative group/tooltip">
             <button
               onClick={() => onPause(lead.id, !lead.isPaused)}
-              className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" : "text-zinc-500 hover:text-black hover:bg-zinc-100"}`}
+              className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-[#10B981]" : "text-[#475569] hover:text-white hover:bg-white/5"}`}
               aria-label={lead.isPaused ? "Resume sequence" : "Pause sequence"}
             >
               {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
@@ -124,7 +125,7 @@ const LeadRow = memo(function LeadRow({
           <div className="relative group/tooltip">
             <Link
               href={`/leads/${lead.id}`}
-              className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
+              className="p-1.5 text-[#475569] hover:text-white hover:bg-white/5 rounded-md transition-all"
               aria-label={`View ${lead.firstName}`}
             >
               <ExternalLink className="w-3.5 h-3.5" />
@@ -138,7 +139,7 @@ const LeadRow = memo(function LeadRow({
             <button
               onClick={() => onDelete(lead.id)}
               disabled={loading}
-              className="p-1.5 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50"
+              className="p-1.5 text-[#475569] hover:text-[#EF4444] hover:bg-red-500/10 rounded-md transition-all disabled:opacity-50"
               aria-label={`Delete ${lead.firstName}`}
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
@@ -167,17 +168,15 @@ function EditLeadModal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-zinc-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }} role="dialog" aria-modal="true">
+      <div className="w-full max-w-lg overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-container)', boxShadow: 'var(--shadow-2xl)' }}>
         <form onSubmit={onSave}>
-          <div className="p-6 border-b border-zinc-100">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-black">Edit Lead</h3>
-              <button type="button" onClick={onClose} className="p-1 text-zinc-400 hover:text-black rounded transition-colors" aria-label="Close">
+            <div className="flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '1.5rem' }}>
+              <h3 className="text-lg font-semibold text-white">Edit Lead</h3>
+              <button type="button" onClick={onClose} className="p-1 text-[#64748B] hover:text-white rounded transition-colors" aria-label="Close">
                 <X className="w-5 h-5" />
               </button>
             </div>
-          </div>
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <Field label="First Name" name="firstName" defaultValue={lead.firstName} />
@@ -188,8 +187,8 @@ function EditLeadModal({
             <div className="grid grid-cols-2 gap-4">
               <Field label="Job Title" name="jobTitle" defaultValue={lead.jobTitle} />
               <div>
-                <label htmlFor="edit-status" className="text-xs font-medium text-zinc-500 mb-1 block">Status</label>
-                <select id="edit-status" name="status" defaultValue={lead.status} className="w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-zinc-400">
+                <label htmlFor="edit-status" className="text-xs font-medium mb-1 block" style={{ color: '#64748B' }}>Status</label>
+                <select id="edit-status" name="status" defaultValue={lead.status} className="input-dark w-full">
                   <option value="Cold">Cold</option>
                   <option value="Hot">Hot</option>
                   <option value="Warm">Warm</option>
@@ -199,11 +198,11 @@ function EditLeadModal({
               </div>
             </div>
           </div>
-          <div className="p-6 border-t border-zinc-100 flex gap-3">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-zinc-200 rounded-lg text-sm font-medium text-zinc-600 hover:bg-zinc-50 transition-colors">
+          <div className="p-6 flex gap-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 text-sm font-medium text-[#94A3B8] hover:text-white transition-colors" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)' }}>
               Cancel
             </button>
-            <button type="submit" disabled={loading} className="flex-1 px-4 py-2.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2">
+            <button type="submit" disabled={loading} className="btn-primary flex-1 flex items-center justify-center gap-2">
               {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Save
             </button>
@@ -217,8 +216,8 @@ function EditLeadModal({
 function Field({ label, name, defaultValue }: { label: string; name: string; defaultValue: string }) {
   return (
     <div>
-      <label htmlFor={`edit-${name}`} className="text-xs font-medium text-zinc-500 mb-1 block">{label}</label>
-      <input id={`edit-${name}`} name={name} defaultValue={defaultValue} className="w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-zinc-400" />
+      <label htmlFor={`edit-${name}`} className="text-xs font-medium mb-1 block" style={{ color: '#64748B' }}>{label}</label>
+      <input id={`edit-${name}`} name={name} defaultValue={defaultValue} className="input-dark w-full" />
     </div>
   );
 }
@@ -323,36 +322,37 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
   return (
     <>
       {modalState.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl border border-zinc-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-md overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 'var(--radius-container)', boxShadow: 'var(--shadow-2xl)' }}>
             <div className="p-6">
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(239,68,68,0.1)' }}>
+                  <AlertTriangle className="w-6 h-6 text-[#EF4444]" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-black">
+                  <h3 className="text-lg font-semibold text-white">
                     {modalState.type === 'bulk' ? `Delete ${selectedIds.length} Leads?` : "Delete Lead?"}
                   </h3>
-                  <p className="text-sm text-zinc-600 mt-1">
+                  <p className="text-sm text-[#94A3B8] mt-1">
                     This action cannot be undone. This will permanently delete the lead and all associated messages.
                   </p>
                 </div>
               </div>
             </div>
-            <div className="bg-zinc-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-zinc-200">
+            <div className="px-6 py-4 flex items-center justify-end gap-3" style={{ background: 'var(--bg-elevated)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
               <button
                 onClick={() => setModalState({ isOpen: false, type: 'single' })}
                 disabled={!!loading}
-                className="px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-[#94A3B8] hover:text-white transition-colors"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)' }}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={!!loading}
-                style={{ backgroundColor: "#dc2626", color: "#ffffff" }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 hover:translate-y-[-1px]"
+                style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', borderRadius: 'var(--radius-button)', boxShadow: '0 0 16px rgba(239,68,68,0.2)' }}
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Delete {modalState.type === 'bulk' ? 'All' : ''}
@@ -365,9 +365,9 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
       <div className="space-y-4">
       {/* Bulk toolbar */}
       {selectedIds.length > 0 && (
-        <div className="flex items-center gap-3 px-4 py-3 bg-zinc-900 text-white rounded-xl">
-          <span className="text-xs font-medium">{selectedIds.length} selected</span>
-          <div className="h-4 w-px bg-white/20" />
+        <div className="flex items-center gap-3 px-4 py-3 text-white" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 'var(--radius-card)' }}>
+          <span className="text-xs font-medium" style={{ fontFamily: 'var(--font-mono)' }}>{selectedIds.length} selected</span>
+          <div className="h-4 w-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
           <div className="relative">
             <button onClick={() => setShowBulkMenu(!showBulkMenu)} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors">
               Actions <ChevronDown className="w-3 h-3" />
@@ -403,29 +403,29 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
       )}
 
       {/* Table */}
-      <div className="border border-zinc-200 rounded-2xl bg-white overflow-hidden">
+      <div className="overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-card)', background: 'var(--bg-surface)' }}>
         <div className="overflow-x-auto" style={{ scrollbarWidth: "thin" }}>
           <table className="w-full text-left min-w-[800px]">
             <thead>
-              <tr className="border-b border-zinc-200 bg-zinc-50">
-                <th className="px-4 py-3 w-10">
-                  <button onClick={toggleSelectAll} className="text-zinc-500 hover:text-black transition-colors" aria-label="Select all">
-                    {selectedIds.length === leads.length && leads.length > 0 ? <CheckSquare className="w-4 h-4 text-black" /> : <Square className="w-4 h-4" />}
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <th className="px-4 py-3 w-10" style={{ background: 'var(--bg-elevated)' }}>
+                  <button onClick={toggleSelectAll} className="text-[#475569] hover:text-white transition-colors" aria-label="Select all">
+                    {selectedIds.length === leads.length && leads.length > 0 ? <CheckSquare className="w-4 h-4 text-[#6366F1]" /> : <Square className="w-4 h-4" />}
                   </button>
                 </th>
-                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Contact</th>
-                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Company</th>
-                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Status</th>
-                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Activity</th>
-                <th className="px-4 py-3 text-xs font-semibold text-zinc-700">Actions</th>
+                <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Contact</th>
+                <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Company</th>
+                <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Status</th>
+                <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Activity</th>
+                <th className="px-4 py-3 text-xs font-semibold" style={{ background: 'var(--bg-elevated)', color: '#64748B', fontFamily: 'var(--font-mono)', letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.625rem' }}>Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100">
+            <tbody>
               {leads.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center">
-                    <Users className="w-8 h-8 text-zinc-300 mx-auto mb-2" />
-                    <p className="text-sm text-zinc-500">No leads found</p>
+                    <Users className="w-8 h-8 mx-auto mb-2" style={{ color: '#475569' }} />
+                    <p className="text-sm" style={{ color: '#64748B' }}>No leads found</p>
                   </td>
                 </tr>
               ) : (
@@ -450,7 +450,7 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
       {/* Export button when no selection */}
       {selectedIds.length === 0 && leads.length > 0 && (
         <div className="flex justify-end">
-          <button onClick={handleExport} className="text-xs font-medium text-zinc-600 hover:text-black flex items-center gap-1.5 transition-colors">
+          <button onClick={handleExport} className="text-xs font-medium flex items-center gap-1.5 transition-colors" style={{ color: '#64748B' }} onMouseEnter={e => (e.currentTarget.style.color = '#6366F1')} onMouseLeave={e => (e.currentTarget.style.color = '#64748B')}>
             <Download className="w-3.5 h-3.5" /> Export CSV
           </button>
         </div>

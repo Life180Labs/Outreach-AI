@@ -51,8 +51,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-black tracking-tight">Leads</h1>
-          <p className="text-zinc-400 text-sm mt-1">Manage and track your outreach interactions</p>
+          <h1 className="text-2xl font-bold text-gradient tracking-tight">Leads</h1>
+          <p className="text-[#64748B] text-sm mt-1">Manage and track your outreach interactions</p>
         </div>
       </div>
 
@@ -65,24 +65,28 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             name="q"
             defaultValue={q || ""}
             placeholder="Search by name, company..."
-            className="w-full bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors placeholder:text-zinc-400"
+            className="input-dark w-full"
           />
         </form>
 
-        <div className="flex items-center rounded-lg border border-zinc-200 bg-white overflow-hidden">
+        <div className="flex items-center overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-button)', background: 'var(--bg-surface)' }}>
           {tabs.map((tab) => {
             const isActive = (tab.key === null && !status) || tab.key === status;
             return (
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`px-4 py-2 text-xs font-medium transition-colors border-r last:border-r-0 border-zinc-200 ${
+                className={`px-4 py-2 text-xs font-medium transition-all duration-200 ${
                   isActive
-                    ? "bg-black text-white"
-                    : "text-zinc-500 hover:text-black hover:bg-zinc-50"
+                    ? "text-white"
+                    : "text-[#64748B] hover:text-[#94A3B8]"
                 }`}
+                style={{
+                  background: isActive ? 'rgba(99,102,241,0.15)' : 'transparent',
+                  borderRight: '1px solid rgba(255,255,255,0.06)',
+                }}
               >
-                {tab.label} ({tab.count})
+                {tab.label} <span style={{ fontFamily: 'var(--font-mono)', opacity: 0.6 }}>({tab.count})</span>
               </Link>
             );
           })}
@@ -93,7 +97,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       <LeadsClient leads={leads} />
 
       {/* Footer */}
-      <div className="text-center text-xs text-zinc-400 py-4">
+      <div className="text-center text-xs py-4" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
         Showing {leads.length} of {allCount} leads
       </div>
     </div>

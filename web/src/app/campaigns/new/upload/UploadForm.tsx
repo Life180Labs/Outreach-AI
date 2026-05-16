@@ -223,14 +223,14 @@ export function UploadForm() {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-black tracking-tight">Import Leads</h1>
-          <p className="text-sm text-zinc-400 mt-1">Upload a CSV or paste a Google Sheets link to get started</p>
+          <h1 className="text-2xl font-bold text-gradient tracking-tight">Import Leads</h1>
+          <p className="text-sm text-[#64748B] mt-1">Upload a CSV or paste a Google Sheets link to get started</p>
         </div>
 
-        <div className="p-8 rounded-2xl border border-zinc-200 bg-white space-y-6">
+        <div className="p-8 card-surface space-y-6">
           {/* Google Sheets */}
           <div>
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2 block">
+            <label className="text-xs font-semibold uppercase tracking-wide mb-2 block" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
               <Link2 className="w-3.5 h-3.5 inline mr-1.5 -mt-0.5" />
               Google Sheets URL
             </label>
@@ -240,13 +240,13 @@ export function UploadForm() {
                 value={sheetUrl}
                 onChange={(e) => setSheetUrl(e.target.value)}
                 placeholder="https://docs.google.com/spreadsheets/..."
-                className="flex-1 bg-white border border-zinc-200 rounded-lg px-4 py-2.5 text-sm text-black focus:outline-none focus:border-zinc-400 transition-colors"
+                className="input-dark flex-1"
               />
               <button
                 type="button"
                 onClick={handleSheetImport}
                 disabled={sheetLoading || !sheetUrl}
-                className="bg-black hover:bg-zinc-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 text-sm inline-flex items-center gap-2"
+                className="btn-primary px-5 py-2.5 text-sm inline-flex items-center gap-2"
               >
                 {sheetLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Import"}
               </button>
@@ -254,22 +254,22 @@ export function UploadForm() {
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex-1 h-px bg-zinc-100" />
-            <span className="text-xs font-medium text-zinc-300 uppercase">or</span>
-            <div className="flex-1 h-px bg-zinc-100" />
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <span className="text-xs font-medium uppercase" style={{ color: '#475569' }}>or</span>
+            <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
           </div>
 
           {/* CSV Upload */}
-          <label className="flex flex-col items-center justify-center p-10 border-2 border-dashed border-zinc-200 rounded-2xl cursor-pointer hover:border-zinc-400 hover:bg-zinc-50/50 transition-all group">
-            <Upload className="w-8 h-8 text-zinc-300 group-hover:text-zinc-500 transition-colors mb-3" />
-            <span className="text-sm font-medium text-zinc-600">Upload CSV file</span>
-            <span className="text-xs text-zinc-400 mt-1">Drag & drop or click to browse</span>
+          <label className="flex flex-col items-center justify-center p-10 cursor-pointer transition-all duration-300 group" style={{ border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-card)', background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.04) 0%, transparent 70%)' }}>
+            <Upload className="w-8 h-8 text-[#475569] group-hover:text-[#6366F1] transition-colors mb-3" />
+            <span className="text-sm font-medium text-[#94A3B8]">Upload CSV file</span>
+            <span className="text-xs mt-1" style={{ color: '#475569' }}>Drag & drop or click to browse</span>
             <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
           </label>
         </div>
 
-        <div className="p-5 rounded-2xl border border-blue-100 bg-blue-50/50">
-          <p className="text-xs text-blue-700 leading-relaxed">
+        <div className="p-5" style={{ background: 'rgba(99,102,241,0.04)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 'var(--radius-card)' }}>
+          <p className="text-xs leading-relaxed" style={{ color: '#818CF8' }}>
             <span className="font-semibold">All columns accepted.</span> After import, you'll be able to map each column to the correct field. 
             Required field: <span className="font-semibold">Email</span>. Other fields like Name, Company, Title, etc. are optional but improve AI personalization.
           </p>
@@ -283,8 +283,8 @@ export function UploadForm() {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-black tracking-tight">Map Your Fields</h1>
-          <p className="text-sm text-zinc-400 mt-1">
+          <h1 className="text-2xl font-bold text-gradient tracking-tight">Map Your Fields</h1>
+          <p className="text-sm mt-1" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
             {rawData.length} rows imported · {rawHeaders.length} columns detected
           </p>
         </div>
@@ -292,14 +292,14 @@ export function UploadForm() {
           <button
             type="button"
             onClick={() => { setStep("upload"); setRawData([]); setRawHeaders([]); }}
-            className="px-4 py-2.5 bg-white border border-zinc-200 hover:bg-zinc-50 text-zinc-600 rounded-lg text-sm font-medium transition-colors"
+            className="px-4 py-2.5 text-sm font-medium transition-all duration-200" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)', color: '#94A3B8' }}
           >
             ← Re-upload
           </button>
           <button
             type="submit"
             disabled={loading || validLeads.length === 0 || !hasEmailMapping}
-            className="bg-black hover:bg-zinc-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50 text-sm inline-flex items-center gap-2 shadow-sm"
+            className="btn-primary text-sm inline-flex items-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             Continue with {validLeads.length} leads
@@ -311,10 +311,10 @@ export function UploadForm() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Left: Field Mapping */}
         <div className="flex-1 lg:w-[58.33%] space-y-4">
-          <div className="p-6 rounded-2xl border border-zinc-200 bg-white">
+          <div className="p-6 card-surface">
             <div className="flex items-center gap-2 mb-5">
-              <Table2 className="w-4 h-4 text-blue-600" />
-              <h2 className="text-sm font-semibold text-black">Column Mapping</h2>
+              <Table2 className="w-4 h-4 text-[#6366F1]" />
+              <h2 className="text-sm font-semibold text-white">Column Mapping</h2>
             </div>
 
             <div className="space-y-3">
@@ -326,18 +326,23 @@ export function UploadForm() {
                 return (
                   <div
                     key={header}
-                    className={`flex items-center gap-4 p-3 rounded-xl border transition-colors ${
+                    className={`flex items-center gap-4 p-3 border transition-all duration-200 ${
                       currentMapping !== "skip"
-                        ? "border-blue-100 bg-blue-50/30"
-                        : "border-zinc-100 bg-zinc-50/30"
+                        ? ""
+                        : ""
                     }`}
+                    style={{
+                      borderRadius: 'var(--radius-button)',
+                      background: currentMapping !== 'skip' ? 'rgba(99,102,241,0.04)' : 'rgba(255,255,255,0.02)',
+                      borderColor: currentMapping !== 'skip' ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.06)',
+                    }}
                   >
                     {/* Source column */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-black truncate">{header}</span>
+                        <span className="text-sm font-medium text-[#F1F5F9] truncate">{header}</span>
                         {rawData[0]?.[header] && (
-                          <span className="text-[11px] text-zinc-400 truncate max-w-[180px]" title={rawData[0][header]}>
+                          <span className="text-[11px] truncate max-w-[180px]" title={rawData[0][header]} style={{ color: '#475569' }}>
                             e.g. "{rawData[0][header]}"
                           </span>
                         )}
@@ -345,18 +350,24 @@ export function UploadForm() {
                     </div>
 
                     {/* Arrow */}
-                    <ArrowRight className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
+                    <ArrowRight className="w-3.5 h-3.5 shrink-0" style={{ color: '#475569' }} />
 
                     {/* Target field dropdown */}
                     <div className="relative w-48 shrink-0">
                       <select
                         value={currentMapping}
                         onChange={(e) => updateMapping(header, e.target.value)}
-                        className={`w-full appearance-none rounded-lg border px-3 py-2 text-sm font-medium pr-8 cursor-pointer transition-colors focus:outline-none ${
+                        className={`w-full appearance-none border px-3 py-2 text-sm font-medium pr-8 cursor-pointer transition-all duration-200 focus:outline-none ${
                           currentMapping !== "skip"
-                            ? "bg-white border-blue-200 text-blue-700"
-                            : "bg-white border-zinc-200 text-zinc-400"
+                            ? ""
+                            : ""
                         }`}
+                        style={{
+                          borderRadius: 'var(--radius-button)',
+                          background: 'var(--bg-elevated)',
+                          borderColor: currentMapping !== 'skip' ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.06)',
+                          color: currentMapping !== 'skip' ? '#818CF8' : '#64748B',
+                        }}
                       >
                         <option value="skip">— Skip —</option>
                         {KNOWN_FIELDS.map((f) => (
@@ -365,15 +376,15 @@ export function UploadForm() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 pointer-events-none" />
+                      <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" style={{ color: '#475569' }} />
                     </div>
 
                     {/* Status */}
                     <div className="w-6 flex items-center justify-center shrink-0">
                       {currentMapping !== "skip" ? (
-                        <Check className="w-4 h-4 text-blue-500" />
+                        <Check className="w-4 h-4 text-[#6366F1]" />
                       ) : (
-                        <X className="w-4 h-4 text-zinc-300" />
+                        <X className="w-4 h-4" style={{ color: '#475569' }} />
                       )}
                     </div>
                   </div>
@@ -382,9 +393,9 @@ export function UploadForm() {
             </div>
 
             {!hasEmailMapping && (
-              <div className="mt-4 p-3 rounded-xl border border-red-100 bg-red-50/50 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
-                <p className="text-xs text-red-700 font-medium">
+              <div className="mt-4 p-3 flex items-center gap-2" style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 'var(--radius-button)' }}>
+                <AlertTriangle className="w-4 h-4 text-[#EF4444] shrink-0" />
+                <p className="text-xs font-medium" style={{ color: '#F87171' }}>
                   You must map at least one column to "Email" to continue.
                 </p>
               </div>
@@ -395,48 +406,48 @@ export function UploadForm() {
         {/* Right: Validation Results */}
         <div className="flex-1 lg:w-[41.66%] space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl border border-zinc-200 bg-white">
-              <p className="text-3xl font-semibold text-emerald-600 mb-1">{validLeads.length}</p>
-              <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Valid Leads</p>
+            <div className="p-5 card-surface">
+              <p className="text-3xl font-semibold text-[#10B981] mb-1" style={{ fontFamily: 'var(--font-mono)' }}>{validLeads.length}</p>
+              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Valid Leads</p>
             </div>
-            <div className="p-5 rounded-2xl border border-zinc-200 bg-white">
-              <p className="text-3xl font-semibold text-red-500 mb-1">{validationErrors.length}</p>
-              <p className="text-xs font-medium text-zinc-400 uppercase tracking-wide">Errors</p>
+            <div className="p-5 card-surface">
+              <p className="text-3xl font-semibold text-[#EF4444] mb-1" style={{ fontFamily: 'var(--font-mono)' }}>{validationErrors.length}</p>
+              <p className="text-xs font-medium uppercase tracking-wide" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Errors</p>
             </div>
           </div>
 
           {/* Mapped Fields Summary */}
-          <div className="p-5 rounded-2xl border border-zinc-200 bg-white">
-            <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Mapped Fields</h3>
+          <div className="p-5 card-surface">
+            <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Mapped Fields</h3>
             <div className="flex flex-wrap gap-2">
               {Object.entries(mappings)
                 .filter(([, v]) => v !== "skip")
                 .map(([header, field]) => {
                   const label = KNOWN_FIELDS.find((f) => f.value === field)?.label || field;
                   return (
-                    <span key={header} className="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-100">
+                    <span key={header} className="px-2.5 py-1 text-[11px] font-medium" style={{ background: 'rgba(99,102,241,0.08)', color: '#818CF8', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 'var(--radius-badge)' }}>
                       {label}
                     </span>
                   );
                 })}
               {Object.values(mappings).filter((v) => v !== "skip").length === 0 && (
-                <span className="text-xs text-zinc-400">No fields mapped yet</span>
+                <span className="text-xs" style={{ color: '#475569' }}>No fields mapped yet</span>
               )}
             </div>
           </div>
 
           {/* Preview */}
           {validLeads.length > 0 && (
-            <div className="p-5 rounded-2xl border border-zinc-200 bg-white">
-              <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-3">Preview (First Lead)</h3>
+            <div className="p-5 card-surface">
+            <h3 className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Preview (First Lead)</h3>
               <div className="space-y-2">
                 {Object.entries(validLeads[0]).map(([key, value]) => {
                   if (!value) return null;
                   const label = KNOWN_FIELDS.find((f) => f.value === key)?.label || key;
                   return (
                     <div key={key} className="flex items-start gap-2">
-                      <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-tight w-20 shrink-0 pt-0.5">{label}</span>
-                      <span className="text-sm text-zinc-700 break-all">{value as string}</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-tight w-20 shrink-0 pt-0.5" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>{label}</span>
+                      <span className="text-sm break-all" style={{ color: '#94A3B8' }}>{value as string}</span>
                     </div>
                   );
                 })}
@@ -446,16 +457,16 @@ export function UploadForm() {
 
           {/* Errors */}
           {validationErrors.length > 0 && (
-            <div className="p-5 rounded-2xl border border-red-100 bg-red-50/50">
-              <div className="flex items-center gap-2 mb-3">
-                <AlertTriangle className="w-3.5 h-3.5 text-red-500" />
-                <h3 className="text-xs font-semibold text-red-700 uppercase tracking-wide">{validationErrors.length} Issues</h3>
+            <div className="p-5" style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 'var(--radius-card)' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="w-3.5 h-3.5 text-[#EF4444]" />
+              <h3 className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#F87171', fontFamily: 'var(--font-mono)' }}>{validationErrors.length} Issues</h3>
               </div>
               <div className="space-y-2 max-h-[200px] overflow-y-auto" style={{ scrollbarWidth: "thin" }}>
                 {validationErrors.slice(0, 10).map((err, i) => (
                   <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="text-red-800 truncate">{err.name} ({err.email})</span>
-                    <span className="px-2 py-0.5 rounded bg-red-100 text-red-600 font-medium shrink-0 ml-2">{err.issue}</span>
+                    <span className="truncate" style={{ color: '#FCA5A5' }}>{err.name} ({err.email})</span>
+                    <span className="px-2 py-0.5 font-medium shrink-0 ml-2" style={{ background: 'rgba(239,68,68,0.1)', color: '#EF4444', borderRadius: 'var(--radius-badge)' }}>{err.issue}</span>
                   </div>
                 ))}
               </div>

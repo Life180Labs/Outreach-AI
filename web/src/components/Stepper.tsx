@@ -15,7 +15,7 @@ export function Stepper({ campaignId }: { campaignId?: string }) {
   ];
 
   return (
-    <div className="w-full border-b border-zinc-200 bg-white">
+    <div className="w-full" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'var(--bg-surface)' }}>
       <div className="flex items-center w-full px-2">
       {steps.map((step, idx) => {
         const isActive = pathname.includes(`/${step.path}`);
@@ -32,15 +32,15 @@ export function Stepper({ campaignId }: { campaignId?: string }) {
             {isCompleted ? (
               <Link 
                 href={href}
-                className={`block py-3 text-xs font-semibold text-center border-b-2 transition-colors ${
-                  isActive ? 'text-black border-black' : 'text-zinc-400 border-transparent hover:text-black hover:border-zinc-200'
+                className={`block py-3 text-xs font-semibold text-center border-b-2 transition-all duration-200 ${
+                  isActive ? 'text-white border-[#6366F1]' : 'text-[#475569] border-transparent hover:text-[#94A3B8] hover:border-[rgba(99,102,241,0.3)]'
                 }`}
               >
-                <span className="hidden sm:inline-block mr-1 opacity-40">{idx + 1} ·</span> {step.label}
+                <span className="hidden sm:inline-block mr-1 opacity-40" style={{ fontFamily: 'var(--font-mono)' }}>{idx + 1} ·</span> {step.label}
               </Link>
             ) : (
-              <span className="block py-3 text-xs font-semibold text-center border-b-2 text-zinc-200 border-transparent cursor-not-allowed">
-                <span className="hidden sm:inline-block mr-1 opacity-40">{idx + 1} ·</span> {step.label}
+              <span className="block py-3 text-xs font-semibold text-center border-b-2 border-transparent cursor-not-allowed" style={{ color: 'rgba(255,255,255,0.15)' }}>
+                <span className="hidden sm:inline-block mr-1 opacity-40" style={{ fontFamily: 'var(--font-mono)' }}>{idx + 1} ·</span> {step.label}
               </span>
             )}
           </div>

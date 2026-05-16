@@ -37,13 +37,15 @@ export default function LoginPage() {
         }
     };
 
-
     return (
-        <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4">
-            <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-xl border border-zinc-100">
+        <div className="flex min-h-screen items-center justify-center p-4 relative" style={{ background: 'var(--bg-sink)' }}>
+            {/* Background glow */}
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] pointer-events-none" style={{ background: 'radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, rgba(59,130,246,0.04) 40%, transparent 70%)', filter: 'blur(80px)' }} />
+
+            <div className="w-full max-w-md space-y-8 p-8 relative z-10" style={{ background: 'var(--bg-surface)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-container)', boxShadow: 'var(--shadow-2xl)' }}>
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-zinc-900">Welcome back</h2>
-                    <p className="mt-2 text-sm text-zinc-500">Log in to your Outreach AI account.</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-gradient">Welcome back</h2>
+                    <p className="mt-2 text-sm" style={{ color: '#64748B' }}>Log in to your Outreach AI account.</p>
                 </div>
 
                 <div className="mt-8 space-y-6">
@@ -51,31 +53,31 @@ export default function LoginPage() {
 
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
-                            <span className="w-full border-t border-zinc-200"></span>
+                            <span className="w-full" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}></span>
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-white px-2 text-zinc-400 font-medium">Or continue with</span>
+                            <span className="px-2 font-medium" style={{ background: 'var(--bg-surface)', color: '#475569' }}>Or continue with</span>
                         </div>
                     </div>
 
                     <form className="space-y-6" onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-tight mb-1">Email</label>
+                                <label className="block text-xs font-bold uppercase tracking-tight mb-1" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Email</label>
                                 <input
                                     type="email"
                                     required
-                                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
+                                    className="input-dark w-full"
                                     value={form.email}
                                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                                 />
                             </div>
                             <div>
-                                <label className="block text-xs font-bold text-zinc-500 uppercase tracking-tight mb-1">Password</label>
+                                <label className="block text-xs font-bold uppercase tracking-tight mb-1" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Password</label>
                                 <input
                                     type="password"
                                     required
-                                    className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
+                                    className="input-dark w-full"
                                     value={form.password}
                                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                                 />
@@ -85,17 +87,16 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-xl bg-zinc-900 px-4 py-3 text-sm font-bold text-white hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50 shadow-sm"
+                            className="btn-primary w-full py-3 text-sm font-bold flex items-center justify-center"
                         >
                             {loading ? "Signing in..." : "Sign in"}
                         </button>
                     </form>
                 </div>
 
-
-                <p className="text-center text-sm text-gray-600">
-                    Don't have an account?{" "}
-                    <Link href="/signup" className="font-semibold text-blue-600 hover:text-blue-500">
+                <p className="text-center text-sm" style={{ color: '#64748B' }}>
+                    Don&apos;t have an account?{" "}
+                    <Link href="/signup" className="font-semibold text-[#6366F1] hover:text-[#818CF8] transition-colors">
                         Sign up
                     </Link>
                 </p>

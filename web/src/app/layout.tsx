@@ -1,15 +1,29 @@
 import type { Metadata } from "next";
-import { Inter, Geist } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/shell/AppShell";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-jakarta',
+  display: 'swap',
+});
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: 'swap',
 });
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+  display: 'swap',
+});
+
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: "Outreach AI — Life180",
@@ -24,12 +38,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("h-full", "antialiased", inter.variable, "font-sans", geist.variable)} suppressHydrationWarning>
-      <body className="h-full flex flex-col bg-background text-foreground font-sans">
+    <html
+      lang="en"
+      className={cn(
+        "h-full antialiased",
+        inter.variable,
+        jakarta.variable,
+        geistMono.variable,
+        geist.variable,
+      )}
+      suppressHydrationWarning
+    >
+      <body className="h-full flex flex-col bg-[#070709] text-[#F1F5F9]">
         <AppShell>{children}</AppShell>
         <ToasterProvider />
       </body>
     </html>
   );
 }
-

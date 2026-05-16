@@ -29,7 +29,6 @@ export default async function DashboardPage() {
     },
   });
 
-
   const totalLeads = campaigns.reduce((acc, c) => acc + c._count.leads, 0);
   const totalSent = campaigns.reduce((acc, c) => acc + c.leads.filter(l => l.sent).length, 0);
   const totalHot = campaigns.reduce((acc, c) => acc + c.leads.filter(l => l.status === "Hot" || l.status === "hot").length, 0);
@@ -37,48 +36,51 @@ export default async function DashboardPage() {
   const lastCampaign = campaigns[0];
 
   return (
-    <div className="w-full space-y-8">
+    <div className="w-full space-y-8 relative">
+      {/* Mesh gradient backdrop */}
+      <div className="mesh-gradient" />
+
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-black tracking-tight">Dashboard</h1>
-        <p className="text-blue-600 text-sm mt-1">Overview of your outreach performance</p>
+      <div className="relative z-10">
+        <h1 className="text-3xl font-bold text-gradient tracking-tight">Dashboard</h1>
+        <p className="text-[#64748B] text-sm mt-1.5">Overview of your outreach performance</p>
       </div>
 
       {/* Bento Grid — Row 1: Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Leads" value={totalLeads} icon={Users} />
-        <StatCard label="Emails Sent" value={totalSent} icon={Send} />
-        <StatCard label="Replies" value={totalReplied} icon={BarChart3} accent="text-blue-600" />
-        <StatCard label="Hot Leads" value={totalHot} icon={Flame} accent="text-emerald-600" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+        <StatCard label="Total Leads" value={totalLeads} icon={Users} color="default" />
+        <StatCard label="Emails Sent" value={totalSent} icon={Send} color="default" />
+        <StatCard label="Replies" value={totalReplied} icon={BarChart3} color="blue" />
+        <StatCard label="Hot Leads" value={totalHot} icon={Flame} color="green" />
       </div>
 
       {/* Bento Grid — Row 2: Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
         {/* New Campaign */}
         <Link
           href="/campaigns/new/upload"
-          className="group flex flex-col justify-between p-6 rounded-2xl border border-zinc-200 bg-white hover:border-zinc-400 transition-all h-44"
+          className="group flex flex-col justify-between p-6 h-44 card-surface hover:border-[rgba(99,102,241,0.3)] transition-all duration-300"
         >
-          <div className="w-9 h-9 rounded-lg bg-zinc-100 group-hover:bg-black transition-colors flex items-center justify-center">
-            <Plus className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" style={{ background: 'rgba(99,102,241,0.1)' }}>
+            <Plus className="w-4 h-4 text-[#6366F1] group-hover:text-white transition-colors" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-black">New Campaign</p>
-            <p className="text-xs text-blue-600/70 mt-0.5">Upload leads, configure AI, and launch</p>
+            <p className="text-sm font-semibold text-white">New Campaign</p>
+            <p className="text-xs text-[#64748B] mt-0.5">Upload leads, configure AI, and launch</p>
           </div>
         </Link>
 
         {/* Resume Campaign */}
         <Link
           href={lastCampaign ? `/campaigns/${lastCampaign.id}/setup` : "/campaigns/new/upload"}
-          className="group flex flex-col justify-between p-6 rounded-2xl border border-zinc-200 bg-white hover:border-zinc-400 transition-all h-44"
+          className="group flex flex-col justify-between p-6 h-44 card-surface hover:border-[rgba(99,102,241,0.3)] transition-all duration-300"
         >
-          <div className="w-9 h-9 rounded-lg bg-zinc-100 group-hover:bg-black transition-colors flex items-center justify-center">
-            <RotateCcw className="w-4 h-4 text-zinc-400 group-hover:text-white transition-colors" />
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" style={{ background: 'rgba(59,130,246,0.1)' }}>
+            <RotateCcw className="w-4 h-4 text-[#3B82F6] group-hover:text-white transition-colors" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-black">Resume Campaign</p>
-            <p className="text-xs text-blue-600/70 mt-0.5 truncate">
+            <p className="text-sm font-semibold text-white">Resume Campaign</p>
+            <p className="text-xs text-[#64748B] mt-0.5 truncate">
               {lastCampaign?.name || "No recent campaigns"}
             </p>
           </div>
@@ -89,18 +91,18 @@ export default async function DashboardPage() {
       </div>
 
       {/* Bento Grid — Row 3: Recent Campaigns */}
-      <div>
+      <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-black">Recent Campaigns</h2>
-          <Link href="/campaigns" className="text-xs text-zinc-400 hover:text-black transition-colors">
+          <h2 className="text-sm font-semibold text-white">Recent Campaigns</h2>
+          <Link href="/campaigns" className="text-xs text-[#64748B] hover:text-[#6366F1] transition-colors">
             View all →
           </Link>
         </div>
         <div>
           {campaigns.length === 0 ? (
-            <div className="col-span-full py-16 border border-dashed border-zinc-200 rounded-2xl flex flex-col items-center justify-center text-zinc-400 gap-2">
-              <BarChart3 className="w-6 h-6 opacity-30" />
-              <p className="text-sm">No campaigns yet</p>
+            <div className="col-span-full py-16 rounded-xl flex flex-col items-center justify-center gap-2" style={{ border: '1px dashed rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+              <BarChart3 className="w-6 h-6 text-[#475569]" />
+              <p className="text-sm text-[#64748B]">No campaigns yet</p>
             </div>
           ) : (
             <CampaignsClient campaigns={campaigns} />
@@ -111,21 +113,29 @@ export default async function DashboardPage() {
   );
 }
 
-function StatCard({ label, value, icon: Icon, accent }: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; accent?: string }) {
-  const isGreen = accent?.includes("emerald");
-  const isBlue = accent?.includes("blue");
-  
+function StatCard({ label, value, icon: Icon, color }: { label: string; value: number; icon: React.ComponentType<{ className?: string }>; color: "default" | "blue" | "green" }) {
+  const accents = {
+    default: { icon: '#64748B', value: '#F1F5F9', bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.06)' },
+    blue: { icon: '#3B82F6', value: '#3B82F6', bg: 'rgba(59,130,246,0.05)', border: 'rgba(59,130,246,0.15)' },
+    green: { icon: '#10B981', value: '#10B981', bg: 'rgba(16,185,129,0.05)', border: 'rgba(16,185,129,0.15)' },
+  };
+  const a = accents[color];
+
   return (
-    <div className={`p-5 rounded-2xl border-2 transition-all ${
-      isGreen ? "bg-emerald-50/50 border-emerald-100" : 
-      isBlue ? "bg-blue-50/50 border-blue-100" : 
-      "bg-zinc-50/50 border-zinc-100"
-    }`}>
+    <div
+      className="p-5 transition-all duration-300 hover:translate-y-[-2px]"
+      style={{
+        background: a.bg,
+        border: `1px solid ${a.border}`,
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-layered)',
+      }}
+    >
       <div className="flex items-center justify-between mb-3">
-        <Icon className={`w-5 h-5 ${accent || "text-zinc-400"}`} />
+        <Icon className="w-5 h-5" style={{ color: a.icon }} />
       </div>
-      <p className={`text-3xl font-bold tabular-nums ${accent || "text-black"}`}>{value}</p>
-      <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mt-1">{label}</p>
+      <p className="text-3xl font-bold tabular-nums" style={{ color: a.value, fontFamily: 'var(--font-mono)' }}>{value}</p>
+      <p className="text-[10px] font-bold uppercase tracking-wider mt-1" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>{label}</p>
     </div>
   );
 }
