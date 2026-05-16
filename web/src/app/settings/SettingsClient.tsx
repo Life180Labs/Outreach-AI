@@ -125,19 +125,19 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* OpenAI */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-700">OpenAI API Key</label>
-                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>OpenAI API Key</label>
+                  <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.openai ? "text" : "password"}
                       name="openaiApiKey"
                       defaultValue={settings?.openaiApiKey || ""}
                       placeholder="sk-..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
                     />
                     <button
                       type="button"
                       onClick={() => toggleKey('openai')}
-                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
                     >
                       {showKeys.openai ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -146,19 +146,19 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* Groq */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-700">Groq API Key</label>
-                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>Groq API Key</label>
+                  <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.groq ? "text" : "password"}
                       name="groqApiKey"
                       defaultValue={settings?.groqApiKey || ""}
                       placeholder="gsk_..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
                     />
                     <button
                       type="button"
                       onClick={() => toggleKey('groq')}
-                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
                     >
                       {showKeys.groq ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -167,19 +167,19 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* Claude */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-zinc-700">Claude API Key</label>
-                  <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
+                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>Claude API Key</label>
+                  <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.claude ? "text" : "password"}
                       name="claudeApiKey"
                       defaultValue={settings?.claudeApiKey || ""}
                       placeholder="x-api-key..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
                     />
                     <button
                       type="button"
                       onClick={() => toggleKey('claude')}
-                      className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
                     >
                       {showKeys.claude ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>

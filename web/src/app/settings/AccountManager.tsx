@@ -145,18 +145,18 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
         {accounts.length > 0 ? (
           <div className="grid gap-4">
             {accounts.map((acc) => (
-              <div key={acc.id} className="flex justify-between items-center p-5 bg-zinc-50 rounded-2xl border border-zinc-200 group hover:border-zinc-300 transition-all">
+              <div key={acc.id} className="flex justify-between items-center p-5 card-surface group hover:border-[#6366F1]/30 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white border border-zinc-200 rounded-xl flex items-center justify-center text-zinc-400 group-hover:text-zinc-600 transition-colors relative">
+                  <div className="w-10 h-10 card-elevated flex items-center justify-center text-[#475569] group-hover:text-white transition-colors relative">
                     <Mail className="w-5 h-5" />
                     {acc.isVerified && (
-                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white" title="Verified" />
+                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#10B981] rounded-full border-2 border-[#0D0E12]" title="Verified" />
                     )}
                   </div>
                   <div>
-                    <p className="font-semibold text-zinc-900">{acc.name}</p>
-                    <p className="text-xs text-zinc-500 font-medium">
-                      {acc.username} <span className="mx-1 opacity-30">|</span> {acc.host}:{acc.port}
+                    <p className="font-semibold text-white">{acc.name}</p>
+                    <p className="text-xs font-medium" style={{ color: '#64748B' }}>
+                      {acc.username} <span className="mx-1 opacity-20">|</span> {acc.host}:{acc.port}
                       {acc.fromEmail && <span className="block mt-0.5 opacity-60">Sender: {acc.fromName} &lt;{acc.fromEmail}&gt;</span>}
                     </p>
                   </div>
@@ -166,22 +166,23 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                     onClick={() => handleToggleStatus(acc.id)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
                       acc.isActive 
-                        ? "bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-100" 
-                        : "bg-zinc-100 text-zinc-400 border-zinc-200 hover:bg-zinc-200"
+                        ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 hover:bg-[#10B981]/20" 
+                        : "bg-white/5 text-[#475569] border-white/5 hover:bg-white/10"
                     }`}
+                    style={{ fontFamily: 'var(--font-mono)' }}
                   >
                     {acc.isActive ? "Active" : "Disabled"}
                   </button>
                   <button
                     onClick={() => handleEdit(acc)}
-                    className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-white rounded-lg border border-transparent hover:border-zinc-200 transition-all"
+                    className="p-2 text-[#475569] hover:text-white hover:bg-white/5 rounded-lg transition-all"
                     title="Edit Configuration"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(acc.id)}
-                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-white rounded-lg border border-transparent hover:border-red-100 transition-all"
+                    className="p-2 text-[#475569] hover:text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg transition-all"
                     title="Delete Account"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -191,27 +192,28 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 bg-zinc-50 rounded-2xl border border-dashed border-zinc-200">
-            <p className="text-sm text-zinc-400">No SMTP accounts configured yet.</p>
+          <div className="text-center py-12 bg-white/[0.02] rounded-2xl border border-dashed border-white/10">
+            <p className="text-sm font-medium" style={{ color: '#475569' }}>No SMTP accounts configured yet.</p>
           </div>
         )}
       </div>
 
       {/* Add/Edit Account Form */}
-      <div id="smtp-form" className="pt-8 border-t border-zinc-100">
+      <div id="smtp-form" className="pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-zinc-100 rounded-lg">
-              {editingId ? <Edit2 className="w-4 h-4 text-zinc-600" /> : <Plus className="w-4 h-4 text-zinc-600" />}
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366F1' }}>
+              {editingId ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </div>
-            <h3 className="text-base font-bold text-zinc-900">
+            <h3 className="text-lg font-bold text-white">
               {editingId ? "Edit SMTP Connection" : "Add New Connection"}
             </h3>
           </div>
           {editingId && (
             <button 
               onClick={cancelEdit}
-              className="text-xs font-semibold text-zinc-400 hover:text-zinc-900 flex items-center gap-1 transition-colors"
+              className="text-xs font-bold text-[#64748B] hover:text-white flex items-center gap-1 transition-colors uppercase tracking-widest"
+              style={{ fontFamily: 'var(--font-mono)' }}
             >
               <X className="w-3 h-3" />
               Cancel Edit
@@ -222,51 +224,51 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Friendly Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Display Name</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Display Name</label>
               <input 
                 type="text" 
                 required 
                 value={form.name} 
                 onChange={e => setForm({ ...form, name: e.target.value })} 
                 placeholder="e.g. Sales Inbox" 
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+                className="input-dark w-full" 
               />
             </div>
 
             {/* Host */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Host</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>SMTP Host</label>
               <input 
                 type="text" 
                 required 
                 value={form.host} 
                 onChange={e => setForm({ ...form, host: e.target.value })} 
                 placeholder="e.g. smtp.gmail.com" 
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+                className="input-dark w-full" 
               />
             </div>
 
             {/* Port */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Port</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>SMTP Port</label>
               <input 
                 type="number" 
                 required 
                 value={form.port} 
                 onChange={e => setForm({ ...form, port: e.target.value })} 
                 placeholder="465 or 587" 
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+                className="input-dark w-full" 
               />
             </div>
 
             {/* Encryption */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Encryption</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Encryption</label>
               <select 
                 value={form.encryptionType} 
                 onChange={e => setForm({ ...form, encryptionType: e.target.value })}
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none cursor-pointer"
+                className="input-dark w-full cursor-pointer appearance-none"
               >
                 <option value="TLS">STARTTLS (Port 587)</option>
                 <option value="SSL">SSL/TLS (Port 465)</option>
@@ -275,36 +277,36 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             </div>
 
             {/* Username */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">SMTP Username</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>SMTP Username</label>
               <input 
                 type="text" 
                 required 
                 value={form.username} 
                 onChange={e => setForm({ ...form, username: e.target.value })} 
                 placeholder="you@company.com" 
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+                className="input-dark w-full" 
               />
             </div>
 
             {/* Password */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">
-                App Password {editingId && <span className="font-normal lowercase opacity-50">(leave blank to keep current)</span>}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
+                App Password {editingId && <span className="font-normal lowercase opacity-40">(leave blank to keep current)</span>}
               </label>
-              <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-4 focus-within:ring-2 focus-within:ring-zinc-900/5 focus-within:border-zinc-900 transition-all">
+              <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                 <input 
                   type={showPass ? "text" : "password"} 
                   required={!editingId} 
                   value={form.password} 
                   onChange={e => setForm({ ...form, password: e.target.value })} 
                   placeholder={editingId ? "••••••••••••••••" : "Enter your secure app password"} 
-                  className="w-full py-2.5 text-sm outline-none bg-transparent" 
+                  className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="p-1.5 text-zinc-400 hover:text-zinc-600 transition-colors ml-2"
+                  className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -312,28 +314,28 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             </div>
 
             {/* From Name */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Sender Display Name</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Sender Display Name</label>
               <input 
                 type="text" 
                 required 
                 value={form.fromName} 
                 onChange={e => setForm({ ...form, fromName: e.target.value })} 
                 placeholder="e.g. Sandeep from Life180" 
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+                className="input-dark w-full" 
               />
             </div>
 
             {/* From Email */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-zinc-500 uppercase tracking-tight">Sender Email Address</label>
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Sender Email Address</label>
               <input 
                 type="email" 
                 required 
                 value={form.fromEmail} 
                 onChange={e => setForm({ ...form, fromEmail: e.target.value })} 
                 placeholder="e.g. hello@life180.ai" 
-                className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none" 
+                className="input-dark w-full" 
               />
             </div>
           </div>
@@ -342,7 +344,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             <button 
               type="submit" 
               disabled={loading} 
-              className="flex items-center gap-2 px-8 py-3 bg-zinc-900 text-white text-sm font-bold rounded-xl hover:bg-zinc-800 transition-all active:scale-[0.98] disabled:opacity-50 shadow-lg shadow-zinc-200"
+              className="btn-primary flex items-center justify-center gap-2 px-8"
             >
               {loading ? "Verifying Connection..." : (editingId ? "Update Configuration" : "Verify & Save Account")}
               <ShieldCheck className="w-4 h-4" />

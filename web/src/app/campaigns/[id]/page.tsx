@@ -194,7 +194,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                   <p className="text-[10px] mt-2 italic" style={{ color: '#475569' }}>Select a proven strategy from the Prompt Engineering Studio</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-3 block">Tone</label>
+                  <label className="text-xs font-medium mb-3 block" style={{ color: '#64748B' }}>Tone</label>
                   <div className="flex flex-wrap gap-2">
                     {['Professional', 'Friendly', 'Direct'].map(t => (
                       <label key={t} className="cursor-pointer">
@@ -208,7 +208,7 @@ export default async function CampaignSetupPage({ params }: { params: Promise<{ 
                 </div>
 
                 <div>
-                  <label className="text-xs font-medium text-zinc-500 mb-3 block">CTA Style</label>
+                  <label className="text-xs font-medium mb-3 block" style={{ color: '#64748B' }}>CTA Style</label>
                   <div className="flex flex-wrap gap-2">
                     {['Book a call', 'Reply back', 'Custom'].map(c => (
                       <label key={c} className="cursor-pointer">

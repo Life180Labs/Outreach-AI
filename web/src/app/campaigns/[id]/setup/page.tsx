@@ -60,7 +60,7 @@ export default async function CampaignSetupPage({ params }: PageProps) {
 
   if (!campaign) {
     return (
-      <div className="p-8 text-center text-zinc-400">
+      <div className="p-8 text-center" style={{ color: '#64748B' }}>
         Campaign not found
       </div>
     );
@@ -78,21 +78,22 @@ export default async function CampaignSetupPage({ params }: PageProps) {
           <div className="mb-1 flex items-center gap-2">
             <Link
               href={`/campaigns/${campaign.id}`}
-              className="text-[10px] font-bold uppercase tracking-widest text-zinc-400 transition-colors hover:text-black"
+              className="text-[10px] font-bold uppercase tracking-widest transition-colors"
+              style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}
             >
               Campaign
             </Link>
-            <span className="text-zinc-300">/</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-black">
+            <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-white" style={{ fontFamily: 'var(--font-mono)' }}>
               Configuration
             </span>
           </div>
 
-          <h1 className="text-2xl font-semibold tracking-tight text-black">
+          <h1 className="text-3xl font-bold tracking-tight text-gradient">
             {campaign.name || "Campaign Setup"}
           </h1>
 
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm" style={{ color: '#64748B' }}>
             Define your outreach strategy and AI context
           </p>
         </div>
@@ -101,31 +102,31 @@ export default async function CampaignSetupPage({ params }: PageProps) {
           {/* LEFT COLUMN */}
           <div className="flex-1 space-y-6 lg:w-[58.33%]">
             {/* Campaign Identity */}
-            <div className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-6">
+            <div className="space-y-6 card-surface p-6">
               <div>
-                <h3 className="text-sm font-semibold text-black">
+                <h3 className="text-sm font-semibold text-white">
                   Campaign Identity
                 </h3>
-                <p className="mt-0.5 text-xs text-zinc-400">
+                <p className="mt-0.5 text-xs" style={{ color: '#64748B' }}>
                   Define your internal name and outreach context
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                     Campaign Name
                   </label>
                   <input
                     type="text"
                     name="campaignName"
                     defaultValue={campaign.name || ""}
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                    className="input-dark w-full"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                     AI Author / Sender Name
                   </label>
                   <input
@@ -133,12 +134,12 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                     name="senderName"
                     defaultValue={campaign.senderName || ""}
                     placeholder="Your Name or GTM Team"
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                    className="input-dark w-full"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-zinc-500">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                     Context for AI
                   </label>
                   <textarea
@@ -146,19 +147,19 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                     rows={4}
                     defaultValue={campaign.context || ""}
                     placeholder="Offering AI ops support..."
-                    className="w-full resize-none rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                    className="input-dark w-full resize-none"
                   />
                 </div>
               </div>
             </div>
 
             {/* Followups */}
-            <div className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-6">
+            <div className="space-y-6 card-surface p-6">
               <div>
-                <h3 className="text-sm font-semibold text-black">
+                <h3 className="text-sm font-semibold text-white">
                   Sequence Logic
                 </h3>
-                <p className="mt-0.5 text-xs text-zinc-400">
+                <p className="mt-0.5 text-xs" style={{ color: '#64748B' }}>
                   Configure follow-up timing
                 </p>
               </div>
@@ -166,7 +167,7 @@ export default async function CampaignSetupPage({ params }: PageProps) {
               <div className="grid grid-cols-2 gap-6">
                 {[1, 2].map((step) => (
                   <div key={step}>
-                    <label className="mb-1 block text-xs font-medium text-zinc-500">
+                    <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                       Follow-up {step}
                     </label>
                     <select
@@ -176,12 +177,12 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                           ? campaign.followup1Delay
                           : campaign.followup2Delay
                       }
-                      className="w-full cursor-pointer appearance-none rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                      className="input-dark w-full cursor-pointer appearance-none"
                     >
                       {(settings?.followupDelayOptions || "1,3,5,7,10,14")
                         .split(",")
                         .map((delay) => (
-                          <option key={delay} value={delay.trim()}>
+                          <option key={delay} value={delay.trim()} className="bg-[#0D0E12]">
                             Day {delay.trim()}
                           </option>
                         ))}
@@ -195,38 +196,38 @@ export default async function CampaignSetupPage({ params }: PageProps) {
           {/* RIGHT COLUMN */}
           <div className="flex-1 space-y-6 lg:w-[41.66%]">
             {/* Strategy & SMTP */}
-            <div className="space-y-6 rounded-2xl border border-zinc-200 bg-white p-6">
+            <div className="space-y-6 card-surface p-6">
               <div>
-                <h3 className="text-sm font-semibold text-black">
+                <h3 className="text-sm font-semibold text-white">
                   Tone & Strategy
                 </h3>
-                <p className="mt-0.5 text-xs text-zinc-400">
+                <p className="mt-0.5 text-xs" style={{ color: '#64748B' }}>
                   Configure outreach behavior
                 </p>
               </div>
 
               {/* SMTP Account Selector */}
               <div>
-                <label className="mb-2 block text-xs font-medium text-zinc-500">
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                   Sending Email Account
                 </label>
                 <select
                   name="smtpAccountId"
                   defaultValue={campaign.smtpAccountId || ""}
-                  className="w-full cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                  className="input-dark w-full cursor-pointer appearance-none"
                 >
-                  <option value="">Select Sending Account...</option>
+                  <option value="" className="bg-[#0D0E12]">Select Sending Account...</option>
                   {smtpAccounts.map((account) => (
-                    <option key={account.id} value={account.id}>
+                    <option key={account.id} value={account.id} className="bg-[#0D0E12]">
                       {account.name} ({account.fromEmail})
                     </option>
                   ))}
                 </select>
 
                 {smtpAccounts.length === 0 && (
-                  <p className="mt-2 text-[10px] text-red-500">
+                  <p className="mt-2 text-[10px] text-[#EF4444] font-bold uppercase tracking-tight">
                     No SMTP accounts found.{" "}
-                    <Link href="/settings" className="font-bold underline">
+                    <Link href="/settings" className="underline">
                       Add one in settings
                     </Link>
                   </p>
@@ -236,17 +237,17 @@ export default async function CampaignSetupPage({ params }: PageProps) {
               {/* AI Strategy Selector */}
               {strategies.length > 0 && (
                 <div>
-                  <label className="mb-2 block text-xs font-medium text-zinc-500">
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                     AI Strategy
                   </label>
                   <select
                     name="strategyId"
                     defaultValue={campaign.strategyId || ""}
-                    className="w-full cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                    className="input-dark w-full cursor-pointer appearance-none"
                   >
-                    <option value="">Default Strategy</option>
+                    <option value="" className="bg-[#0D0E12]">Default Strategy</option>
                     {strategies.map((strategy) => (
-                      <option key={strategy.id} value={strategy.id}>
+                      <option key={strategy.id} value={strategy.id} className="bg-[#0D0E12]">
                         {strategy.name}
                       </option>
                     ))}
@@ -256,44 +257,44 @@ export default async function CampaignSetupPage({ params }: PageProps) {
 
               {/* Tone Selector */}
               <div>
-                <label className="mb-2 block text-xs font-medium text-zinc-500">
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                   Tone
                 </label>
                 <select
                   name="tone"
                   defaultValue={campaign.tone || "Professional"}
-                  className="w-full cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                  className="input-dark w-full cursor-pointer appearance-none"
                 >
-                  <option value="Professional">Professional</option>
-                  <option value="Conversational">Conversational</option>
-                  <option value="Friendly">Friendly</option>
-                  <option value="Direct">Direct</option>
-                  <option value="Casual">Casual</option>
-                  <option value="Formal">Formal</option>
+                  <option value="Professional" className="bg-[#0D0E12]">Professional</option>
+                  <option value="Conversational" className="bg-[#0D0E12]">Conversational</option>
+                  <option value="Friendly" className="bg-[#0D0E12]">Friendly</option>
+                  <option value="Direct" className="bg-[#0D0E12]">Direct</option>
+                  <option value="Casual" className="bg-[#0D0E12]">Casual</option>
+                  <option value="Formal" className="bg-[#0D0E12]">Formal</option>
                 </select>
               </div>
 
               {/* CTA Selector */}
               <div>
-                <label className="mb-2 block text-xs font-medium text-zinc-500">
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
                   Call to Action
                 </label>
                 <select
                   name="cta"
                   defaultValue={campaign.cta || "Book a call"}
-                  className="w-full cursor-pointer rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-black transition-colors focus:border-zinc-400 focus:outline-none"
+                  className="input-dark w-full cursor-pointer appearance-none"
                 >
-                  <option value="Book a call">Book a call</option>
-                  <option value="Reply to this email">Reply to this email</option>
-                  <option value="Visit our site">Visit our site</option>
-                  <option value="Schedule a demo">Schedule a demo</option>
+                  <option value="Book a call" className="bg-[#0D0E12]">Book a call</option>
+                  <option value="Reply to this email" className="bg-[#0D0E12]">Reply to this email</option>
+                  <option value="Visit our site" className="bg-[#0D0E12]">Visit our site</option>
+                  <option value="Schedule a demo" className="bg-[#0D0E12]">Schedule a demo</option>
                 </select>
               </div>
             </div>
 
             <button
               type="submit"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-black px-5 py-4 font-semibold text-white shadow-sm transition-all hover:bg-zinc-800 active:scale-[0.98]"
+              className="btn-primary w-full flex items-center justify-center gap-2"
             >
               Generate {campaign._count.leads} Drafts
               <ArrowRight className="h-4 w-4" />
