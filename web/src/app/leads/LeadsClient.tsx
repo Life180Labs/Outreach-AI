@@ -75,19 +75,19 @@ const LeadRow = memo(function LeadRow({
         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium ${
           lead.replied || lead.status === "Hot"
             ? "bg-emerald-50 text-emerald-700"
-            : lead.opened
+            : (lead.opened || lead.status === "Opened")
             ? "bg-amber-50 text-amber-700"
             : "bg-zinc-100 text-zinc-600"
         }`}>
           <div className={`w-1.5 h-1.5 rounded-full ${
-            lead.replied ? "bg-emerald-500" : lead.opened ? "bg-amber-500" : "bg-zinc-500"
+            lead.replied ? "bg-emerald-500" : (lead.opened || lead.status === "Opened") ? "bg-amber-500" : "bg-zinc-500"
           }`} />
-          {lead.replied ? "Replied" : lead.opened ? "Opened" : "Cold"}
+          {lead.replied ? "Replied" : (lead.opened || lead.status === "Opened") ? "Opened" : lead.status}
         </span>
       </td>
       <td className="px-4 py-4">
         <p className="text-xs text-zinc-600">
-          {lead.replied ? "Replied" : lead.opened ? "Opened" : lead.sent ? "Sent" : "Pending"}
+          {lead.replied ? "Replied" : (lead.opened || lead.status === "Opened") ? "Opened" : lead.sent ? "Sent" : "Pending"}
         </p>
         <p className="text-[11px] text-zinc-500 mt-0.5">
           {new Date(lead.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}

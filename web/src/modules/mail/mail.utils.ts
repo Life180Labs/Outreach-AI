@@ -27,7 +27,7 @@ export function formatTrackingPixel(trackingUrl: string): string {
  */
 export function buildTrackingUrl(leadId: string): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  return `${appUrl}/api/tracking/open/${leadId}`;
+  return `${appUrl}/api/track/open/${leadId}`;
 }
 
 /**

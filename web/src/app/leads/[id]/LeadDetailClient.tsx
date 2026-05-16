@@ -200,10 +200,10 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
 
             <div className="flex flex-wrap items-center gap-2 mt-5 pt-5 border-t border-[#FFAB00]/10">
               <span className={`px-2.5 py-0.5 rounded-none text-[10px] font-mono uppercase font-medium border ${lead.status === "Hot" ? "bg-[#5C3A0B]/40 text-[#FFAB00] border-[#FFAB00]/40"
-                  : lead.status === "Warm" ? "bg-amber-950/40 text-amber-400 border-amber-500/30"
+                  : lead.status === "Warm" || lead.status === "Opened" || lead.opened ? "bg-amber-950/40 text-amber-400 border-amber-500/30"
                     : "bg-zinc-900 text-zinc-400 border-zinc-800"
                 }`}>
-                {lead.status}
+                {lead.status === "Opened" || lead.opened ? "Opened" : lead.status}
               </span>
               {lead.sent && <span className="px-2 py-0.5 rounded-none text-[10px] font-mono uppercase bg-blue-950/40 text-blue-400 border border-blue-500/30">Sent</span>}
               {lead.replied && <span className="px-2 py-0.5 rounded-none text-[10px] font-mono uppercase bg-emerald-950/40 text-emerald-400 border border-emerald-500/30">Replied</span>}

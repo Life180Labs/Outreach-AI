@@ -11,7 +11,7 @@ export async function GET(
     // Mark as opened in background
     await prisma.lead.update({
       where: { id: leadId },
-      data: { opened: true, status: "warm" }
+      data: { opened: true, status: "Opened" }
     });
     console.log(`[Tracking] Lead ${leadId} opened the email`);
   } catch (error) {
