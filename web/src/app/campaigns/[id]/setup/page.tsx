@@ -84,7 +84,7 @@ export default async function CampaignSetupPage({ params }: PageProps) {
               Campaign
             </Link>
             <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-white" style={{ fontFamily: 'var(--font-mono)' }}>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-mono)' }}>
               Configuration
             </span>
           </div>
@@ -104,17 +104,17 @@ export default async function CampaignSetupPage({ params }: PageProps) {
             {/* Campaign Identity */}
             <div className="space-y-6 card-surface p-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   Campaign Identity
                 </h3>
-                <p className="mt-0.5 text-xs" style={{ color: '#64748B' }}>
+                <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                   Define your internal name and outreach context
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>
                     Campaign Name
                   </label>
                   <input
@@ -139,7 +139,7 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>
+                  <label className="mb-2 block text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>
                     Context for AI
                   </label>
                   <textarea
@@ -156,10 +156,10 @@ export default async function CampaignSetupPage({ params }: PageProps) {
             {/* Followups */}
             <div className="space-y-6 card-surface p-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   Sequence Logic
                 </h3>
-                <p className="mt-0.5 text-xs" style={{ color: '#64748B' }}>
+                <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                   Configure follow-up timing
                 </p>
               </div>
@@ -182,7 +182,7 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                       {(settings?.followupDelayOptions || "1,3,5,7,10,14")
                         .split(",")
                         .map((delay) => (
-                          <option key={delay} value={delay.trim()} className="bg-[#0D0E12]">
+                          <option key={delay} value={delay.trim()} className="bg-[var(--bg-surface)]">
                             Day {delay.trim()}
                           </option>
                         ))}
@@ -198,10 +198,10 @@ export default async function CampaignSetupPage({ params }: PageProps) {
             {/* Strategy & SMTP */}
             <div className="space-y-6 card-surface p-6">
               <div>
-                <h3 className="text-sm font-semibold text-white">
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
                   Tone & Strategy
                 </h3>
-                <p className="mt-0.5 text-xs" style={{ color: '#64748B' }}>
+                <p className="mt-0.5 text-xs" style={{ color: 'var(--text-muted)' }}>
                   Configure outreach behavior
                 </p>
               </div>
@@ -216,9 +216,9 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                   defaultValue={campaign.smtpAccountId || ""}
                   className="input-dark w-full cursor-pointer appearance-none"
                 >
-                  <option value="" className="bg-[#0D0E12]">Select Sending Account...</option>
+                  <option value="" className="bg-[var(--bg-surface)]">Select Sending Account...</option>
                   {smtpAccounts.map((account) => (
-                    <option key={account.id} value={account.id} className="bg-[#0D0E12]">
+                    <option key={account.id} value={account.id} className="bg-[var(--bg-surface)]">
                       {account.name} ({account.fromEmail})
                     </option>
                   ))}
@@ -245,9 +245,9 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                     defaultValue={campaign.strategyId || ""}
                     className="input-dark w-full cursor-pointer appearance-none"
                   >
-                    <option value="" className="bg-[#0D0E12]">Default Strategy</option>
+                    <option value="" className="bg-[var(--bg-surface)]">Default Strategy</option>
                     {strategies.map((strategy) => (
-                      <option key={strategy.id} value={strategy.id} className="bg-[#0D0E12]">
+                      <option key={strategy.id} value={strategy.id} className="bg-[var(--bg-surface)]">
                         {strategy.name}
                       </option>
                     ))}
@@ -265,12 +265,12 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                   defaultValue={campaign.tone || "Professional"}
                   className="input-dark w-full cursor-pointer appearance-none"
                 >
-                  <option value="Professional" className="bg-[#0D0E12]">Professional</option>
-                  <option value="Conversational" className="bg-[#0D0E12]">Conversational</option>
-                  <option value="Friendly" className="bg-[#0D0E12]">Friendly</option>
-                  <option value="Direct" className="bg-[#0D0E12]">Direct</option>
-                  <option value="Casual" className="bg-[#0D0E12]">Casual</option>
-                  <option value="Formal" className="bg-[#0D0E12]">Formal</option>
+                  <option value="Professional" className="bg-[var(--bg-surface)]">Professional</option>
+                  <option value="Conversational" className="bg-[var(--bg-surface)]">Conversational</option>
+                  <option value="Friendly" className="bg-[var(--bg-surface)]">Friendly</option>
+                  <option value="Direct" className="bg-[var(--bg-surface)]">Direct</option>
+                  <option value="Casual" className="bg-[var(--bg-surface)]">Casual</option>
+                  <option value="Formal" className="bg-[var(--bg-surface)]">Formal</option>
                 </select>
               </div>
 
@@ -284,10 +284,10 @@ export default async function CampaignSetupPage({ params }: PageProps) {
                   defaultValue={campaign.cta || "Book a call"}
                   className="input-dark w-full cursor-pointer appearance-none"
                 >
-                  <option value="Book a call" className="bg-[#0D0E12]">Book a call</option>
-                  <option value="Reply to this email" className="bg-[#0D0E12]">Reply to this email</option>
-                  <option value="Visit our site" className="bg-[#0D0E12]">Visit our site</option>
-                  <option value="Schedule a demo" className="bg-[#0D0E12]">Schedule a demo</option>
+                  <option value="Book a call" className="bg-[var(--bg-surface)]">Book a call</option>
+                  <option value="Reply to this email" className="bg-[var(--bg-surface)]">Reply to this email</option>
+                  <option value="Visit our site" className="bg-[var(--bg-surface)]">Visit our site</option>
+                  <option value="Schedule a demo" className="bg-[var(--bg-surface)]">Schedule a demo</option>
                 </select>
               </div>
             </div>

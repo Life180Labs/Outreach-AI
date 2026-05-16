@@ -104,7 +104,7 @@ const LeadRow = memo(function LeadRow({
             >
               <Edit className="w-3.5 h-3.5" />
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#6366F1] text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-[var(--bg-surface)] border border-[#6366F1] text-[var(--text-primary)] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
               Edit lead details
             </div>
           </div>
@@ -117,7 +117,7 @@ const LeadRow = memo(function LeadRow({
             >
               {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#6366F1] text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-[var(--bg-surface)] border border-[#6366F1] text-[var(--text-primary)] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
               {lead.isPaused ? "Resume automated sequence" : "Pause automated sequence"}
             </div>
           </div>
@@ -130,7 +130,7 @@ const LeadRow = memo(function LeadRow({
             >
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#6366F1] text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-[var(--bg-surface)] border border-[#6366F1] text-[var(--text-primary)] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.2)] animate-in fade-in zoom-in-95 duration-200">
               Open conversation log
             </div>
           </div>
@@ -144,7 +144,7 @@ const LeadRow = memo(function LeadRow({
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
             </button>
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-black border border-[#EF4444] text-[#EF4444] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-in fade-in zoom-in-95 duration-200">
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block z-[100] bg-[var(--bg-surface)] border border-[#EF4444] text-[#EF4444] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-in fade-in zoom-in-95 duration-200">
               Permanently delete lead
             </div>
           </div>

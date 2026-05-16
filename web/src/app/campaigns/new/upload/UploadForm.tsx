@@ -224,7 +224,7 @@ export function UploadForm() {
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gradient tracking-tight">Import Leads</h1>
-          <p className="text-sm text-[#64748B] mt-1">Upload a CSV or paste a Google Sheets link to get started</p>
+          <p className="text-sm text-[var(--text-muted)] mt-1">Upload a CSV or paste a Google Sheets link to get started</p>
         </div>
 
         <div className="p-8 card-surface space-y-6">
@@ -260,10 +260,10 @@ export function UploadForm() {
           </div>
 
           {/* CSV Upload */}
-          <label className="flex flex-col items-center justify-center p-10 cursor-pointer transition-all duration-300 group" style={{ border: '1px dashed rgba(255,255,255,0.15)', borderRadius: 'var(--radius-card)', background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.04) 0%, transparent 70%)' }}>
-            <Upload className="w-8 h-8 text-[#475569] group-hover:text-[#6366F1] transition-colors mb-3" />
-            <span className="text-sm font-medium text-[#94A3B8]">Upload CSV file</span>
-            <span className="text-xs mt-1" style={{ color: '#475569' }}>Drag & drop or click to browse</span>
+          <label className="flex flex-col items-center justify-center p-10 cursor-pointer transition-all duration-300 group" style={{ border: '1px dashed var(--border-muted)', borderRadius: 'var(--radius-card)', background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.04) 0%, transparent 70%)' }}>
+            <Upload className="w-8 h-8 text-[var(--text-faint)] group-hover:text-[#6366F1] transition-colors mb-3" />
+            <span className="text-sm font-bold text-[var(--text-muted)]">Upload CSV file</span>
+            <span className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>Drag & drop or click to browse</span>
             <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
           </label>
         </div>
@@ -292,7 +292,7 @@ export function UploadForm() {
           <button
             type="button"
             onClick={() => { setStep("upload"); setRawData([]); setRawHeaders([]); }}
-            className="px-4 py-2.5 text-sm font-medium transition-all duration-200" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)', color: '#94A3B8' }}
+            className="px-4 py-2.5 text-sm font-bold transition-all duration-200" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-button)', color: 'var(--text-muted)' }}
           >
             ← Re-upload
           </button>
@@ -314,7 +314,7 @@ export function UploadForm() {
           <div className="p-6 card-surface">
             <div className="flex items-center gap-2 mb-5">
               <Table2 className="w-4 h-4 text-[#6366F1]" />
-              <h2 className="text-sm font-semibold text-white">Column Mapping</h2>
+              <h2 className="text-sm font-bold text-[var(--text-primary)]">Column Mapping</h2>
             </div>
 
             <div className="space-y-3">
@@ -340,7 +340,7 @@ export function UploadForm() {
                     {/* Source column */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-[#F1F5F9] truncate">{header}</span>
+                        <span className="text-sm font-bold text-[var(--text-primary)] truncate">{header}</span>
                         {rawData[0]?.[header] && (
                           <span className="text-[11px] truncate max-w-[180px]" title={rawData[0][header]} style={{ color: '#475569' }}>
                             e.g. "{rawData[0][header]}"
@@ -446,8 +446,8 @@ export function UploadForm() {
                   const label = KNOWN_FIELDS.find((f) => f.value === key)?.label || key;
                   return (
                     <div key={key} className="flex items-start gap-2">
-                      <span className="text-[10px] font-semibold uppercase tracking-tight w-20 shrink-0 pt-0.5" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>{label}</span>
-                      <span className="text-sm break-all" style={{ color: '#94A3B8' }}>{value as string}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-tight w-20 shrink-0 pt-0.5" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>{label}</span>
+                      <span className="text-sm font-bold break-all" style={{ color: 'var(--text-secondary)' }}>{value as string}</span>
                     </div>
                   );
                 })}

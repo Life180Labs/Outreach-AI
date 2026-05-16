@@ -147,15 +147,15 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             {accounts.map((acc) => (
               <div key={acc.id} className="flex justify-between items-center p-5 card-surface group hover:border-[#6366F1]/30 transition-all">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 card-elevated flex items-center justify-center text-[#475569] group-hover:text-white transition-colors relative">
+                  <div className="w-10 h-10 card-elevated flex items-center justify-center text-[var(--text-faint)] group-hover:text-[var(--text-primary)] transition-colors relative">
                     <Mail className="w-5 h-5" />
                     {acc.isVerified && (
-                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#10B981] rounded-full border-2 border-[#0D0E12]" title="Verified" />
+                      <div className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-[#10B981] rounded-full border-2 border-[var(--bg-surface)]" title="Verified" />
                     )}
                   </div>
                   <div>
-                    <p className="font-semibold text-white">{acc.name}</p>
-                    <p className="text-xs font-medium" style={{ color: '#64748B' }}>
+                    <p className="font-bold text-[var(--text-primary)]">{acc.name}</p>
+                    <p className="text-xs font-bold" style={{ color: 'var(--text-muted)' }}>
                       {acc.username} <span className="mx-1 opacity-20">|</span> {acc.host}:{acc.port}
                       {acc.fromEmail && <span className="block mt-0.5 opacity-60">Sender: {acc.fromName} &lt;{acc.fromEmail}&gt;</span>}
                     </p>
@@ -167,7 +167,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
                       acc.isActive 
                         ? "bg-[#10B981]/10 text-[#10B981] border-[#10B981]/20 hover:bg-[#10B981]/20" 
-                        : "bg-white/5 text-[#475569] border-white/5 hover:bg-white/10"
+                        : "bg-[var(--bg-elevated)] text-[var(--text-faint)] border-[var(--border-muted)] hover:bg-[var(--bg-surface)]"
                     }`}
                     style={{ fontFamily: 'var(--font-mono)' }}
                   >
@@ -192,8 +192,8 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 bg-white/[0.02] rounded-2xl border border-dashed border-white/10">
-            <p className="text-sm font-medium" style={{ color: '#475569' }}>No SMTP accounts configured yet.</p>
+          <div className="text-center py-12 bg-[var(--bg-sink)] rounded-2xl border border-dashed border-[var(--border-muted)]">
+            <p className="text-sm font-bold" style={{ color: 'var(--text-faint)' }}>No SMTP accounts configured yet.</p>
           </div>
         )}
       </div>
@@ -205,14 +205,14 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
             <div className="p-2 rounded-lg" style={{ background: 'rgba(99,102,241,0.1)', color: '#6366F1' }}>
               {editingId ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
             </div>
-            <h3 className="text-lg font-bold text-white">
+            <h3 className="text-lg font-bold text-[var(--text-primary)]">
               {editingId ? "Edit SMTP Connection" : "Add New Connection"}
             </h3>
           </div>
           {editingId && (
             <button 
               onClick={cancelEdit}
-              className="text-xs font-bold text-[#64748B] hover:text-white flex items-center gap-1 transition-colors uppercase tracking-widest"
+              className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 transition-colors uppercase tracking-widest"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               <X className="w-3 h-3" />
@@ -225,7 +225,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Friendly Name */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Display Name</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Display Name</label>
               <input 
                 type="text" 
                 required 
@@ -238,7 +238,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* Host */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>SMTP Host</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SMTP Host</label>
               <input 
                 type="text" 
                 required 
@@ -251,7 +251,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* Port */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>SMTP Port</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SMTP Port</label>
               <input 
                 type="number" 
                 required 
@@ -264,7 +264,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* Encryption */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Encryption</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Encryption</label>
               <select 
                 value={form.encryptionType} 
                 onChange={e => setForm({ ...form, encryptionType: e.target.value })}
@@ -278,7 +278,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* Username */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>SMTP Username</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>SMTP Username</label>
               <input 
                 type="text" 
                 required 
@@ -291,7 +291,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* Password */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 App Password {editingId && <span className="font-normal lowercase opacity-40">(leave blank to keep current)</span>}
               </label>
               <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
@@ -301,12 +301,12 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
                   value={form.password} 
                   onChange={e => setForm({ ...form, password: e.target.value })} 
                   placeholder={editingId ? "••••••••••••••••" : "Enter your secure app password"} 
-                  className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
+                  className="w-full py-2.5 text-sm outline-none bg-transparent text-[var(--text-primary)]"
                 />
                 <button 
                   type="button"
                   onClick={() => setShowPass(!showPass)}
-                  className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
+                  className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors ml-2"
                 >
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -315,7 +315,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* From Name */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Sender Display Name</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Sender Display Name</label>
               <input 
                 type="text" 
                 required 
@@ -328,7 +328,7 @@ export default function AccountManager({ initialAccounts }: { initialAccounts: a
 
             {/* From Email */}
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Sender Email Address</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Sender Email Address</label>
               <input 
                 type="email" 
                 required 

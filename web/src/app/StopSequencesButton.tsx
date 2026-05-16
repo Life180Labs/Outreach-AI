@@ -38,7 +38,7 @@ export function StopSequencesButton({ variant = "card" }: { variant?: "card" | "
         >
           <div className="flex items-center justify-between w-full">
             <div className="w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" style={{ background: 'rgba(239,68,68,0.1)' }}>
-              <OctagonX className="w-4 h-4 text-[#EF4444] group-hover:text-white transition-colors" />
+              <OctagonX className="w-4 h-4 text-[#EF4444] group-hover:text-[var(--text-primary)] transition-colors" />
             </div>
             <div className="flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 rounded-full bg-[#EF4444] animate-pulse-dot" />
@@ -46,8 +46,8 @@ export function StopSequencesButton({ variant = "card" }: { variant?: "card" | "
             </div>
           </div>
           <div>
-            <p className="text-sm font-semibold text-[#FCA5A5]">Stop All Sequences</p>
-            <p className="text-xs text-[#DC2626]/60 mt-0.5">Pauses all active outreach immediately</p>
+            <p className="text-sm font-bold text-[#FCA5A5]">Stop All Sequences</p>
+            <p className="text-xs text-[#DC2626] mt-0.5">Pauses all active outreach immediately</p>
           </div>
         </button>
       ) : (
@@ -75,16 +75,16 @@ export function StopSequencesButton({ variant = "card" }: { variant?: "card" | "
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.1)' }}>
                   <AlertTriangle className="w-4 h-4 text-[#EF4444]" />
                 </div>
-                <h3 className="text-base font-semibold text-white">Confirm Emergency Stop</h3>
+                <h3 className="text-base font-bold text-[var(--text-primary)]">Confirm Emergency Stop</h3>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-1 text-[#64748B] hover:text-white rounded transition-colors">
+              <button onClick={() => setShowModal(false)} className="p-1 text-[var(--text-faint)] hover:text-[var(--text-primary)] rounded transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <div className="p-6">
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
-                This will immediately pause <span className="font-semibold text-white">all active campaigns</span> and un-sent lead sequences. You can resume them manually later.
+              <p className="text-sm text-[var(--text-muted)] leading-relaxed">
+                This will immediately pause <span className="font-bold text-[var(--text-primary)]">all active campaigns</span> and un-sent lead sequences. You can resume them manually later.
               </p>
               
               <div className="mt-6 flex flex-col gap-2">
@@ -105,7 +105,7 @@ export function StopSequencesButton({ variant = "card" }: { variant?: "card" | "
                 <button
                   onClick={() => setShowModal(false)}
                   disabled={loading}
-                  className="w-full py-3 text-[#64748B] hover:text-white text-sm font-semibold transition-colors"
+                  className="w-full py-3 text-[var(--text-faint)] hover:text-[var(--text-primary)] text-sm font-bold transition-colors"
                   style={{ borderRadius: 'var(--radius-button)' }}
                 >
                   Cancel

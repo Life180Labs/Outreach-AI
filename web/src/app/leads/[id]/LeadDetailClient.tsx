@@ -349,22 +349,22 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
                   aria-label="Reply content"
                 />
                 {generating && (
-                  <div className="absolute inset-0 bg-black/90 rounded-none flex items-center justify-center gap-2 border border-[#FFAB00]/30 animate-pulse">
+                  <div className="absolute inset-0 bg-[var(--bg-sink)]/90 rounded-none flex items-center justify-center gap-2 border border-[#FFAB00]/30 animate-pulse">
                     <Loader2 className="w-4 h-4 animate-spin text-[#FFAB00]" />
-                    <span className="text-xs font-mono tracking-widest uppercase text-[#FFAB00]">Synthesizing response draft...</span>
+                    <span className="text-xs font-bold font-mono tracking-widest uppercase text-[#FFAB00]">Synthesizing response draft...</span>
                   </div>
                 )}
               </div>
 
               {/* Feedback Loop Refinement Entry Input */}
               {showRegenInput && (
-                <div className="flex gap-2 bg-[#030303] p-2 border border-zinc-800">
+                <div className="flex gap-2 bg-[var(--bg-sink)] p-2 border border-[var(--border-muted)]">
                   <input
                     type="text"
                     value={regenComment}
                     onChange={(e) => setRegenComment(e.target.value)}
                     placeholder="Provide alignment guidelines (e.g., make it shorter, more formal)..."
-                    className="flex-1 bg-black border border-zinc-800 text-white rounded-none px-3 py-2 text-xs font-mono uppercase tracking-wider focus:outline-none focus:border-[#FFAB00]/50 placeholder:text-zinc-700"
+                    className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-muted)] text-[var(--text-primary)] rounded-none px-3 py-2 text-xs font-mono uppercase tracking-wider focus:outline-none focus:border-[#FFAB00]/50 placeholder:text-[var(--text-faint)]"
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && regenComment.trim()) handleGenerateAI(regenComment);
                     }}
@@ -376,7 +376,7 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
                   >
                     Iterate
                   </button>
-                  <button onClick={() => { setShowRegenInput(false); setRegenComment(""); }} className="px-3 py-2 text-zinc-500 hover:text-white font-mono text-[11px] uppercase tracking-wider">
+                  <button onClick={() => { setShowRegenInput(false); setRegenComment(""); }} className="px-3 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] font-mono text-[11px] uppercase tracking-wider">
                     Abort
                   </button>
                 </div>
@@ -394,7 +394,7 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
                     <Sparkles className="w-3.5 h-3.5 text-[#FF6D00]" />
                     {replyText ? "AI Re-Draft Pattern" : "Generate AI Draft"}
                   </button>
-                  <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+                  <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50 bg-[var(--bg-surface)] border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
                     Use language models to generate contextual message templates
                   </div>
                 </div>
@@ -403,12 +403,12 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
                   <div className="relative group">
                     <button
                       onClick={() => setShowRegenInput(!showRegenInput)}
-                      className="flex items-center gap-1.5 px-3 py-2.5 border border-transparent text-zinc-500 hover:text-white text-[11px] font-mono uppercase tracking-widest transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-2.5 border border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[11px] font-mono uppercase tracking-widest transition-colors"
                     >
                       <RefreshCcw className="w-3.5 h-3.5" />
                       Refine with details
                     </button>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-zinc-700 text-zinc-300 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-[var(--bg-surface)] border border-[var(--border-muted)] text-[var(--text-secondary)] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
                       Input custom context optimization rules
                     </div>
                   </div>
@@ -418,12 +418,12 @@ export function LeadDetailClient({ lead: initialLead }: { lead: LeadWithMessages
                   <button
                     onClick={handleSendReply}
                     disabled={loading || !replyText.trim()}
-                    className="flex items-center gap-1.5 px-6 py-2.5 bg-white text-black hover:bg-[#FFAB00] hover:text-black rounded-none text-[11px] font-mono uppercase tracking-widest font-bold transition-all disabled:opacity-20 disabled:bg-zinc-800 disabled:text-zinc-600 disabled:border-transparent"
+                    className="flex items-center gap-1.5 px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg-surface)] hover:bg-[#FFAB00] hover:text-black rounded-none text-[11px] font-mono uppercase tracking-widest font-bold transition-all disabled:opacity-20 disabled:bg-[var(--bg-elevated)] disabled:text-[var(--text-faint)] disabled:border-transparent"
                   >
                     {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                     Transmit Signal
                   </button>
-                  <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50 bg-black border border-white text-white text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+                  <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50 bg-[var(--bg-surface)] border border-[var(--border-muted)] text-[var(--text-primary)] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
                     Dispatch email pipeline delivery sequence
                   </div>
                 </div>

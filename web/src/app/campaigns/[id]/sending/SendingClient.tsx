@@ -36,9 +36,9 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
-            <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F1F5F9', fontFamily: 'var(--font-mono)' }}>Real-time Monitor</span>
+            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
+            <span style={{ color: 'var(--border-muted)' }}>/</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>Real-time Monitor</span>
           </div>
           <h1 className="text-3xl font-bold text-gradient tracking-tight">{campaign.name || 'Monitoring Outreach'}</h1>
           <p className="text-sm mt-1" style={{ color: '#64748B' }}>Tracking live sequence progression and responses</p>
@@ -63,8 +63,8 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
           {/* Progress */}
           <div className="p-6 card-surface space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Overall Progress</h3>
-              <span className="text-sm font-bold text-white tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>{progressPercent}%</span>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Overall Progress</h3>
+              <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums" style={{ fontFamily: 'var(--font-mono)' }}>{progressPercent}%</span>
             </div>
             <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
               <div 
@@ -84,8 +84,8 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
           {/* Timeline */}
           <div className="p-6 card-surface space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-white">Sequence Lifecycle</h3>
-              <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Automated outreach progression</p>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Sequence Lifecycle</h3>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Automated outreach progression</p>
             </div>
             <div className="space-y-6 pl-2">
               <TimelineStep label="Day 0" title="Initial Outreach" description="Currently being dispatched to approved leads." status="active" />
@@ -109,8 +109,8 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
 
         {/* Right Column: Live Feed (5/12) */}
         <div className="flex-1 lg:w-[41.66%] flex flex-col h-[700px] card-surface overflow-hidden">
-          <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-            <h2 className="text-sm font-semibold text-white">Live Feed</h2>
+          <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid var(--border-muted)', background: 'var(--bg-elevated)' }}>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Live Feed</h2>
             <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#10B981] uppercase tracking-tight" style={{ fontFamily: 'var(--font-mono)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
               Real-time
@@ -132,12 +132,12 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
                     {lead.sent ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4 animate-spin" />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-white truncate">{lead.email}</p>
+                    <p className="text-sm font-bold text-[var(--text-primary)] truncate">{lead.email}</p>
                     <p className="text-[11px] mt-0.5" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }} suppressHydrationWarning>
                       {lead.sent ? 'Dispatched' : 'Processing'} · {new Date(lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
-                  <Link href={`/leads/${lead.id}`} className="p-1.5 text-[#475569] hover:text-white transition-colors">
+                  <Link href={`/leads/${lead.id}`} className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors">
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -145,8 +145,8 @@ export function SendingClient({ campaign, recentLeads, stats }: any) {
             )}
           </div>
 
-          <div className="p-4 bg-white/5 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-            <Link href={`/campaigns/${campaign.id}`} className="text-xs font-bold text-[#64748B] hover:text-white transition-all flex items-center justify-center gap-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
+          <div className="p-4 bg-[var(--bg-elevated)] text-center" style={{ borderTop: '1px solid var(--border-muted)' }}>
+            <Link href={`/campaigns/${campaign.id}`} className="text-xs font-bold text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center justify-center gap-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
               View Campaign Insights
               <ArrowRight className="w-3 h-3" />
             </Link>
@@ -174,9 +174,9 @@ function TimelineStep({ label, title, description, status }: any) {
         status === 'active' ? 'bg-[#6366F1] ring-4 ring-[#6366F1]/10' : 'bg-[#16171D]'
       }`} />
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>{label}</span>
-        <span style={{ color: 'rgba(255,255,255,0.06)' }}>·</span>
-        <h4 className="text-sm font-semibold text-white">{title}</h4>
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>{label}</span>
+        <span style={{ color: 'var(--border-muted)' }}>·</span>
+        <h4 className="text-sm font-bold text-[var(--text-primary)]">{title}</h4>
       </div>
       <p className="text-xs" style={{ color: '#64748B' }}>{description}</p>
     </div>

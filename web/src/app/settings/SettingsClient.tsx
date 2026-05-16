@@ -89,7 +89,7 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
             <form onSubmit={(e) => handleSave(e, "AI")} className="p-6 space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>Primary AI Provider</label>
+                  <label className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>Primary AI Provider</label>
                   <select
                     name="aiProvider"
                     defaultValue={settings?.aiProvider || "gemini"}
@@ -104,7 +104,7 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* Gemini */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>Gemini API Key</label>
+                  <label className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>Gemini API Key</label>
                   <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.gemini ? "text" : "password"}
@@ -116,7 +116,7 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
                     <button
                       type="button"
                       onClick={() => toggleKey('gemini')}
-                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
+                      className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors ml-2"
                     >
                       {showKeys.gemini ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -125,14 +125,14 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* OpenAI */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>OpenAI API Key</label>
+                  <label className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>OpenAI API Key</label>
                   <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.openai ? "text" : "password"}
                       name="openaiApiKey"
                       defaultValue={settings?.openaiApiKey || ""}
                       placeholder="sk-..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: 'var(--text-primary)' }}
                     />
                     <button
                       type="button"
@@ -146,19 +146,19 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* Groq */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>Groq API Key</label>
+                  <label className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>Groq API Key</label>
                   <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.groq ? "text" : "password"}
                       name="groqApiKey"
                       defaultValue={settings?.groqApiKey || ""}
                       placeholder="gsk_..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: 'var(--text-primary)' }}
                     />
                     <button
                       type="button"
                       onClick={() => toggleKey('groq')}
-                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
+                      className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors ml-2"
                     >
                       {showKeys.groq ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -167,19 +167,19 @@ export default function SettingsClient({ settings, accounts }: SettingsClientPro
 
                 {/* Claude */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" style={{ color: '#94A3B8' }}>Claude API Key</label>
+                  <label className="text-sm font-bold" style={{ color: 'var(--text-muted)' }}>Claude API Key</label>
                   <div className="flex items-center px-4 transition-all" style={{ background: 'var(--bg-elevated)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 'var(--radius-input)' }}>
                     <input
                       type={showKeys.claude ? "text" : "password"}
                       name="claudeApiKey"
                       defaultValue={settings?.claudeApiKey || ""}
                       placeholder="x-api-key..."
-                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: '#F1F5F9' }}
+                      className="w-full py-2.5 text-sm outline-none bg-transparent" style={{ color: 'var(--text-primary)' }}
                     />
                     <button
                       type="button"
                       onClick={() => toggleKey('claude')}
-                      className="p-1.5 text-[#475569] hover:text-white transition-colors ml-2"
+                      className="p-1.5 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors ml-2"
                     >
                       {showKeys.claude ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>

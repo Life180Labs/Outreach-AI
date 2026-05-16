@@ -200,9 +200,9 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
-            <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
-            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F1F5F9', fontFamily: 'var(--font-mono)' }}>Review Workspace</span>
+            <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
+            <span style={{ color: 'var(--border-muted)' }}>/</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>Review Workspace</span>
           </div>
           <h1 className="text-3xl font-bold text-gradient tracking-tight">{campaign.name || 'Review Drafts'}</h1>
           <p className="text-sm" style={{ color: '#64748B' }}>{leads.length} leads · {approvedCount} approved · {draftedLeadsCount} drafted</p>
@@ -231,7 +231,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
         {/* Left: Queue (4/12) */}
         <div className="flex-1 lg:w-[33.33%] lg:max-w-[33.33%] flex flex-col card-surface overflow-hidden">
           <div className="px-5 py-4 flex items-center justify-between shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-            <h2 className="text-sm font-semibold text-white">Sequence Queue</h2>
+            <h2 className="text-sm font-bold text-[var(--text-primary)]">Sequence Queue</h2>
             <span className="text-[11px] font-bold uppercase tracking-wide text-[#6366F1]" style={{ fontFamily: 'var(--font-mono)' }}>
               {approvedCount}/{leads.length} Approved
             </span>
@@ -248,10 +248,10 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
               >
                 <div className="text-[10px] font-bold text-[#475569] w-4" style={{ fontFamily: 'var(--font-mono)' }}>{idx + 1}</div>
                 <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-medium truncate ${selectedLeadId === lead.id ? 'text-white' : 'text-[#94A3B8]'}`}>
+                  <p className={`text-sm font-bold truncate ${selectedLeadId === lead.id ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'}`}>
                     {lead.firstName} {lead.lastName}
                   </p>
-                  <p className="text-xs truncate" style={{ color: '#475569' }}>{lead.companyName}</p>
+                  <p className="text-xs truncate" style={{ color: 'var(--text-faint)' }}>{lead.companyName}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {lead.isApproved ? (
@@ -280,15 +280,15 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                     {selectedLead.firstName[0]}{selectedLead.lastName?.[0] || ''}
                   </div>
                   <div>
-                    <h3 className="text-sm font-semibold text-white">{selectedLead.firstName} {selectedLead.lastName}</h3>
-                    <p className="text-xs" style={{ color: '#64748B' }}>{selectedLead.jobTitle} at {selectedLead.companyName}</p>
+                    <h3 className="text-sm font-bold text-[var(--text-primary)]">{selectedLead.firstName} {selectedLead.lastName}</h3>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>{selectedLead.jobTitle} at {selectedLead.companyName}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <button 
                     onClick={() => { setShowTestInput(!showTestInput); setShowRegenInput(false); }}
                     disabled={selectedLead.emailSubject === "Error"}
-                    className="flex items-center gap-2 px-3 py-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-lg transition-colors disabled:opacity-30"
+                    className="flex items-center gap-2 px-3 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors disabled:opacity-30"
                     title="Send test email"
                   >
                     <Mail className="w-4 h-4" />
@@ -296,7 +296,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                   </button>
                   <button 
                     onClick={() => { setShowRegenInput(!showRegenInput); setShowTestInput(false); }}
-                    className="flex items-center gap-2 px-3 py-2 text-[#64748B] hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                    className="flex items-center gap-2 px-3 py-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] rounded-lg transition-colors"
                     title="Regenerate draft"
                   >
                     <RefreshCcw className="w-4 h-4" />
@@ -350,7 +350,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                       </button>
                     </>
                   )}
-                  <button onClick={() => { setShowRegenInput(false); setShowTestInput(false); }} className="text-[#475569] hover:text-white p-1">
+                  <button onClick={() => { setShowRegenInput(false); setShowTestInput(false); }} className="text-[var(--text-faint)] hover:text-[var(--text-primary)] p-1">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -368,15 +368,15 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                     <X className="w-8 h-8 text-[#EF4444]" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">AI Generation Failed</h3>
-                    <p className="text-sm max-w-sm mt-2" style={{ color: '#64748B' }}>
+                    <h3 className="text-lg font-bold text-[var(--text-primary)]">AI Generation Failed</h3>
+                    <p className="text-sm max-w-sm mt-2" style={{ color: 'var(--text-muted)' }}>
                       There was an error generating this draft. This usually happens if your AI provider API key is missing or invalid.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <Link href="/settings" className="text-xs font-bold text-[#6366F1] hover:underline">Check AI Settings</Link>
-                    <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
-                    <button onClick={() => setShowRegenInput(true)} className="text-xs font-bold text-white hover:underline">Try Again</button>
+                    <span style={{ color: 'var(--border-muted)' }}>|</span>
+                    <button onClick={() => setShowRegenInput(true)} className="text-xs font-bold text-[var(--text-primary)] hover:underline">Try Again</button>
                   </div>
                 </div>
               ) : (
@@ -384,7 +384,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                   {/* Scrollable area: subject + body only */}
                   <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-6" style={{ scrollbarWidth: 'thin' }}>
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: '#64748B', fontFamily: 'var(--font-mono)' }}>Subject</label>
+                      <label className="text-[10px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Subject</label>
                       <input 
                         type="text" 
                         name="subject" 
@@ -400,7 +400,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                         </div>
 
                         <div className="flex-1 card-surface overflow-hidden flex flex-col" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                          <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-white/5 [&_.ql-toolbar]:bg-white/5 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-[#F1F5F9] [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
+                          <div className="flex-1 flex flex-col [&_.ql-toolbar]:border-none [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-[var(--border-muted)] [&_.ql-toolbar]:bg-[var(--bg-elevated)]/50 [&_.ql-container]:border-none [&_.ql-container]:flex-1 [&_.ql-editor]:min-h-full [&_.ql-editor]:text-sm [&_.ql-editor]:text-[var(--text-primary)] [&_.ql-editor]:leading-relaxed [&_.ql-editor]:p-4 [&_p]:mb-4">
                             <ReactQuill 
                               theme="snow" 
                               value={editBody} 
@@ -427,7 +427,7 @@ export function ReviewClient({ campaign, initialLeads }: { campaign: any, initia
                         <Zap className="w-3 h-3 text-[#6366F1]" />
                         <span className="text-[10px] font-bold uppercase tracking-tight" style={{ color: '#818CF8', fontFamily: 'var(--font-mono)' }}>AI Strategy</span>
                       </div>
-                      <p className="text-[11px] font-medium italic line-clamp-2" style={{ color: '#64748B' }}>
+                      <p className="text-[11px] font-bold italic line-clamp-2" style={{ color: 'var(--text-muted)' }}>
                         "{selectedLead.aiRationale || 'Highly personalized based on lead notes'}"
                       </p>
                     </div>

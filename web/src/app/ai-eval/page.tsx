@@ -151,10 +151,10 @@ Output Format:
       <div className="card-surface p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           <div className="card-elevated p-2">
-            <Layout className="w-5 h-5 text-[#475569]" />
+            <Layout className="w-5 h-5 text-[var(--text-faint)]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Active Strategy</p>
+            <p className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Active Strategy</p>
             <select 
               value={activeStrategyId || ""}
               onChange={(e) => {
@@ -188,7 +188,7 @@ Output Format:
         <div className="flex items-center gap-2">
           <button 
             onClick={() => setShowSaveNameModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/5 text-[#94A3B8] rounded-lg text-[11px] font-bold hover:text-white hover:bg-white/10 transition-all uppercase tracking-widest"
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] border border-[var(--border-muted)] text-[var(--text-muted)] rounded-lg text-[11px] font-bold hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)] transition-all uppercase tracking-widest"
             style={{ fontFamily: 'var(--font-mono)' }}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -226,8 +226,8 @@ Output Format:
                   {/* ROLE */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <UserCircle className="w-4 h-4 text-[#475569]" />
-                      <label className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Persona Role</label>
+                      <UserCircle className="w-4 h-4 text-[var(--text-faint)]" />
+                      <label className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Persona Role</label>
                     </div>
                     <textarea 
                       value={form.role}
@@ -237,15 +237,15 @@ Output Format:
                   </div>
 
                   {/* CONTEXT */}
-                  <div className="space-y-4 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="space-y-4 pt-6" style={{ borderTop: '1px solid var(--border-muted)' }}>
                     <div className="flex items-center gap-2">
-                      <Briefcase className="w-4 h-4 text-[#475569]" />
-                      <label className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Campaign Context</label>
+                      <Briefcase className="w-4 h-4 text-[var(--text-faint)]" />
+                      <label className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Campaign Context</label>
                     </div>
                     
                     <div className="grid grid-cols-1 gap-4">
                       <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-[#64748B] ml-1 uppercase tracking-tight">Product/Service</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] ml-1 uppercase tracking-tight">Product/Service</p>
                         <input 
                           value={form.product}
                           onChange={(e) => handleChange('product', e.target.value)}
@@ -253,7 +253,7 @@ Output Format:
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-[#64748B] ml-1 uppercase tracking-tight">Target Persona</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] ml-1 uppercase tracking-tight">Target Persona</p>
                         <input 
                           value={form.persona}
                           onChange={(e) => handleChange('persona', e.target.value)}
@@ -261,7 +261,7 @@ Output Format:
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-[#64748B] ml-1 uppercase tracking-tight">Pain Point</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] ml-1 uppercase tracking-tight">Pain Point</p>
                         <input 
                           value={form.painPoint}
                           onChange={(e) => handleChange('painPoint', e.target.value)}
@@ -269,7 +269,7 @@ Output Format:
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-[#64748B] ml-1 uppercase tracking-tight">Social Proof</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] ml-1 uppercase tracking-tight">Social Proof</p>
                         <input 
                           value={form.socialProof}
                           onChange={(e) => handleChange('socialProof', e.target.value)}
@@ -280,14 +280,14 @@ Output Format:
                   </div>
 
                   {/* CONSTRAINTS */}
-                  <div className="space-y-4 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="space-y-4 pt-6" style={{ borderTop: '1px solid var(--border-muted)' }}>
                     <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4 text-[#475569]" />
-                      <label className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Guidelines</label>
+                      <Target className="w-4 h-4 text-[var(--text-faint)]" />
+                      <label className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Guidelines</label>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-[#64748B] ml-1 uppercase tracking-tight">Tone</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] ml-1 uppercase tracking-tight">Tone</p>
                         <input 
                           value={form.tone}
                           onChange={(e) => handleChange('tone', e.target.value)}
@@ -295,7 +295,7 @@ Output Format:
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-[#64748B] ml-1 uppercase tracking-tight">Desired CTA</p>
+                        <p className="text-[10px] font-bold text-[var(--text-muted)] ml-1 uppercase tracking-tight">Desired CTA</p>
                         <input 
                           value={form.cta}
                           onChange={(e) => handleChange('cta', e.target.value)}
@@ -307,7 +307,7 @@ Output Format:
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>System Prompt</p>
+                  <p className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>System Prompt</p>
                   <div className="bg-[var(--bg-sink)] text-[#10B981] p-6 rounded-xl text-xs font-mono whitespace-pre-wrap leading-relaxed border border-[var(--border-muted)] shadow-inner overflow-y-auto max-h-[500px]">
                     {builtPrompt}
                   </div>
@@ -319,9 +319,9 @@ Output Format:
           {/* Test Harness */}
           <div className="card-surface p-6 space-y-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Test Simulation (Lead Data)</label>
+              <label className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Test Simulation (Lead Data)</label>
               <div className="flex gap-2">
-                 <button className="text-[9px] font-bold text-[#475569] hover:text-white border border-white/5 px-2 py-1 rounded transition-colors">MOCK DATA</button>
+                 <button className="text-[9px] font-bold text-[var(--text-faint)] hover:text-[var(--text-primary)] border border-[var(--border-muted)] px-2 py-1 rounded transition-colors">MOCK DATA</button>
               </div>
             </div>
             <textarea 
@@ -348,21 +348,21 @@ Output Format:
                {/* Score Dashboard */}
                <div className="grid grid-cols-3 gap-4">
                   <div className="card-surface p-4 shadow-sm">
-                    <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Quality</p>
+                    <p className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Quality</p>
                     <div className="flex items-end gap-1">
                       <span className="text-2xl font-black text-[#10B981]">{result.score}%</span>
-                      <span className="text-[10px] text-[#475569] mb-1 font-bold">SCORE</span>
+                      <span className="text-[10px] text-[var(--text-faint)] mb-1 font-bold">SCORE</span>
                     </div>
                   </div>
                   <div className="card-surface p-4 shadow-sm col-span-2 flex items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Auditor Feedback</p>
-                      <p className="text-xs text-[#94A3B8] line-clamp-2">{result.feedback}</p>
+                      <p className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest mb-1" style={{ fontFamily: 'var(--font-mono)' }}>Auditor Feedback</p>
+                      <p className="text-xs text-[var(--text-muted)] line-clamp-2">{result.feedback}</p>
                     </div>
                     <button
                       onClick={handleRefine}
                       disabled={refining}
-                      className="shrink-0 flex items-center gap-2 px-3 py-2 bg-white/5 text-white rounded-lg text-[10px] font-bold hover:bg-white/10 transition-all disabled:opacity-50"
+                      className="shrink-0 flex items-center gap-2 px-3 py-2 bg-[var(--bg-elevated)] text-[var(--text-primary)] rounded-lg text-[10px] font-bold hover:bg-[var(--bg-surface)] transition-all disabled:opacity-50"
                     >
                       {refining ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-[#6366F1]" />}
                       AUTO-FIX
@@ -372,10 +372,10 @@ Output Format:
 
                {/* Inbox Simulation */}
                <div className="card-surface overflow-hidden shadow-sm">
-                  <div className="px-6 py-4 bg-white/5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="px-6 py-4 bg-[var(--bg-elevated)] flex items-center justify-between" style={{ borderBottom: '1px solid var(--border-muted)' }}>
                     <div className="flex items-center gap-2">
-                       <Layout className="w-4 h-4 text-[#475569]" />
-                       <p className="text-[10px] font-bold text-[#475569] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Delivery Preview</p>
+                       <Layout className="w-4 h-4 text-[var(--text-faint)]" />
+                       <p className="text-[10px] font-bold text-[var(--text-faint)] uppercase tracking-widest" style={{ fontFamily: 'var(--font-mono)' }}>Delivery Preview</p>
                     </div>
                     <div className="flex gap-1.5">
                        <div className="w-2.5 h-2.5 rounded-full bg-white/5" />
@@ -419,13 +419,13 @@ Output Format:
                </div>
             </div>
           ) : (
-            <div className="h-full min-h-[600px] border-2 border-dashed border-white/5 bg-white/[0.02] rounded-3xl flex flex-col items-center justify-center text-[#475569] gap-6">
-               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center animate-pulse">
+            <div className="h-full min-h-[600px] border-2 border-dashed border-[var(--border-muted)] bg-[var(--bg-elevated)]/50 rounded-3xl flex flex-col items-center justify-center text-[var(--text-faint)] gap-6">
+               <div className="w-20 h-20 rounded-full bg-[var(--bg-elevated)] flex items-center justify-center animate-pulse">
                   <Search className="w-10 h-10 opacity-10" />
                </div>
                <div className="text-center space-y-2">
-                  <p className="text-sm font-black text-[#475569] uppercase tracking-[0.2em]" style={{ fontFamily: 'var(--font-mono)' }}>Auditor Standby</p>
-                  <p className="text-xs text-[#64748B] max-w-[240px] mx-auto leading-relaxed">Configure your strategy and run the audit to simulate delivery.</p>
+                  <p className="text-sm font-bold text-[var(--text-faint)] uppercase tracking-[0.2em]" style={{ fontFamily: 'var(--font-mono)' }}>Auditor Standby</p>
+                  <p className="text-xs text-[var(--text-muted)] max-w-[240px] mx-auto leading-relaxed">Configure your strategy and run the audit to simulate delivery.</p>
                </div>
             </div>
           )}
@@ -457,10 +457,10 @@ Output Format:
                 />
               </div>
             </div>
-            <div className="p-6 bg-white/[0.02] flex items-center justify-end gap-3">
+            <div className="p-6 bg-[var(--bg-elevated)] flex items-center justify-end gap-3">
               <button 
                 onClick={() => setShowSaveNameModal(false)}
-                className="px-4 py-2 text-xs font-bold text-[#475569] hover:text-white transition-all uppercase tracking-widest"
+                className="px-4 py-2 text-xs font-bold text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-all uppercase tracking-widest"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
                 Cancel

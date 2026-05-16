@@ -85,15 +85,15 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
               <button
                 onClick={() => setModalState({ isOpen: false, type: "single" })}
                 disabled={isDeleting}
-                className="px-4 py-2 text-sm font-medium text-[#94A3B8] rounded-lg transition-all duration-200 hover:text-white"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 'var(--radius-button)' }}
+                className="px-4 py-2 text-sm font-bold text-[var(--text-muted)] rounded-lg transition-all duration-200 hover:text-[var(--text-primary)]"
+                style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-muted)', borderRadius: 'var(--radius-button)' }}
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white transition-all duration-200 disabled:opacity-50 hover:translate-y-[-1px]"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-white transition-all duration-200 disabled:opacity-50 hover:translate-y-[-1px]"
                 style={{
                   background: 'linear-gradient(135deg, #EF4444, #DC2626)',
                   borderRadius: 'var(--radius-button)',
@@ -119,9 +119,9 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
               {selectedIds.length === campaigns.length ? (
                 <CheckSquare className="w-4 h-4 text-[#6366F1]" />
               ) : (
-                <Square className="w-4 h-4 text-[#475569]" />
+                <Square className="w-4 h-4 text-[var(--text-faint)]" />
               )}
-              <span className="font-medium text-[#94A3B8]">Select All</span>
+              <span className="font-bold text-[var(--text-muted)]">Select All</span>
             </button>
 
             {selectedIds.length > 0 && (
@@ -213,9 +213,9 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                   </div>
 
                   <div className="mb-4">
-                    <div className="flex justify-between text-[11px] font-medium mb-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
-                      <span className="text-[#64748B]">Progress</span>
-                      <span className="text-[#94A3B8]">{progress}%</span>
+                    <div className="flex justify-between text-[11px] font-bold mb-1.5" style={{ fontFamily: 'var(--font-mono)' }}>
+                      <span className="text-[var(--text-faint)]">Progress</span>
+                      <span className="text-[var(--text-muted)]">{progress}%</span>
                     </div>
                     <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                       <div
@@ -238,7 +238,7 @@ export function CampaignsClient({ campaigns }: CampaignsClientProps) {
                       <span className="text-[var(--text-muted)]">
                         <span className="text-[var(--text-primary)]">{sentCount}</span>{" "}Sent
                       </span>
-                      <span className="text-[#94A3B8]">
+                      <span className="text-[var(--text-muted)]">
                         <span className="font-bold text-[#10B981]">{hotCount}</span>{" "}Hot
                       </span>
                     </div>

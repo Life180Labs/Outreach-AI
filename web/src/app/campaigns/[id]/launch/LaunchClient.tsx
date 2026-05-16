@@ -37,9 +37,9 @@ export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, read
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
-          <span style={{ color: 'rgba(255,255,255,0.06)' }}>/</span>
-          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#F1F5F9', fontFamily: 'var(--font-mono)' }}>Launch Control</span>
+          <Link href={`/campaigns/${campaign.id}`} className="text-[10px] font-bold uppercase tracking-widest transition-colors" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>Campaign</Link>
+          <span style={{ color: 'var(--border-muted)' }}>/</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>Launch Control</span>
         </div>
         <h1 className="text-3xl font-bold text-gradient tracking-tight">{campaign.name || 'Ready to Launch'}</h1>
         <p className="text-sm mt-1" style={{ color: '#64748B' }}>Final review before starting automated outreach</p>
@@ -51,7 +51,7 @@ export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, read
         <div className="flex-1 lg:w-[58.33%] space-y-6">
           <div className="p-6 card-surface space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-white">Campaign Summary</h3>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Campaign Summary</h3>
               <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Final review of your sequence configuration</p>
             </div>
             
@@ -66,7 +66,7 @@ export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, read
 
           <div className="p-6 card-surface space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-white">Sequence Timeline</h3>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Sequence Timeline</h3>
               <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Automatic follow-up progression</p>
             </div>
             
@@ -82,7 +82,7 @@ export function LaunchClient({ campaign, smtpAccount, settings, totalLeads, read
         <div className="flex-1 lg:w-[41.66%] space-y-6">
           <div className="p-6 card-surface space-y-6">
             <div>
-              <h3 className="text-sm font-semibold text-white">Pre-send Checklist</h3>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Pre-send Checklist</h3>
               <p className="text-xs mt-0.5" style={{ color: '#64748B' }}>Safety checks before starting</p>
             </div>
             
@@ -133,9 +133,9 @@ function SummaryItem({ icon: Icon, label, value }: { icon: any; label: string; v
     <div className="p-3.5 border" style={{ background: 'var(--bg-elevated)', borderColor: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-badge)' }}>
       <div className="flex items-center gap-2 mb-1.5">
         <Icon className="w-3 h-3 text-[#475569]" />
-        <span className="text-[10px] font-bold uppercase tracking-tight" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>{label}</span>
+        <span className="text-[10px] font-bold uppercase tracking-tight" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>{label}</span>
       </div>
-      <p className="text-sm font-semibold text-white truncate">{value}</p>
+      <p className="text-sm font-bold text-[var(--text-primary)] truncate">{value}</p>
     </div>
   );
 }
@@ -145,9 +145,9 @@ function TimelineStep({ label, title, description, status }: { label: string; ti
     <div className="relative pl-6 last:border-0 pb-6 last:pb-0" style={{ borderLeft: '1px solid rgba(255,255,255,0.06)' }}>
       <div className={`absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full border-2 border-[#0D0E12] ${status === 'active' ? 'bg-[#6366F1] ring-4 ring-[#6366F1]/10' : 'bg-[#16171D]'}`} />
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#475569', fontFamily: 'var(--font-mono)' }}>{label}</span>
-        <span style={{ color: 'rgba(255,255,255,0.06)' }}>·</span>
-        <h4 className="text-sm font-semibold text-white">{title}</h4>
+        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>{label}</span>
+        <span style={{ color: 'var(--border-muted)' }}>·</span>
+        <h4 className="text-sm font-bold text-[var(--text-primary)]">{title}</h4>
       </div>
       <p className="text-xs" style={{ color: '#64748B' }}>{description}</p>
     </div>
@@ -157,10 +157,10 @@ function TimelineStep({ label, title, description, status }: { label: string; ti
 function CheckItem({ label, checked }: { label: string; checked: boolean }) {
   return (
     <li className="flex items-center gap-3">
-      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${checked ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/5 text-[#475569]'}`}>
+      <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${checked ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[var(--bg-elevated)] text-[var(--text-faint)]'}`}>
         <Check className="w-3 h-3" />
       </div>
-      <span className={`text-sm font-medium ${checked ? 'text-[#F1F5F9]' : 'text-[#475569]'}`}>{label}</span>
+      <span className={`text-sm font-bold ${checked ? 'text-[var(--text-primary)]' : 'text-[var(--text-faint)]'}`}>{label}</span>
     </li>
   );
 }
