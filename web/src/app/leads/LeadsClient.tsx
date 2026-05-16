@@ -95,35 +95,58 @@ const LeadRow = memo(function LeadRow({
       </td>
       <td className="px-4 py-4">
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => onEdit(lead)}
-            className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
-            aria-label={`Edit ${lead.firstName}`}
-          >
-            <Edit className="w-3.5 h-3.5" />
-          </button>
-          <button
-            onClick={() => onPause(lead.id, !lead.isPaused)}
-            className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" : "text-zinc-500 hover:text-black hover:bg-zinc-100"}`}
-            aria-label={lead.isPaused ? "Resume sequence" : "Pause sequence"}
-          >
-            {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
-          </button>
-          <Link
-            href={`/leads/${lead.id}`}
-            className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
-            aria-label={`View ${lead.firstName}`}
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-          </Link>
-          <button
-            onClick={() => onDelete(lead.id)}
-            disabled={loading}
-            className="p-1.5 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50"
-            aria-label={`Delete ${lead.firstName}`}
-          >
-            {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
-          </button>
+          <div className="relative group">
+            <button
+              onClick={() => onEdit(lead)}
+              className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
+              aria-label={`Edit ${lead.firstName}`}
+            >
+              <Edit className="w-3.5 h-3.5" />
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+              Edit lead details
+            </div>
+          </div>
+
+          <div className="relative group">
+            <button
+              onClick={() => onPause(lead.id, !lead.isPaused)}
+              className={`p-1.5 rounded-md transition-all ${lead.isPaused ? "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" : "text-zinc-500 hover:text-black hover:bg-zinc-100"}`}
+              aria-label={lead.isPaused ? "Resume sequence" : "Pause sequence"}
+            >
+              {lead.isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+              {lead.isPaused ? "Resume automated sequence" : "Pause automated sequence"}
+            </div>
+          </div>
+
+          <div className="relative group">
+            <Link
+              href={`/leads/${lead.id}`}
+              className="p-1.5 text-zinc-500 hover:text-black hover:bg-zinc-100 rounded-md transition-all"
+              aria-label={`View ${lead.firstName}`}
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+              Open conversation log
+            </div>
+          </div>
+
+          <div className="relative group">
+            <button
+              onClick={() => onDelete(lead.id)}
+              disabled={loading}
+              className="p-1.5 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-all disabled:opacity-50"
+              aria-label={`Delete ${lead.firstName}`}
+            >
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-red-500 text-red-500 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+              Permanently delete lead
+            </div>
+          </div>
         </div>
       </td>
     </tr>
@@ -359,12 +382,23 @@ export function LeadsClient({ leads: initialLeads }: { leads: Lead[] }) {
               </div>
             )}
           </div>
-          <button onClick={handleExport} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors">
-            <Download className="w-3.5 h-3.5" /> Export
-          </button>
-          <button onClick={handleBulkDeleteClick} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors text-red-300 hover:text-red-200 ml-auto">
-            <Trash2 className="w-3.5 h-3.5" /> Delete
-          </button>
+          <div className="relative group">
+            <button onClick={handleExport} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors">
+              <Download className="w-3.5 h-3.5" /> Export
+            </button>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 bg-black border border-[#FFAB00] text-[#FFAB00] text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+              Download selection as CSV
+            </div>
+          </div>
+
+          <div className="relative group ml-auto">
+            <button onClick={handleBulkDeleteClick} className="text-xs font-medium flex items-center gap-1 px-2 py-1 hover:bg-white/10 rounded transition-colors text-red-300 hover:text-red-200">
+              <Trash2 className="w-3.5 h-3.5" /> Delete
+            </button>
+            <div className="absolute bottom-full right-0 mb-2 hidden group-hover:block z-50 bg-black border border-red-500 text-red-400 text-[9px] font-mono uppercase tracking-widest px-2 py-1 pointer-events-none whitespace-nowrap shadow-lg">
+              Remove all selected leads
+            </div>
+          </div>
         </div>
       )}
 
